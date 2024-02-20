@@ -28,8 +28,10 @@ using System.Windows.Media;
 using AngleSharp.Dom;
 using YoutubeExplode.Videos;
 using Newtonsoft.Json.Linq;
-
-
+using static System.Net.Mime.MediaTypeNames;
+using AngleSharp.Media;
+using System.ComponentModel;
+using Microsoft.Win32;
 namespace NHMPh_music_player
 {
     /// <summary>
@@ -37,7 +39,7 @@ namespace NHMPh_music_player
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool isChromeOpen= false;
+        bool isChromeOpen = false;
         WaveOutEvent output = new WaveOutEvent();
         MediaFoundationReader _mf;
         ThreadStart start;
@@ -48,35 +50,93 @@ namespace NHMPh_music_player
         bool isAutoPlay;
         string currenturl = string.Empty;
         YoutubeDL ytdl = new YoutubeDL();
-
+        public static string currentCustomPlayList;
         //Normal video info
         Queue<VideoInfo> videoQueue = new Queue<VideoInfo>();
         //Normal video info for autoplay
         Queue<VideoInfo> videoAutoQueue = new Queue<VideoInfo>();
-        //real queue for 
-        Queue<string> videoPlayListQueue = new Queue<string>();
-        Queue<string> videoPlayListQueueTitile = new Queue<string>();
-
+        List<CustomPlaylist> activeWindow = new List<CustomPlaylist>();
 
         public MainWindow()
         {
 
             InitializeComponent();
-
+            LoadCustomPlayList();
             this.MouseDown += Window_MouseDown;
             pauseBtn.Style = null;
             Topmost = true;
             Icon = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\Images\\icon.ico"));
             start = new ThreadStart(TrackManager);
             thread = new Thread(start);
+            Closed += MainWindow_Closed;
 
+        }
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            foreach (Window window in System.Windows.Application.Current.Windows)
+            {
+                window.Close();
+            }
+        }
+
+        private void LoadCustomPlayList(object sender, EventArgs e)
+        {
+
+
+          
+            comboboxCustomPlayList.SelectionChanged -= comboboxCustomPlayList_SelectionChanged;
+            comboboxCustomPlayList.Items.Clear();
+
+            // Get all file names in the folder
+            string[] fileNames = Directory.GetFiles(".\\custom\\");
+
+            if (fileNames.Length != 0)
+            {
+                if (currentCustomPlayList == null)
+                {
+                    currentCustomPlayList = Path.GetFileNameWithoutExtension(fileNames[0]);
+                }
+                activeWindow.Remove(sender as CustomPlaylist);
+                CustomPlaylist temp = sender as CustomPlaylist;
+                temp.Uid = currentCustomPlayList;
+                activeWindow.Add(temp);
+                customPlname.Text = currentCustomPlayList;
+                // Print all file names
+                foreach (string fileName in fileNames)
+                {
+
+                    ComboBoxItem comboBoxItem = new ComboBoxItem()
+                    {
+                        Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF282B30")),
+                        Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF00F9FF")),
+                        BorderThickness = new Thickness(0),
+                        Content = Path.GetFileNameWithoutExtension(fileName)
+                    };
+                    comboboxCustomPlayList.Items.Add(comboBoxItem);
+                }
+
+            }
+            else
+            {
+                customPlname.Text = "Click here";
+            }
+
+            ComboBoxItem _comboBoxItem = new ComboBoxItem()
+            {
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF282B30")),
+                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF00F9FF")),
+                BorderThickness = new Thickness(0),
+                Content = "CREATE NEW PLAYLIST"
+            };
+            comboboxCustomPlayList.Items.Add(_comboBoxItem);
+            comboboxCustomPlayList.SelectionChanged += comboboxCustomPlayList_SelectionChanged;
         }
 
         private async void PlayMusic(VideoInfo videoInfo)
         {
             if (videoInfo.url == null) return;
             currenturl = videoInfo.url;
-            Console.Write(currenturl);
             //Convert url to audiable link
             var options = new OptionSet() { Format = "m4a", GetUrl = true };
             var streamUrl = await ytdl.RunWithOptions(
@@ -84,15 +144,12 @@ namespace NHMPh_music_player
                 options,
                 CancellationToken.None
             );
-            Console.WriteLine("\ndsd " + streamUrl.ErrorOutput.ToString());
             string url = null;
 
             foreach (var item in streamUrl.Data)
             {
                 url = item;
-                Console.WriteLine(url);
             }
-            Console.WriteLine(url);
             //set _mf for playing audio
             _mf = new MediaFoundationReader(url);
             //play audio
@@ -101,7 +158,7 @@ namespace NHMPh_music_player
             output.Init(_mf);
             output.Play();
 
-            SetVisual("Now playing: " + videoInfo.title, videoInfo.description.Length > 200 ? videoInfo.description.Substring(0, 200) + "..." : videoInfo.description, videoInfo.thumbnail);
+            SetVisual("" + videoInfo.title, videoInfo.description.Length > 200 ? videoInfo.description.Substring(0, 200) + "..." : videoInfo.description, videoInfo.thumbnail);
             //Start track thread
             if (thread.ThreadState != System.Threading.ThreadState.WaitSleepJoin)
             {
@@ -110,6 +167,7 @@ namespace NHMPh_music_player
             SetTrackVisual();
             CheckQueue();
             CheckNextSong();
+            status.Text = "...";
         }
         private void SetTrackVisual()
         {
@@ -145,7 +203,6 @@ namespace NHMPh_music_player
                             {
                                 _mf = null;
                                 songProgress.Value = 0;
-                                Console.WriteLine("VideoQueue");
                                 PlayMusic(videoQueue.Dequeue());
 
                             }
@@ -156,7 +213,6 @@ namespace NHMPh_music_player
                                 {
                                     _mf = null;
                                     songProgress.Value = 0;
-                                    Console.WriteLine("AutoVideoQueue");
                                     PlayMusic(videoAutoQueue.Dequeue());
 
                                     songProgress.Value = 0;
@@ -179,21 +235,12 @@ namespace NHMPh_music_player
         private async void CheckQueue()
         {
 
-            if (videoPlayListQueue.Count == 0)
+            if (videoAutoQueue.Count == 0)
             {
                 if (isAutoPlay)
                 {
                     GetPlayList();
                 }
-                    
-
-            }
-            while (videoAutoQueue.Count < 1)
-            {
-
-                videoAutoQueue.Enqueue(await Search(videoPlayListQueue.Dequeue()));
-                videoPlayListQueueTitile.Dequeue();
-
             }
 
 
@@ -201,6 +248,7 @@ namespace NHMPh_music_player
         }
         private async Task<VideoInfo> Search(string key)
         {
+            status.Text = "Searching...";
             var youtube = new YoutubeClient();
             VideoInfo videoInfo = new VideoInfo();
             int mode = EvaluateKeyWord(key);
@@ -214,11 +262,13 @@ namespace NHMPh_music_player
                     videoInfo.description = videolinkInfo.Description;
                     videoInfo.url = videolinkInfo.Url;
                     videoInfo.thumbnail = videolinkInfo.Thumbnails.FirstOrDefault().Url;
+                    status.Text = "...";
                     return videoInfo;
                 }
                 catch
                 {
                     MessageBox.Show("Error! This youtube link is wrong or not found");
+                    status.Text = "...";
                     return videoInfo;
                 }
 
@@ -244,20 +294,21 @@ namespace NHMPh_music_player
                     videoInfo.description = $"Play lists with {videos.Count} videos";
                     videoInfo.thumbnail = videos.First().Thumbnails.FirstOrDefault().Url;
                     videoInfo.url = videos.First().Url;
+                    status.Text = "...";
                     return videoInfo;
                 }
                 catch (Exception ex)
                 {
-                    
-                        MessageBox.Show("Error! Playlist link is wrong or not found");
-                        return null;
-                    
+
+                    MessageBox.Show("Error! Auto-generated playlist link is not supported or playlist is private");
+                    status.Text = "...";
+                    return null;
+
 
                 }
 
 
             }
-            Console.WriteLine($"Searching {key}");
 
             //Search by key
             using (var httpClient = new HttpClient())
@@ -276,9 +327,10 @@ namespace NHMPh_music_player
                     videoInfo.description = description.Description;
                     videoInfo.url = video.Url;
                     videoInfo.thumbnail = video.ThumbnailUrl;
-
+                    status.Text = "...";
                     return videoInfo;
                 }
+                status.Text = "...";
                 return null;
             }
 
@@ -287,12 +339,13 @@ namespace NHMPh_music_player
         {
             title.Content = _title;
             description.Text = _desciption;
-            thumbnail.Source = new BitmapImage(
+            thumbnail.ImageSource = new BitmapImage(
              new Uri(_thumbnail));
-        }    
+        }
         private async void GetPlayList()
         {
             isChromeOpen = true;
+            status.Text = "Fetching";
             IBrowser browser;
             try
             {
@@ -301,22 +354,38 @@ namespace NHMPh_music_player
                     Headless = true,
                     ExecutablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
                 });
+               
             }
             catch
             {
-                await new BrowserFetcher().DownloadAsync();
-                browser = await Puppeteer.LaunchAsync(new LaunchOptions
+                try
                 {
-                    Headless = true,
-                });
+                    browser = await Puppeteer.LaunchAsync(new LaunchOptions
+                    {
+                        Headless = true,
+                        ExecutablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+                    });
+                }catch
+                {
+                    await new BrowserFetcher().DownloadAsync();
+                    browser = await Puppeteer.LaunchAsync(new LaunchOptions
+                    {
+                        Headless = true,
+                    });
+                }
+               
             }
             string videoUrl = $"{currenturl}&list=RD{ExtractId(currenturl)}&themeRefresh=1";
             var page = await browser.NewPageAsync();
             await page.GoToAsync(videoUrl);
+            //style-scope ytd-playlist-panel-renderer
+            await page.WaitForSelectorAsync(".style-scope.ytd-playlist-panel-renderer");
             await page.WaitForSelectorAsync("a#wc-endpoint");
+            await page.WaitForSelectorAsync("img");
+            await page.WaitForNetworkIdleAsync();
             var content = await page.GetContentAsync();
             await browser.CloseAsync();
-            isChromeOpen= false;
+            isChromeOpen = false;
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
             var document = await context.OpenAsync(res => res.Content(content));
@@ -326,24 +395,22 @@ namespace NHMPh_music_player
             var wcEndpointTitles = document.QuerySelectorAll("#video-title")
           .Select(a => a.GetAttribute("title"))
           .ToList();
-
-            Console.WriteLine("Count1: " + wcEndpointHrefs.Count());
-
-            videoPlayListQueueTitile.Clear();
             videoAutoQueue.Clear();
-            videoPlayListQueue.Clear();
+
+            List<string> urls = new List<string>();
+            List<string> titles = new List<string>();
+            List<string> thumbnails = new List<string>();
+
             int stopCount = 2;
-
-
             // Print the extracted href values
             foreach (var href in wcEndpointHrefs)
             {
                 if (stopCount == 2)
                 {
-                    videoPlayListQueue.Enqueue($"https://www.youtube.com/watch?v={ExtractId(href)}");
-
+                    urls.Add($"https://www.youtube.com/watch?v={ExtractId(href)}");
+                    thumbnails.Add($"https://i.ytimg.com/vi/{ExtractId(href)}/hqdefault.jpg?sqp=-oaymwEjCOADEI4CSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLBzQ9ogPrePWJD7x2FhmZKlos8bDA");
                     stopCount = 0;
-
+                    //https://i.ytimg.com/vi/nfs8NYg7yQM/hqdefault.jpg?sqp=-oaymwEjCOADEI4CSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLBzQ9ogPrePWJD7x2FhmZKlos8bDA
                 }
                 else
                 {
@@ -355,62 +422,65 @@ namespace NHMPh_music_player
             {
                 if (title != null && stopCount < 25)
                 {
-                    videoPlayListQueueTitile.Enqueue(title);
+                    titles.Add(title);
                     stopCount++;
                 }
             }
-
+            for (int i = 0; i < 25; i++)
+            {
+                videoAutoQueue.Enqueue(new VideoInfo()
+                {
+                    title = titles[i],
+                    thumbnail = thumbnails[i],
+                    url = urls[i],
+                    description = "From autoplay",
+                });
+                Console.WriteLine($"Thumbnail: {thumbnails[i]} Title: {titles[i]} Url: {urls[i]} ");
+            }
+            status.Text = "Playlist loaded";
             //remove the original
-            videoPlayListQueueTitile.Dequeue();
-            videoPlayListQueue.Dequeue();
+            videoAutoQueue.Dequeue();
             CheckQueue();
-            CheckNextSong();
+
         }
         //Call when song change
         void CheckNextSong()
         {
             combobox.SelectionChanged -= Combobox_SelectionChanged;
             combobox.Items.Clear();
-            if (videoQueue.Count + videoPlayListQueue.Count > 0)
+            if (videoQueue.Count + videoAutoQueue.Count > 0)
             {
-
-                int j = 0;
                 //Add videoQueue 1st
-
+                int j = 0;
                 for (int i = 0; i < videoQueue.Count; i++)
                 {
+                    StackPanel stackPanel = CreatePlaylistSelection(videoQueue.ElementAt(i).thumbnail, videoQueue.ElementAt(i).title, j);
                     combobox.Items.Add(new ComboBoxItem()
                     {
-                        Content = j + ". " + videoQueue.ElementAt(i).title,
+                        Content = stackPanel,
                         Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF282B30")),
                         Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF00F9FF")),
                         BorderThickness = new Thickness(0),
+
                     });
                     j++;
                 }
+
                 for (int i = 0; i < videoAutoQueue.Count; i++)
                 {
+
+                    StackPanel stackPanel = CreatePlaylistSelection(videoAutoQueue.ElementAt(i).thumbnail, videoAutoQueue.ElementAt(i).title, j);
                     combobox.Items.Add(new ComboBoxItem()
                     {
-                        Content = j + ". " + videoAutoQueue.ElementAt(i).title + " (autoplay)",
+                        Content = stackPanel,
                         Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF282B30")),
                         Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF00F9FF")),
                         BorderThickness = new Thickness(0),
+
                     });
                     j++;
                 }
-                //Add videoAutoQueue 2nd
-                for (int i = 0; i < videoPlayListQueueTitile.Count; i++)
-                {
-                    combobox.Items.Add(new ComboBoxItem()
-                    {
-                        Content = j + ". " + videoPlayListQueueTitile.ElementAt(i) + " (autoplay)",
-                        Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF282B30")),
-                        Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF00F9FF")),
-                        BorderThickness = new Thickness(0),
-                    });
-                    j++;
-                }
+
                 combobox.SelectionChanged += Combobox_SelectionChanged;
             }
             else
@@ -423,45 +493,92 @@ namespace NHMPh_music_player
                     BorderThickness = new Thickness(0),
                 });
             }
-            queue_txt.Text = $" {videoQueue.Count + videoPlayListQueue.Count + videoAutoQueue.Count} ";
-            next_txt.Text = videoQueue.Count != 0 ? $"{videoQueue.ElementAt(0).title}" : videoAutoQueue.Count != 0 ? $"{videoAutoQueue.ElementAt(0).title}" : $"Click here to see your playlist";
+            queue_txt.Text = $" {videoQueue.Count + videoAutoQueue.Count} ";
+            next_txt.Text = videoQueue.Count != 0 ? $"{videoQueue.ElementAt(0).title}" : videoAutoQueue.Count != 0 ? $"{videoAutoQueue.ElementAt(0).title}" : $"Click to select song from queue";
         }
+        private StackPanel CreatePlaylistSelection(string thumbnail, string title, int id)
+        {
+            StackPanel stackPanel = new StackPanel()
+            {
+                Orientation = Orientation.Horizontal,
+            };
+            Border border = new Border()
+            {
+                Height = 30,
+                Width = 43,
+                CornerRadius = new CornerRadius(2),
+                Margin = new Thickness(5, 1, 5, 1),
+                Background = new ImageBrush()
+                {
+                    Stretch = Stretch.Fill,
+                    ImageSource = new BitmapImage(new Uri(thumbnail))
+                },
+                BorderThickness = new Thickness(0)
+
+            };
+            TextBlock textBlock = new TextBlock()
+            {
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Text = id + ". " + title
+            };
+            Button button = new Button();
+            button.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF282B30"));
+            button.BorderThickness = new Thickness(0);
+            button.Width = 50;
+            button.Margin = new Thickness(7, 0, 0, 0);
+            button.Content = "Remove";
+            button.Foreground = Brushes.White;
+            button.FontSize = 12;
+            button.VerticalAlignment = System.Windows.VerticalAlignment.Center;
+            button.Height = 20;
+            button.Click += Delete_Btn_Click;
+            button.CommandParameter = id;
+            stackPanel.Children.Add(border);
+            stackPanel.Children.Add(textBlock);
+            stackPanel.Children.Add(button);
+            return stackPanel;
+        }
+        private void Delete_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            int id = int.Parse((sender as Button).CommandParameter.ToString());
+            if (id < videoQueue.Count)
+            {
+
+                RemoveAtIndex(videoQueue, id);
+            }
+            else
+            {
+                RemoveAtIndex(videoAutoQueue, id - videoQueue.Count);
+            }
+            CheckNextSong();
+        }
+
         private async void MoveTrackManager(string track)
         {
-            next_txt.Text = RemoveIdAndParentheses(track);
+
             int id = ExtractTrackId(track);
             if (id < videoQueue.Count)
             {
-                var videoTemp = videoQueue.ElementAt(id).url;
+                var videoTemp = videoQueue.ElementAt(id);
                 videoQueue = new Queue<VideoInfo>(videoQueue.Reverse());
-                videoQueue.Enqueue(await Search(videoTemp));
+                videoQueue.Enqueue(videoTemp);
                 videoQueue = new Queue<VideoInfo>(videoQueue.Reverse());
                 RemoveAtIndex(videoQueue, id + 1);
-
-            }
-            else if (id == videoQueue.Count && videoAutoQueue.Count != 0)
-            {
-                videoQueue = new Queue<VideoInfo>(videoQueue.Reverse());
-                videoQueue.Enqueue(videoAutoQueue.Dequeue());
-                videoQueue = new Queue<VideoInfo>(videoQueue.Reverse());
-                CheckQueue();
             }
             else
             {
                 videoQueue = new Queue<VideoInfo>(videoQueue.Reverse());
-                videoQueue.Enqueue(await Search(videoPlayListQueue.ElementAt(id - 1 - videoQueue.Count)));
+                videoQueue.Enqueue(videoAutoQueue.ElementAt(id - videoQueue.Count));
+                RemoveAtIndex(videoAutoQueue, id - videoQueue.Count + 1);
                 videoQueue = new Queue<VideoInfo>(videoQueue.Reverse());
-                Console.WriteLine($"Remove at {id - videoQueue.Count + 1 - videoAutoQueue.Count}");
-                RemoveAtIndex(videoPlayListQueueTitile, id - videoQueue.Count + 1 - videoAutoQueue.Count);
-                RemoveAtIndex(videoPlayListQueue, id - videoQueue.Count + 1 - videoAutoQueue.Count);
             }
             CheckNextSong();
-        }   
-        
-        
-        
+        }
+
+
+
         //Support function
-        int EvaluateKeyWord(string key)
+        public static int EvaluateKeyWord(string key)
         {
             if (IsYouTubePlaylistLink(key))
             {
@@ -476,18 +593,18 @@ namespace NHMPh_music_player
             }
             else
             {
-                Console.WriteLine("serasdlink");
+                Console.WriteLine("search");
                 return 3;
             }
         }
-        bool IsYouTubeVideoLink(string input)
+        public static bool IsYouTubeVideoLink(string input)
         {
             string pattern = @"^(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/)";
             Regex regex = new Regex(pattern);
             Match match = regex.Match(input);
             return match.Success;
         }
-        bool IsYouTubePlaylistLink(string input)
+        public static bool IsYouTubePlaylistLink(string input)
         {
             string pattern = @"^(https?://)?(www\.)?(youtube\.com/playlist\?list=|youtube\.com/watch\?v=.+&list=)([a-zA-Z0-9_-]+)";
             Regex regex = new Regex(pattern);
@@ -612,7 +729,7 @@ namespace NHMPh_music_player
             }
 
         }
-       
+
         private void thumb_GotMouseCapture(object sender, MouseEventArgs e)
         {
             if (isChosingTimeStap == false)
@@ -647,15 +764,17 @@ namespace NHMPh_music_player
             int second = (int)Math.Floor(thumbPostion / 1000);
             int current = (int)Math.Floor(thumb.Value / 1000);
             int secondToSkip = second - current;
-            _mf.Skip(secondToSkip);
-            songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
+ 
+                _mf.Skip(secondToSkip);
+                songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
+            
             if (output.PlaybackState != PlaybackState.Playing)
             {
                 output.Play();
             }
 
         }
-       
+
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             if (currenturl == string.Empty) return;
@@ -681,7 +800,7 @@ namespace NHMPh_music_player
         }
         private void Skip_Btn(object sender, RoutedEventArgs e)
         {
-
+            status.Text = "Skipping...";
             //When there's song(s) in queue
             if (videoQueue.Count > 0)
             {
@@ -717,7 +836,7 @@ namespace NHMPh_music_player
             if (isAutoPlay)
             {
                 auto_txt.Text = " on ";
-                if (videoPlayListQueue.Count == 0)
+                if (videoAutoQueue.Count == 0)
                 {
                     GetPlayList();
                 }
@@ -726,10 +845,9 @@ namespace NHMPh_music_player
             {
                 auto_txt.Text = " off ";
                 //remove later
-                videoQueue.Clear();
-                videoPlayListQueue.Clear();
+
                 videoAutoQueue.Clear();
-                videoPlayListQueueTitile.Clear();
+
                 CheckNextSong();
             }
 
@@ -774,7 +892,7 @@ namespace NHMPh_music_player
                         }*/
 
         }
-       
+
         private async void Window_KeyDown(object sender, KeyEventArgs e)
         {
             //Add song to queue
@@ -791,11 +909,11 @@ namespace NHMPh_music_player
                 if (output.PlaybackState == PlaybackState.Stopped)
                     PlayMusic(videoQueue.Dequeue());
 
+                CheckNextSong();
             }
-            CheckNextSong();
             if (e.Key == Key.T)
             {
-                Console.WriteLine($"{videoQueue.Count} {videoAutoQueue.Count} {videoPlayListQueue.Count}");
+                Console.WriteLine($"{videoQueue.Count} {videoAutoQueue.Count}");
             }
         }
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
@@ -805,33 +923,150 @@ namespace NHMPh_music_player
 
             //  cts.Cancel();
         }
-       
+
+
         private void Combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var text = ((sender as ComboBox).SelectedItem as ComboBoxItem).Content as string;
+            var text = ((sender as ComboBox).SelectedItem as ComboBoxItem).Content as StackPanel;
             if (text != null)
-                Console.WriteLine(text);
-            MoveTrackManager(text);
+                MoveTrackManager((text.Children[1] as TextBlock).Text);
         }
         private void comboboxCustomPlayList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
             var text = ((sender as ComboBox).SelectedItem as ComboBoxItem).Content as string;
-            if (text != null)
-                Console.WriteLine(text);
-            LoadCustomPlaylist(text);
+            if (text == "CREATE NEW PLAYLIST")
+            {
+
+                string[] fileNames = Directory.GetFiles(".\\custom\\");
+                int count = 0;
+                foreach (string fileName in fileNames)
+                {
+
+                    if (Path.GetFileNameWithoutExtension(fileName).Contains("New playlist")) count++;
+                }
+                var data = new JObject(
+                new JProperty("thumbnail", "https://i.ytimg.com/vi/J3pF2jkQ4vc/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB2BGz1gQ9O8LD0Y4NcWdEfaYgAyw"),
+                 new JProperty("title", "New playlist"),
+                 new JProperty("songs", new JArray())
+                                      );
+                if (count == 0)
+                {
+                    System.IO.File.WriteAllText(".\\custom\\New playlist.json", data.ToString());
+
+                    customPlname.Text = "New playlist";
+                    currentCustomPlayList = "New playlist";
+                }
+                else
+                {
+                    System.IO.File.WriteAllText($".\\custom\\New playlist ({count}).json", data.ToString());
+                    customPlname.Text = $"New playlist ({count})";
+                    currentCustomPlayList = $"New playlist ({count})";
+                }
+                OpenNewWindow();
+                LoadCustomPlayList();
+                return;
+
+            }
+
+            customPlname.Text = text;
+            currentCustomPlayList = text;
         }
         //////////////
-
-        //Custom playlist
-        private void LoadCustomPlaylist(string plName)
+        private void LoadCustomPlayList()
         {
-           var playlists = ReadJsonFile("D:\\WPF\\NHMPh music player\\Light-Music-Player\\bin\\Debug\\custom\\Default.json");
-            Console.WriteLine(playlists);
+            comboboxCustomPlayList.SelectionChanged -= comboboxCustomPlayList_SelectionChanged;
+            comboboxCustomPlayList.Items.Clear();
+
+            // Get all file names in the folder
+            string[] fileNames = Directory.GetFiles(".\\custom\\");
+            if (fileNames.Count() != 0)
+            {
+                foreach (string fileName in fileNames)
+                {
+
+                    ComboBoxItem comboBoxItem = new ComboBoxItem()
+                    {
+                        Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF282B30")),
+                        Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF00F9FF")),
+                        BorderThickness = new Thickness(0),
+                        Content = Path.GetFileNameWithoutExtension(fileName)
+                    };
+                    comboboxCustomPlayList.Items.Add(comboBoxItem);
+                }
+                /*  currentCustomPlayList = Path.GetFileNameWithoutExtension(fileNames[0]);
+                  customPlname.Text = currentCustomPlayList;*/
+            }
+            // Print all file names
+
+
+            ComboBoxItem _comboBoxItem = new ComboBoxItem()
+            {
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF282B30")),
+                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF00F9FF")),
+                BorderThickness = new Thickness(0),
+                Content = "CREATE NEW PLAYLIST"
+            };
+            comboboxCustomPlayList.Items.Add(_comboBoxItem);
+            comboboxCustomPlayList.SelectionChanged += comboboxCustomPlayList_SelectionChanged;
+        }
+        //Custom playlist
+
+
+        private void load_custom_btn(object sender, RoutedEventArgs e)
+        {
+            var playlists = ReadJsonFile($".\\custom\\{currentCustomPlayList}.json");
+            if (playlists == null) return;
+            for (int i = 0; i < playlists["songs"].Count(); i++)
+            {
+                videoQueue.Enqueue(new VideoInfo()
+                {
+                    title = playlists["songs"][i]["title"].ToString(),
+                    thumbnail = playlists["songs"][i]["thumbnail"].ToString(),
+                    url = playlists["songs"][i]["url"].ToString(),
+                    description = "Song from your custom playlist"
+
+                });
+            }
+            CheckNextSong();
+            if (output.PlaybackState == PlaybackState.Stopped)
+                PlayMusic(videoQueue.Dequeue());
+            status.Text = "Playlist loaded";
+        }
+        private void OpenNewWindow()
+        {
+            CustomPlaylist customPlaylistWindow = new CustomPlaylist();
+            for (int i = 0; i < activeWindow.Count; i++)
+            {
+                if (activeWindow[i].Uid == currentCustomPlayList)
+                {
+                    activeWindow[i].Focus();
+                    return;
+                }
+            }
+            customPlaylistWindow.Uid = currentCustomPlayList;
+            customPlaylistWindow.Show();
+            customPlaylistWindow.OnHeadertextChange += LoadCustomPlayList;
+            activeWindow.Add(customPlaylistWindow);
+            customPlaylistWindow.Closing += RemoveActiveWindow;
+        }
+        private void view_custom_btn(object sender, RoutedEventArgs e)
+        {
+            OpenNewWindow();
         }
 
+        private void RemoveActiveWindow(object sender, CancelEventArgs e)
+        {
+            activeWindow.Remove(sender as CustomPlaylist);
+        }
 
-
-        
+        private void close_btn_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (Window window in System.Windows.Application.Current.Windows)
+            {
+                window.Close();
+            }
+        }
     }
 
 }

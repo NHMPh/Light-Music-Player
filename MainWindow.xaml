@@ -11,19 +11,20 @@
 
         <Border CornerRadius="7" Background="Cyan">
             <StackPanel Background="#282b30" Margin="4,0,0,0">
+               
                 <StackPanel Orientation="Vertical">
-
-                    <StackPanel Orientation="Horizontal"   Height="132" Margin="10,10,0,0">
+                    <Button x:Name="close_btn" Height="13" Width="10" Background="Transparent" Foreground="White" FontSize="12" BorderThickness="0" HorizontalAlignment="Right" Click="close_btn_Click" Padding="0,-5,0,0">x</Button>
+                    <StackPanel Orientation="Horizontal"   Height="132" Margin="10,-3,0,0">
 
                         <StackPanel Orientation="Vertical" Margin="0" Width="380" Height="133">
-                            <Label x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Content="Light music player v.0.0.1" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left" />
-                            <TextBlock x:Name="description" TextWrapping="Wrap" Foreground="White" Height="50" Width="379" FontSize="12" Text="Created by NHMPh" HorizontalAlignment="Left"/>
-                            <Rectangle  Height="2" Margin="0,18,0,0" ></Rectangle>
+                            <Label x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Content="Light music player v.0.0.2 - By NHMPh" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left" />
+                            <TextBlock x:Name="description" TextWrapping="Wrap" Foreground="White" Height="71" Width="379" FontSize="12"  HorizontalAlignment="Left"><Run Text="======MAUNAL======"/><LineBreak/><Run Text="Search song here (youtube link is vaild) then press Enter --------------&gt;"/><LineBreak/><Run Text="When you search a song, it's queued if another is playing."/><LineBreak/><Run Text="Check your setting here | Hover over buttons to see their function.                             "/></TextBlock>
+                            <Rectangle  Height="0" Margin="0,0,0,0" ></Rectangle>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,0" Height="14">
                                 <TextBlock Foreground="#FF007375" FontFamily="Global Sans Serif"  Text="Your custom playlists"  FontWeight="Bold" FontSize="12" Width="128" VerticalAlignment="Center"  />
                                 <Grid  Margin="0,0,5,0"  Width="80" ToolTip="Choose your custom playlist" >
                                     <Border BorderBrush="#FF43A6B3" ToolTip="Choose your saved playlist" BorderThickness="1" CornerRadius="3" >
-                                        <TextBlock Text="Default" Margin="0,-3,0,0" Foreground="#FF00F9FF" HorizontalAlignment="Center" FontSize="12" />
+                                        <TextBlock x:Name="customPlname"  Text="Click here" Margin="0,-3,0,0" Foreground="#FF00F9FF" HorizontalAlignment="Center" FontSize="12" />
                                     </Border>
                                     <ComboBox x:Name="comboboxCustomPlayList" SelectionChanged="comboboxCustomPlayList_SelectionChanged"  FontSize="12" VerticalAlignment="Center" Opacity="0" BorderBrush="#FF282B30" Foreground="#FF8A8A8A">
                                         <ComboBoxItem Background="#FF282B30" Foreground="#FF00F9FF" BorderThickness="0" Content="Default"/>
@@ -31,27 +32,21 @@
                                     </ComboBox>
                                 </Grid>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
-                                    <Button Background="#FF282B30" ToolTip="Queue all custom playlist songs." BorderBrush="#FF43A6B3" Padding="0,-3,0,0"  BorderThickness="1"  Width="40" Margin="0,0,2,0" Content="Load" Foreground="#FF00F9FF" FontSize="12" VerticalAlignment="Center">
+                                    <Button Background="#FF282B30" ToolTip="Queue all custom playlist songs." BorderBrush="#FF43A6B3" Padding="0,-3,0,0"  BorderThickness="1"  Width="40" Margin="0,0,2,0" Content="Load" Foreground="#FF00F9FF" FontSize="12" VerticalAlignment="Center" Click="load_custom_btn">
                                         <Button.Resources>
                                             <Style TargetType="{x:Type Border}">
                                                 <Setter Property="CornerRadius" Value="3"/>
                                             </Style>
                                         </Button.Resources>
                                     </Button>
-                                    <Button Background="#FF282B30" ToolTip="View and edit your custom playlist." BorderBrush="#FF43A6B3"  Padding="0,-3,0,0" BorderThickness="1"  Width="40" Margin="2,0,2,0" Content="View" Foreground="#FF00F9FF" FontSize="12" VerticalAlignment="Center">
+                                    <Button Background="#FF282B30" ToolTip="View and edit your custom playlist." BorderBrush="#FF43A6B3"  Padding="0,-3,0,0" BorderThickness="1"  Width="40" Margin="2,0,2,0" Content="View" Foreground="#FF00F9FF" FontSize="12" VerticalAlignment="Center" Click="view_custom_btn">
                                         <Button.Resources>
                                             <Style TargetType="{x:Type Border}">
                                                 <Setter Property="CornerRadius" Value="3"/>
                                             </Style>
                                         </Button.Resources>
                                     </Button>
-                                    <Button Background="#FF282B30" ToolTip="Add the current song to your custom playlist"  BorderBrush="#FF43A6B3"  Padding="0,-3,0,0" BorderThickness="1" Width="40"  Margin="2,0,0,0" Content="Add" Foreground="#FF00F9FF" FontSize="12" VerticalAlignment="Center">
-                                        <Button.Resources>
-                                            <Style TargetType="{x:Type Border}">
-                                                <Setter Property="CornerRadius" Value="3"/>
-                                            </Style>
-                                        </Button.Resources>
-                                    </Button>
+                                    <TextBlock x:Name="status" ToolTip="Display status" Text="Status: Hello" Foreground="White" Margin="4,0,0,0" VerticalAlignment="Center"  ></TextBlock>
                                 </StackPanel>
 
                             </StackPanel>
@@ -64,11 +59,12 @@
                                 <TextBlock x:Name="queue_txt" Text=" 0 " Foreground="#FF00F9FF" ></TextBlock>
                                 <TextBlock Text="Next:" Foreground="#FF00878A" ></TextBlock>
                                 <Grid Width="180">
-                                    <TextBlock x:Name="next_txt" Text="Click here to see your playlist" Foreground="#FF00F9FF" Width="171" HorizontalAlignment="Center" ></TextBlock>
+                                    <TextBlock x:Name="next_txt" Text="Click to select song from queue" Foreground="#FF00F9FF" Width="171" HorizontalAlignment="Center" ></TextBlock>
                                     <ComboBox Name="combobox" Height="22" FontSize="14" VerticalAlignment="Center" Opacity="0" BorderBrush="#FF282B30" Margin="0,3,0,0">
                                         <ComboBoxItem Background="#FF282B30" Foreground="#FF00F9FF" BorderThickness="0">
                                             Your list is empty. Either queue your song manually or press autoplay button (lower-left) for endless queue.
                                         </ComboBoxItem>
+                                 
                                     </ComboBox>
                                 </Grid>
 
@@ -77,11 +73,14 @@
                             
                         </StackPanel>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Center" Height="127" Width="104">
-                            <Image x:Name="thumbnail" Source="/logo.png" Height="48" Width="89" Margin="0,0,0,0">
-                                <Image.Clip>
-                                    <RectangleGeometry RadiusX="5" RadiusY="5" Rect="0,0,90,48"/>
-                                </Image.Clip>
-                            </Image>
+                            <Border Height="45" Width="89" CornerRadius="4">
+                                <Border.Background>
+                                    <ImageBrush  x:Name="thumbnail" Stretch="Fill" ImageSource="/logo.png"/>
+                                </Border.Background>
+                            </Border>
+                               
+                                
+                          
                             <TextBox x:Name="searchBar" Width="84" Height="19" Margin="5" Background="#FF404040" BorderBrush="#FF98F8FF" Foreground="White" FontSize="12" HorizontalAlignment="Center" TextAlignment="Center">
                                 <TextBox.Resources>
                                     <Style TargetType="Border">
