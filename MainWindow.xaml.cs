@@ -32,6 +32,12 @@ using static System.Net.Mime.MediaTypeNames;
 using AngleSharp.Media;
 using System.ComponentModel;
 using Microsoft.Win32;
+using System.Runtime.InteropServices;
+using NAudio.CoreAudioApi;
+using Accord.Math;
+using System.Numerics;
+using System.Windows.Threading;
+
 namespace NHMPh_music_player
 {
     /// <summary>
@@ -40,14 +46,21 @@ namespace NHMPh_music_player
     public partial class MainWindow : Window
     {
         bool isChromeOpen = false;
+        bool isDragging = false;
         WaveOutEvent output = new WaveOutEvent();
         MediaFoundationReader _mf;
-        ThreadStart start;
-        Thread thread;
+        WaveChannel32 wave;
+        MediaFoundationReader _mfSpectrum;
+        WaveChannel32 waveSpectrum;
+       // ThreadStart start;
+       // Thread thread;
         bool isChosingTimeStap;
         double timeInSong;
         bool isLoop;
         bool isAutoPlay;
+        bool isSpectrum;
+        public static double[] fbands = new double[2048];
+        float[] decreaserate = new float[512];
         string currenturl = string.Empty;
         YoutubeDL ytdl = new YoutubeDL();
         public static string currentCustomPlayList;
@@ -56,22 +69,184 @@ namespace NHMPh_music_player
         //Normal video info for autoplay
         Queue<VideoInfo> videoAutoQueue = new Queue<VideoInfo>();
         List<CustomPlaylist> activeWindow = new List<CustomPlaylist>();
-
+        OptionSet options = new OptionSet() { Format = "m4a", GetUrl = true };
+        RunResult<string[]> streamUrl;
+        YoutubeClient youtube = new YoutubeClient();
+        static HttpClient httpClient = new HttpClient();
+        YoutubeSearchClient client = new YoutubeSearchClient(httpClient);
+        static MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+        List<ProgressBar> spectrumBars = new List<ProgressBar>();
+        MMDevice device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+        FullscreenSpectrum fullscreenSpectrum = new FullscreenSpectrum();
+        private DispatcherTimer timer;
         public MainWindow()
         {
 
             InitializeComponent();
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(1); // Set the interval as needed
+            timer.Tick += async (sender, e) =>
+            {              
+                await TrackManager();
+            };
+            CreateSpectrumBar();
+            WarmUp();
             LoadCustomPlayList();
             this.MouseDown += Window_MouseDown;
+            this.MouseLeftButtonUp += MainWindow_MouseLeftButtonUp;
             pauseBtn.Style = null;
             Topmost = true;
             Icon = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\Images\\icon.ico"));
-            start = new ThreadStart(TrackManager);
-            thread = new Thread(start);
+           // start = new ThreadStart(TrackManager);
+           // thread = new Thread(start);
             Closed += MainWindow_Closed;
-
         }
 
+        private void MainWindow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            isDragging= false;
+        }
+
+        private void UpdateGraph()
+        {
+            while (waveSpectrum.Position <= wave.Position)
+            {
+                fbands = GetFFTdata();
+            }
+        }
+        private void DrawGraph()
+        {
+
+            for (int i = 0, j=0; i < 126; i++)
+            {
+                int mutipler = 5000;
+                if (i < 50) mutipler = 2000;
+
+                
+                if (fbands[i] * mutipler > spectrumBars[i].Value)
+                {
+                    
+                    
+                        spectrumBars[i].Value = ((fbands[i+j] + fbands[i+j+1])/2) * mutipler;
+                        j++;
+                    
+
+                    
+                    decreaserate[i] = 10f;
+                }
+                else
+                {
+                    spectrumBars[i].Value -= 1 * decreaserate[i];
+                    decreaserate[i] *= 1.3f;
+                }
+            }
+
+        }
+        private double[] GetFFTdata()
+        {
+            int desireByte = (int)Math.Pow(2, 13);
+            double[] doublesData = new double[desireByte / 4];
+            doublesData.Clear();
+            byte[] buffer = new byte[desireByte];
+            int bytesRead = 0;
+            try
+            {
+                bytesRead = waveSpectrum.Read(buffer, 0, desireByte);
+
+            }
+            catch
+            {
+                output.Play();
+                Console.WriteLine("Cant read");
+                return null;
+            }
+            for (int i = 0; i < bytesRead / 4; i++)
+            {
+                doublesData[i] = BitConverter.ToSingle(buffer, i * 4) * 10;
+            }
+            return FFT(doublesData);
+
+        }
+        public double[] FFT(double[] data)
+        {
+            double[] fft = new double[data.Length]; 
+            Complex[] fftComplex = new Complex[data.Length]; 
+            for (int i = 0; i < data.Length; i++)
+            {
+                fftComplex[i] = new Complex(data[i], 0.0);
+            }
+            Accord.Math.FourierTransform.FFT(fftComplex, Accord.Math.FourierTransform.Direction.Forward);
+            for (int i = 0; i < data.Length; i++)
+            {
+                fft[i] = fftComplex[i].Magnitude;
+                                                 
+            }
+            return fft;
+        }
+        private void CreateSpectrumBar()
+        {
+            for (int i = 0; i < 126; i++)
+            {
+
+                ProgressBar progressBar = new ProgressBar()
+                {
+                    BorderThickness = new Thickness(0),
+                    Background = new SolidColorBrush(Colors.Transparent),
+                    Foreground = new SolidColorBrush(Colors.Cyan),
+                    Width = 2,
+                    Margin = new Thickness(0, 0,1, 0),
+                    Height = 65,
+                    Maximum = 1000,
+                    Orientation = Orientation.Vertical,
+                    Value = 0
+                };
+               
+                //  spectrum_ctn.Children.Add(progressBar);
+                spectrumBars.Add(progressBar);
+            }
+
+            for (int i = 0; i < 126; i++)
+            {
+                if (i < 63)
+                {
+                    spectrum_ctn.Children.Add(spectrumBars[(62 - i) * 2]);
+
+                }
+                else
+                {
+                    spectrum_ctn.Children.Add(spectrumBars[Math.Abs((62 - i) * 2 + 1)]);
+
+                }
+
+            }
+        
+        }
+
+        private async void WarmUp()
+        {
+            var url = await Search("Rick roll");
+            streamUrl = await ytdl.RunWithOptions(
+                new[] { url.url },
+                options,
+                CancellationToken.None
+            );
+            _mf = new MediaFoundationReader(streamUrl.Data[0]);
+
+            //play audio
+            if (output != null)
+                output.Dispose();
+            output.Init(_mf);
+            output.Play();
+
+            if (output.PlaybackState == PlaybackState.Playing)
+            {
+                output.Stop();
+                output.Dispose();
+                status.Text = "Status: Hello";
+                (startup.Parent as Grid).Children.Remove(startup);
+            }
+
+        }
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             foreach (Window window in System.Windows.Application.Current.Windows)
@@ -84,7 +259,7 @@ namespace NHMPh_music_player
         {
 
 
-          
+
             comboboxCustomPlayList.SelectionChanged -= comboboxCustomPlayList_SelectionChanged;
             comboboxCustomPlayList.Items.Clear();
 
@@ -135,39 +310,39 @@ namespace NHMPh_music_player
 
         private async void PlayMusic(VideoInfo videoInfo)
         {
+            status.Text = "Loading (0%)...";
             if (videoInfo.url == null) return;
             currenturl = videoInfo.url;
             //Convert url to audiable link
-            var options = new OptionSet() { Format = "m4a", GetUrl = true };
-            var streamUrl = await ytdl.RunWithOptions(
+            streamUrl = await ytdl.RunWithOptions(
                 new[] { videoInfo.url },
                 options,
                 CancellationToken.None
             );
-            string url = null;
-
-            foreach (var item in streamUrl.Data)
-            {
-                url = item;
-            }
+            Console.WriteLine(streamUrl.Data[0]);
+            status.Text = "Loading (25%)...";
             //set _mf for playing audio
-            _mf = new MediaFoundationReader(url);
+            _mf = new MediaFoundationReader(streamUrl.Data[0]);
+            wave = new WaveChannel32(_mf);
+            _mfSpectrum = new MediaFoundationReader(streamUrl.Data[0]);
+            waveSpectrum = new WaveChannel32(_mfSpectrum);
+            status.Text = "Loading (50%)...";
             //play audio
             if (output != null)
                 output.Dispose();
-            output.Init(_mf);
+            output.Init(wave);
             output.Play();
-
+            status.Text = "Loading (75%)...";
             SetVisual("" + videoInfo.title, videoInfo.description.Length > 200 ? videoInfo.description.Substring(0, 200) + "..." : videoInfo.description, videoInfo.thumbnail);
             //Start track thread
-            if (thread.ThreadState != System.Threading.ThreadState.WaitSleepJoin)
+            if (!timer.IsEnabled)
             {
-                thread.Start();
+                timer.Start();
             }
             SetTrackVisual();
             CheckQueue();
             CheckNextSong();
-            status.Text = "...";
+            status.Text = "Loaded";
         }
         private void SetTrackVisual()
         {
@@ -176,61 +351,76 @@ namespace NHMPh_music_player
             songProgress.Maximum = _mf.TotalTime.TotalMilliseconds;
             thumb.Maximum = _mf.TotalTime.TotalMilliseconds;
         }
-        private void TrackManager()
+        private async Task TrackManager()
         {
 
-            while (true)
-            {
-
-                Dispatcher.Invoke(() =>
+            
+                await Task.Run(() =>
                 {
-
-                    //Song end
-                    if (songProgress.Value == songProgress.Maximum)
+                    Dispatcher.Invoke(() =>
                     {
-                        //When loop is on
-                        if (isLoop)
+                        // Console.WriteLine(_mf.Position);
+                        if (!fullscreenSpectrum.IsInitialized)
                         {
-                            SetTrackVisual();
-                            _mf.Seek(0, SeekOrigin.Begin);
-
+                            if (!isDragging && output.PlaybackState == PlaybackState.Playing && isSpectrum)
+                            {
+                                UpdateGraph();
+                                DrawGraph();
+                            }
                         }
-
                         else
                         {
-                            //When there's song(s) in queue
-                            if (videoQueue.Count != 0)
+                            UpdateGraph();
+                        }
+                                              
+                        //Song end
+                        if (songProgress.Value == songProgress.Maximum)
+                        {
+                            //When loop is on
+                            if (isLoop)
                             {
-                                _mf = null;
-                                songProgress.Value = 0;
-                                PlayMusic(videoQueue.Dequeue());
-
+                                SetTrackVisual();
+                                wave.Seek(0, SeekOrigin.Begin);
+                                if (output.PlaybackState != PlaybackState.Playing)
+                                {
+                                    output.Play();
+                                }
+                                waveSpectrum.Seek(0, SeekOrigin.Begin);
                             }
-                            //No song in queue but autoplay is on
+
                             else
                             {
-                                if (videoAutoQueue.Count != 0)
+                                //When there's song(s) in queue
+                                if (videoQueue.Count != 0)
                                 {
                                     _mf = null;
                                     songProgress.Value = 0;
-                                    PlayMusic(videoAutoQueue.Dequeue());
-
-                                    songProgress.Value = 0;
+                                    PlayMusic(videoQueue.Dequeue());
 
                                 }
+                                //No song in queue but autoplay is on
+                                else
+                                {
+                                    if (videoAutoQueue.Count != 0)
+                                    {
+                                        _mf = null;
+                                        songProgress.Value = 0;
+                                        PlayMusic(videoAutoQueue.Dequeue());
+
+                                        songProgress.Value = 0;
+
+                                    }
+                                }
                             }
+
                         }
-
-                    }
-                    else
-                    {
-                        if (_mf != null)
-                            songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
-                    }
-
-                });
-                Thread.Sleep(1);
-            }
+                        else
+                        {
+                            if (_mf != null)
+                                songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
+                        }
+                    });
+                });                          
         }
         private async void CheckQueue()
         {
@@ -249,7 +439,6 @@ namespace NHMPh_music_player
         private async Task<VideoInfo> Search(string key)
         {
             status.Text = "Searching...";
-            var youtube = new YoutubeClient();
             VideoInfo videoInfo = new VideoInfo();
             int mode = EvaluateKeyWord(key);
             //Search by link
@@ -311,28 +500,21 @@ namespace NHMPh_music_player
             }
 
             //Search by key
-            using (var httpClient = new HttpClient())
+
+            client = new YoutubeSearchClient(httpClient);
+            var responseObject = await client.SearchAsync(key);
+            foreach (YoutubeVideo video in responseObject.Results)
             {
-
-                YoutubeSearchClient client = new YoutubeSearchClient(httpClient);
-
-
-                var responseObject = await client.SearchAsync(key);
-
-                foreach (YoutubeVideo video in responseObject.Results)
-                {
-
-                    var description = await youtube.Videos.GetAsync(video.Url);
-                    videoInfo.title = video.Title;
-                    videoInfo.description = description.Description;
-                    videoInfo.url = video.Url;
-                    videoInfo.thumbnail = video.ThumbnailUrl;
-                    status.Text = "...";
-                    return videoInfo;
-                }
+                videoInfo.description = $"{video.Author} - {video.Duration}";
+                videoInfo.title = video.Title;
+                videoInfo.url = video.Url;
+                videoInfo.thumbnail = video.ThumbnailUrl;
                 status.Text = "...";
-                return null;
+                return videoInfo;
             }
+            status.Text = "...";
+            return null;
+
 
         }
         private void SetVisual(string _title, string _desciption, string _thumbnail)
@@ -354,7 +536,7 @@ namespace NHMPh_music_player
                     Headless = true,
                     ExecutablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
                 });
-               
+
             }
             catch
             {
@@ -365,7 +547,8 @@ namespace NHMPh_music_player
                         Headless = true,
                         ExecutablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
                     });
-                }catch
+                }
+                catch
                 {
                     await new BrowserFetcher().DownloadAsync();
                     browser = await Puppeteer.LaunchAsync(new LaunchOptions
@@ -373,7 +556,7 @@ namespace NHMPh_music_player
                         Headless = true,
                     });
                 }
-               
+
             }
             string videoUrl = $"{currenturl}&list=RD{ExtractId(currenturl)}&themeRefresh=1";
             var page = await browser.NewPageAsync();
@@ -745,41 +928,42 @@ namespace NHMPh_music_player
             int second = (int)Math.Floor(thumb.Value / 1000);
             int current = (int)Math.Floor(timeInSong / 1000);
             int secondToSkip = second - current;
-            _mf.Skip(secondToSkip);
+            wave.Skip(secondToSkip);
             songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
             isChosingTimeStap = false;
             if (output.PlaybackState != PlaybackState.Playing)
             {
                 output.Play();
             }
+            waveSpectrum.Position = wave.Position;
         }
         private void thumb_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             System.Windows.Point position = Mouse.GetPosition(songProgress);
             Console.WriteLine("Mouse position: X = " + position.X + ", Y = " + position.Y);
-
+           
             timeInSong = thumb.Value;
             double mousePositionPercentage = position.X / songProgress.Width;
             double thumbPostion = thumb.Maximum * mousePositionPercentage;
             int second = (int)Math.Floor(thumbPostion / 1000);
             int current = (int)Math.Floor(thumb.Value / 1000);
             int secondToSkip = second - current;
- 
-                _mf.Skip(secondToSkip);
-                songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
-            
+
+            wave.Skip(secondToSkip);
+            songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
+
             if (output.PlaybackState != PlaybackState.Playing)
             {
                 output.Play();
             }
-
+            waveSpectrum.Position = wave.Position;
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             if (currenturl == string.Empty) return;
             output.Pause();
-            Console.WriteLine(thread.ThreadState);
+          
 
 
             playpause.Source = new BitmapImage(
@@ -817,6 +1001,7 @@ namespace NHMPh_music_player
         {
             isLoop = !isLoop;
             loopTxt.Text = isLoop ? " on " : " off ";
+
             Console.WriteLine(isLoop);
         }
         private void autoplay_btn_Click(object sender, RoutedEventArgs e)
@@ -914,14 +1099,16 @@ namespace NHMPh_music_player
             if (e.Key == Key.T)
             {
                 Console.WriteLine($"{videoQueue.Count} {videoAutoQueue.Count}");
+                Console.WriteLine(_mf.Length);
             }
         }
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
+                isDragging = true;
                 this.DragMove();
 
-            //  cts.Cancel();
+        
         }
 
 
@@ -1065,6 +1252,45 @@ namespace NHMPh_music_player
             foreach (Window window in System.Windows.Application.Current.Windows)
             {
                 window.Close();
+            }
+        }
+
+        private void spectrum_btn_Click(object sender, RoutedEventArgs e)
+        {
+            isSpectrum = !isSpectrum;
+            if (!isSpectrum )
+            {
+                foreach (var spec in spectrumBars)
+                {
+                    spec.Value = 0;
+                }
+            }
+            if (isSpectrum)
+            {
+              //  FullscreenSpectrum fullscreenSpectrum = new FullscreenSpectrum();
+             //   fullscreenSpectrum.Show();
+              //  waveSpectrum.Position = wave.Position;
+                UpdateGraph();
+                DrawGraph();
+
+            };
+            
+        }
+
+        private void minimize_btn_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void spectrum_btn_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!fullscreenSpectrum.IsActive)
+            {
+                fullscreenSpectrum.Show();
+            }
+            else
+            {
+                fullscreenSpectrum.Focus();
             }
         }
     }

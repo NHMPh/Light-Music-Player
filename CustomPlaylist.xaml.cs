@@ -109,6 +109,7 @@ namespace NHMPh_music_player
         JObject currentCustomFile;
         private void LoadCustomPLayList()
         {
+            
             playlist.Children.Clear();
             currentCustomFile = MainWindow.ReadJsonFile($".\\custom\\{playlistname}.json");
             Header.Text = playlistname.ToString();

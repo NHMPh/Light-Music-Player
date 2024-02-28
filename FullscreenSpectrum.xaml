@@ -1,0 +1,19 @@
+﻿<Window x:Class="NHMPh_music_player.FullscreenSpectrum"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NHMPh_music_player"    
+        mc:Ignorable="d"
+        Title="FullscreenSpectrum" Height="1080" Width="1920" Background="Black" WindowStyle="None" WindowState="Maximized" >
+    <Grid>
+        <StackPanel x:Name="setting" Orientation="Vertical" HorizontalAlignment="Right" Margin="20" Opacity="100">
+            <Button Margin="10" Content="Change bars color" BorderThickness="0" Width="300" Height="45" FontSize="24" Background="#19FFFFFF" Foreground="White" Click="change_bars_color"></Button>
+            <Button Margin="10" Content="Change background color" BorderThickness="0" Width="300" Height="45" FontSize="24" Background="#19FFFFFF" Foreground="White" Click="change_background_color"></Button>
+            <Button Margin="10" Content="Exit" BorderThickness="0" Width="300" Height="45" FontSize="24" Background="#19FFFFFF" Foreground="White"></Button>
+        </StackPanel>
+        <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Margin="10,0,10,0" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
+            <ProgressBar Orientation="Vertical" Width="20" Height="700"></ProgressBar>
+        </StackPanel>
+    </Grid>
+</Window>

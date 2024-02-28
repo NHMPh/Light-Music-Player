@@ -8,19 +8,25 @@
         Title="MainWindow" Height="153" Width="510" Background="Transparent" WindowStyle="None" AllowsTransparency="True" KeyDown="Window_KeyDown" ResizeMode="NoResize" >
 
     <Grid>
-
+      
         <Border CornerRadius="7" Background="Cyan">
             <StackPanel Background="#282b30" Margin="4,0,0,0">
                
                 <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="minimize_btn" Height="13" Width="10" Background="Transparent" Foreground="White" FontSize="12" BorderThickness="0" HorizontalAlignment="Right" Click="minimize_btn_Click" Padding="0,-5,0,0">_</Button>
                     <Button x:Name="close_btn" Height="13" Width="10" Background="Transparent" Foreground="White" FontSize="12" BorderThickness="0" HorizontalAlignment="Right" Click="close_btn_Click" Padding="0,-5,0,0">x</Button>
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal"   Height="132" Margin="10,-3,0,0">
 
                         <StackPanel Orientation="Vertical" Margin="0" Width="380" Height="133">
-                            <Label x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Content="Light music player v.0.0.2 - By NHMPh" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left" />
-                            <TextBlock x:Name="description" TextWrapping="Wrap" Foreground="White" Height="71" Width="379" FontSize="12"  HorizontalAlignment="Left"><Run Text="======MAUNAL======"/><LineBreak/><Run Text="Search song here (youtube link is vaild) then press Enter --------------&gt;"/><LineBreak/><Run Text="When you search a song, it's queued if another is playing."/><LineBreak/><Run Text="Check your setting here | Hover over buttons to see their function.                             "/></TextBlock>
-                            <Rectangle  Height="0" Margin="0,0,0,0" ></Rectangle>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,0" Height="14">
+                            <Label x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Content="Light music player v.0.0.2 - By NHMPh" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left" Height="30" />
+                            <TextBlock Margin="0,-6,0,0" x:Name="description" TextWrapping="Wrap" Foreground="White" Height="14" Width="379" FontSize="12"  HorizontalAlignment="Left"><Run Text="Created by NHMPh" /></TextBlock>
+                            <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="65"  >
+                              
+                               
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,1,0,0" Height="14">
                                 <TextBlock Foreground="#FF007375" FontFamily="Global Sans Serif"  Text="Your custom playlists"  FontWeight="Bold" FontSize="12" Width="128" VerticalAlignment="Center"  />
                                 <Grid  Margin="0,0,5,0"  Width="80" ToolTip="Choose your custom playlist" >
                                     <Border BorderBrush="#FF43A6B3" ToolTip="Choose your saved playlist" BorderThickness="1" CornerRadius="3" >
@@ -90,9 +96,9 @@
                             </TextBox>
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button x:Name="pre_btn" ToolTip="No function" Height="20" Width="20" Background="#FF484C52" BorderBrush="#FF5BECFF" Click="Prevous_Btn" BorderThickness="1" Margin="0,9,0,0" >
+                                    <Button x:Name="spectrum_btn" Click="spectrum_btn_Click" MouseRightButtonDown="spectrum_btn_MouseRightButtonDown" ToolTip="Spectrum visualizer" Height="20" Width="20" Background="#FF484C52" BorderBrush="#FF5BECFF"  BorderThickness="1" Margin="0,9,0,0" >
 
-                                        <Image  Width="20" Source="/Previous.png" />
+                                        <Image  Width="15"  Source="/Spectrum.png" />
 
                                         <Button.Resources>
                                             <Style TargetType="Border">
@@ -205,7 +211,9 @@
             </StackPanel>
 
         </Border>
-
+        <Border x:Name="startup" Background="#F2282B30" Width="0" Height="153">
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">Initializing...</TextBlock>
+        </Border>
     </Grid>
     <Window.Resources>
         <Style x:Key="SliderStyle" TargetType="{x:Type Slider}">
