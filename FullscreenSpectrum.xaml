@@ -7,13 +7,144 @@
         mc:Ignorable="d"
         Title="FullscreenSpectrum" Height="1080" Width="1920" Background="Black" WindowStyle="None" WindowState="Maximized" >
     <Grid>
-        <StackPanel x:Name="setting" Orientation="Vertical" HorizontalAlignment="Right" Margin="20" Opacity="100">
-            <Button Margin="10" Content="Change bars color" BorderThickness="0" Width="300" Height="45" FontSize="24" Background="#19FFFFFF" Foreground="White" Click="change_bars_color"></Button>
-            <Button Margin="10" Content="Change background color" BorderThickness="0" Width="300" Height="45" FontSize="24" Background="#19FFFFFF" Foreground="White" Click="change_background_color"></Button>
-            <Button Margin="10" Content="Exit" BorderThickness="0" Width="300" Height="45" FontSize="24" Background="#19FFFFFF" Foreground="White"></Button>
-        </StackPanel>
-        <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Margin="10,0,10,0" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
-            <ProgressBar Orientation="Vertical" Width="20" Height="700"></ProgressBar>
-        </StackPanel>
+
+        <Border>
+            <Border.Background>
+                <ImageBrush  x:Name="thumbnail" Stretch="Fill" ImageSource="https://cdnb.artstation.com/p/assets/images/images/068/716/337/large/sharkdraws-supreme-witch-calamitas.jpg?1698473026"/>
+            </Border.Background>
+        </Border>
+        <Border>
+            <Border.Background>
+                <SolidColorBrush x:Name="filter" Color="#00FF0000"></SolidColorBrush>
+            </Border.Background>
+        </Border>
+        <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Margin="10,0,10,0" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+        <Border Background="#33FFFFFF" Width="500" Margin="20" Height="550" VerticalAlignment="Top" HorizontalAlignment="Right" CornerRadius="10">
+            <StackPanel x:Name="setting" Orientation="Vertical"   Opacity="100">
+                <Label Content="Setting" Margin="10" FontSize="36" HorizontalAlignment="Center" Foreground="White" FontFamily="Arial Black"/>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Spectrum bars:" Margin="10,0,0,0" FontSize="24" Foreground="White" FontFamily="Arial Black" VerticalAlignment="Top" Width="243"/>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="0,0,0,10">
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                                <Label Content="Width"  FontSize="20" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="83"/>
+                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
+                                    <TextBox x:Name="width_mod" Width="100" Background="Transparent" BorderThickness="0" Text="1000" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+                                </Border>
+                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
+                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White" Click="change_spectrum_width" HorizontalAlignment="Center"></Button>
+                                </Border>
+
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                                <Label Content="Height"  FontSize="20" HorizontalAlignment="Center" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center"/>
+                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
+                                    <TextBox x:Name="height_mod" Width="100" Background="Transparent" BorderThickness="0" Text="1000" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+                                </Border>
+                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
+                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White"  Click="change_spectrum_height" ></Button>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                                <Label Content="Spacing"  FontSize="16" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="82"/>
+                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
+                                    <TextBox x:Name="space_mod" Width="100" Background="Transparent" BorderThickness="0" Text="1000" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+                                </Border>
+                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
+                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White"  Click="change_spectrum_spaceing" ></Button>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <Label Content="Color"  FontSize="20"  Foreground="White" FontFamily="Arial Black" Width="82" />
+                                <Border Background="#33FFFFFF" Width="100"  Margin="0,0,0,0" CornerRadius="5">
+                                    <Button  Content="Change" BorderThickness="0" Width="100"  FontSize="18" Background="Transparent" Foreground="White" Click="change_bars_color"></Button>
+                                </Border>
+
+
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+
+
+
+                            </StackPanel>
+                        </StackPanel>
+
+                    </StackPanel>
+                    <Rectangle Fill="White" Height="2" Width="300" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Background:" Margin="10,0,0,0" FontSize="24"  Foreground="White" FontFamily="Arial Black" Width="243" />
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <Label Content="Local"  FontSize="20" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="83"/>
+                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5">
+                                    <Button  Content="Select" BorderThickness="0" Width="100"  FontSize="18" Background="Transparent" Foreground="White" Click="change_background_local"></Button>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <Label Content="Url" Margin="0" FontSize="20" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="83"/>
+
+                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" Margin="0,5,0,5">
+                                    <TextBox x:Name="background_mod"  Width="100" Background="Transparent" BorderThickness="0" Text="Enter img url" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"/>
+                                </Border>
+
+
+                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
+                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White" Click="change_background_url" HorizontalAlignment="Center"></Button>
+                                </Border>
+
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <Label Content="Color"  FontSize="20"  Foreground="White" FontFamily="Arial Black" VerticalAlignment="Center" Width="83"  />
+                                <Border Background="#33FFFFFF" Margin="0,0,10,0" Width="100" CornerRadius="5">
+                                    <Button  Content="Change" BorderThickness="0" Width="100"  FontSize="18" Background="Transparent" Foreground="White" Click="change_bars_color"></Button>
+                                </Border>
+
+
+
+                            </StackPanel>
+                        </StackPanel>
+
+                    </StackPanel>
+                    <Rectangle Fill="White" Height="2" Width="300" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Filter:" Margin="10,0,0,0" FontSize="24" Foreground="White" FontFamily="Arial Black" VerticalAlignment="Top" Width="243"/>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="0,0,0,10">
+
+
+
+
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                                <Label Content="Color"  FontSize="20"  Foreground="White" FontFamily="Arial Black" Width="82" />
+                                <Border Background="#33FFFFFF" Width="100" Height="25.94" Margin="0,0,10,0" CornerRadius="5">
+                                    <Button  Content="Change" BorderThickness="0" Width="100"  FontSize="18" Background="Transparent" Foreground="White" Click="change_filter_color"></Button>
+                                </Border>
+
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                                <Label Content="Opacity"  FontSize="16" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="82"/>
+                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
+                                    <TextBox x:Name="filter_mod" Width="100" Background="Transparent" BorderThickness="0" Text="1000" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+                                </Border>
+                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
+                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White" Click="change_filter_opacity" ></Button>
+                                </Border>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+
+                <Border Background="#33FFFFFF" Width="200" Height="45" Margin="0,0,10,0" CornerRadius="5">
+                    <Button  Content="Close" BorderThickness="0" Width="200" Height="45" FontSize="18" Background="Transparent" Foreground="White" Click="change_bars_color"></Button>
+                </Border>
+            </StackPanel>
+        </Border>
+
     </Grid>
 </Window>
