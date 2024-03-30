@@ -20,11 +20,18 @@
                     <StackPanel Orientation="Horizontal"   Height="132" Margin="10,-3,0,0">
 
                         <StackPanel Orientation="Vertical" Margin="0" Width="380" Height="133">
-                            <Label x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Content="Light music player v.0.0.2 - By NHMPh" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left" Height="30" />
-                            <TextBlock Margin="0,-6,0,0" x:Name="description" TextWrapping="Wrap" Foreground="White" Height="14" Width="379" FontSize="12"  HorizontalAlignment="Left"><Run Text="Created by NHMPh" /></TextBlock>
-                            <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="65"  >
+
                               
                                
+
+                            <TextBlock Padding="4,4,0,0" x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Text="Light music player v.1.0.0" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"  />
+                            <StackPanel Orientation="Horizontal">
+                                <Grid x:Name="desGrid">
+                                    <TextBlock Padding="4.5,0,0,0" x:Name="description"  Foreground="White" Height="76" Width="379" FontSize="12"  HorizontalAlignment="Left" TextWrapping="Wrap"><Run Text="Created by NHMPh" /></TextBlock>
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="0" >
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,1,0,0" Height="14">
                                 <TextBlock Foreground="#FF007375" FontFamily="Global Sans Serif"  Text="Your custom playlists"  FontWeight="Bold" FontSize="12" Width="128" VerticalAlignment="Center"  />
