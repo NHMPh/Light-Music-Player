@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,49 +39,87 @@ namespace NHMPh_music_player
             {
                 await UpadateSpectrum();
             };
+            MainWindow.FullscreenActive = true;
+            MainWindow.OnSongChange += MainWindow_OnSongChange;
             InitializeComponent();
-            CreateSpectrumBar();     
+            CreateSpectrumBar();
+            //songValue.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
+            //thumb.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
             timer.Start();
         }
 
-       
+        private void MainWindow_OnSongChange(object sender, EventArgs e)
+        {
+            UpdateVisual();
+        }
+
+        private void UpdateVisual()
+        {
+            lable.Content = MainWindow.currenturl.title;
+            des.Content = MainWindow.currenturl.description;
+            artist_cover.ImageSource = new BitmapImage(new Uri(MainWindow.currenturl.thumbnail));
+            songValue.Value = 0;
+            songValue.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
+            thumb.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
+        }
+
         private async Task UpadateSpectrum()
         {
             await Task.Run(() =>
             {
                 Dispatcher.Invoke(() =>
                 {
-                    for (int i = 0, j = 0; i < 256; i++)
+                    if (MainWindow.wave == null) return;
+                    songValue.Value = MainWindow.wave.CurrentTime.TotalMilliseconds;
+                    DrawGraph();
+                    foreach (var lyric in MainWindow.songLyrics)
                     {
-                        int mutipler = 5000;
-                        if (i < 50) mutipler = 2000;
-                        if (i < 10) mutipler = 600;
-
-                        if (MainWindow.fbands[i] * mutipler > spectrumBars[i].Value)
+                        if (lyric["seconds"].ToString() == ((int)MainWindow.wave.CurrentTime.TotalSeconds).ToString())
                         {
-
-
-                            spectrumBars[i].Value = ((MainWindow.fbands[i + j] + MainWindow.fbands[i + j + 1]) / 2) * mutipler;
-                            j++;
-
-
-
-                            decreaserate[i] = 10f;
-                        }
-                        else
-                        {
-                            spectrumBars[i].Value -= 1 * decreaserate[i];
-                            decreaserate[i] *= 1.3f;
+                            if (lyric["lyrics"].ToString().Length > 10)
+                            {
+                                this.lyric.FontSize = 60;
+                            }
+                            else
+                            {
+                                this.lyric.FontSize = 72;
+                            }
+                            try { preLyric.Text = lyric.Previous["lyrics"].ToString(); } catch { }
+                            
+                            this.lyric.Text = lyric["lyrics"].ToString();
+                            postLyric.Text = lyric.Next["lyrics"].ToString();
                         }
                     }
+
                 });
             });
         }
+        private void DrawGraph()
+        {
+            for (int i = 0, j = 0; i < 256; i++)
+            {
+                int mutipler = 5000;
+                if (i < 50) mutipler = 2000;
+                if (i < 10) mutipler = 600;
+                if (MainWindow.fbands[i] * mutipler > spectrumBars[i].Value)
+                {
 
+
+                    spectrumBars[i].Value = ((MainWindow.fbands[i + j] + MainWindow.fbands[i + j + 1]) / 2) * mutipler;
+                    j++;
+                    decreaserate[i] = 10f;
+                }
+                else
+                {
+                    spectrumBars[i].Value -= 1 * decreaserate[i];
+                    decreaserate[i] *= 1.3f;
+                }
+            }
+        }
         private void change_bars_color(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
-         
+
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 foreach (var bar in spectrumBars)
@@ -106,14 +145,14 @@ namespace NHMPh_music_player
         private void change_background_local(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-           openFileDialog.Filter = "Image Files (*.png;*.jpeg;*.jpg;*.gif)|*.png;*.jpeg;*.jpg;*.gif|All Files (*.*)|*.*";
-            if (openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return ;
+            openFileDialog.Filter = "Image Files (*.png;*.jpeg;*.jpg;*.gif)|*.png;*.jpeg;*.jpg;*.gif|All Files (*.*)|*.*";
+            if (openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
             thumbnail.ImageSource = new BitmapImage(new Uri(openFileDialog.FileName));
 
         }
         private void change_filter_color(object sender, RoutedEventArgs e)
         {
-            
+
             try
             {
                 System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
@@ -133,14 +172,14 @@ namespace NHMPh_music_player
         {
             try
             {
-                filter.Color =Color.FromArgb(byte.Parse(filter_mod.Text), filter.Color.R, filter.Color.G, filter.Color.B);
+                filter.Color = Color.FromArgb(byte.Parse(filter_mod.Text), filter.Color.R, filter.Color.G, filter.Color.B);
             }
             catch
             {
                 MessageBox.Show("Invaild input");
                 return;
             }
-                     
+
         }
         private void change_spectrum_width(object sender, RoutedEventArgs e)
         {
@@ -150,7 +189,7 @@ namespace NHMPh_music_player
                 foreach (var bar in spectrumBars)
                 {
                     bar.Width = float.Parse(width_mod.Text);
-                   
+
                 }
             }
             catch
@@ -167,9 +206,9 @@ namespace NHMPh_music_player
 
                 foreach (var bar in spectrumBars)
                 {
-                  
+
                     bar.Height = float.Parse(height_mod.Text);
-                  
+
                 }
             }
             catch
@@ -186,7 +225,7 @@ namespace NHMPh_music_player
 
                 foreach (var bar in spectrumBars)
                 {
-                 
+
                     bar.Margin = new Thickness(0, 0, float.Parse(space_mod.Text), 0);
                 }
             }
@@ -206,14 +245,14 @@ namespace NHMPh_music_player
                 {
                     BorderThickness = new Thickness(0),
                     Background = new SolidColorBrush(Colors.Transparent),
-                    Foreground = new SolidColorBrush(Colors.Red),
-                    Width = 2,
+                    Foreground = new SolidColorBrush(Colors.Cyan),
+                    Width = 1,
                     Margin = new Thickness(0, 0, 6, 0),
-                    Height = 700,
+                    Height = 200,
                     Maximum = 1000,
                     Orientation = Orientation.Vertical,
                     Value = 0,
-                    
+
                 };
                 /*  if(i==125) progressBar.Value = 1000;
 
@@ -236,6 +275,11 @@ namespace NHMPh_music_player
 
             }
 
+        }
+
+        private void songValue_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+          // thumb.Value = songValue.Value;
         }
     }
 }

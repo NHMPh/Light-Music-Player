@@ -21,7 +21,9 @@
 
                         <StackPanel Orientation="Vertical" Margin="0" Width="380" Height="133">
                             <TextBlock Padding="4,4,0,0" x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Text="Light music player v.1.0.0" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"  />
-                            <TextBlock Padding="4,0,0,0" x:Name="description"  Foreground="White" Height="76" Width="379" FontSize="12"  HorizontalAlignment="Left" TextWrapping="Wrap"><Run Text="Created by NHMPh" /></TextBlock>
+                            <Grid x:Name="desGrid">
+                            <TextBlock Padding="4.5,0,0,0" x:Name="description"  Foreground="White" Height="76" Width="379" FontSize="12"  HorizontalAlignment="Left" TextWrapping="Wrap"><Run Text="Created by NHMPh" /></TextBlock>
+                            </Grid>
                             <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="0" >
                                 
 
@@ -180,10 +182,6 @@
                         </Grid>
                     </StackPanel>
                     <Grid Height="15" MouseLeftButtonDown="thumb_MouseLeftButtonDown" Background="#282b30" >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="287*"/>
-                            <ColumnDefinition Width="219*"/>
-                        </Grid.ColumnDefinitions>
                         <ProgressBar x:Name="songProgress" Background="AliceBlue" Height="1" Foreground="#FF00E2FF" Margin="3,7,3,7" Maximum="255" ValueChanged="songProgress_ValueChanged" Width="500" Grid.ColumnSpan="2" />
                         <Slider x:Name="thumb" Width="500" Height="6" Margin="3,4,3,5" GotMouseCapture="thumb_GotMouseCapture" LostMouseCapture="thumb_LostMouseCapture" Grid.ColumnSpan="2">
                             <Slider.Template>

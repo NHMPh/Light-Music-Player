@@ -10,23 +10,92 @@
 
         <Border>
             <Border.Background>
-                <ImageBrush  x:Name="thumbnail" Stretch="Fill" ImageSource="https://cdnb.artstation.com/p/assets/images/images/068/716/337/large/sharkdraws-supreme-witch-calamitas.jpg?1698473026"/>
+                <ImageBrush  x:Name="thumbnail" Stretch="Fill" ImageSource="https://getwallpapers.com/wallpaper/full/3/9/6/1086747-alan-walker-wallpapers-2048x1152-for-4k.jpg"/>
             </Border.Background>
         </Border>
         <Border>
             <Border.Background>
-                <SolidColorBrush x:Name="filter" Color="#00FF0000"></SolidColorBrush>
+                <SolidColorBrush x:Name="filter" Color="#7F000000"></SolidColorBrush>
             </Border.Background>
         </Border>
-        <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Margin="10,0,10,0" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
-        <Border Background="#33FFFFFF" Width="500" Margin="20" Height="550" VerticalAlignment="Top" HorizontalAlignment="Right" CornerRadius="10">
+        <StackPanel  Orientation="Horizontal" Margin="70" VerticalAlignment="Top" HorizontalAlignment="Left" >
+            <Border Height="80" Width="80" CornerRadius="50">
+                <Border.Background>
+                    <ImageBrush Stretch="UniformToFill" ImageSource="./LOGO.PNG"/>
+                </Border.Background>
+            </Border>
+            <StackPanel Orientation="Vertical" Margin="20,0,0,0" VerticalAlignment="Center">
+                <Label Content="Fullscreen mode" Foreground="#33FFFFFF" VerticalContentAlignment="Center" FontSize="48" Height="74"></Label>
+            </StackPanel>
+
+        </StackPanel>
+        <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Margin="10,0,10,0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+
+        </StackPanel>
+        <StackPanel  VerticalAlignment="Top" Margin="0,860,0,0">
+        <Grid Margin="0,20,0,0" >
+            <ProgressBar ValueChanged="songValue_ValueChanged"  x:Name="songValue" Background="Gray" Height="5" Foreground="White" Margin="3,7,3,7" Maximum="255"  Width="900" Grid.ColumnSpan="2" Value="50" />
+            <Slider x:Name="thumb" Width="900" Height="15" Value="50" Margin="3,4,3,5" Maximum="255"  Grid.ColumnSpan="2">
+                <Slider.Template>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Rectangle x:Name="PART_SelectionRange" HorizontalAlignment="Left" Fill="#FF9E1616" />
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Width="12" Height="12">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{TemplateBinding Background}" />
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Slider.Template>
+            </Slider>
+        </Grid>
+        </StackPanel>
+        <StackPanel  Orientation="Vertical" VerticalAlignment="Bottom" Margin="0,0,0,30">
+            <StackPanel Orientation="Horizontal" Margin="120,0,0,0" >
+                <Border  Height="110" Width="146" CornerRadius="5">
+                    <Border.Background>
+                        <ImageBrush x:Name="artist_cover" Stretch="Fill" ImageSource="https://home.voca.vn/assets/img/upload/images/All%20Falls%20Down.jpg"/>
+                    </Border.Background>
+                </Border>
+                <StackPanel Orientation="Vertical" Margin="20,0,0,0">
+                    <Label x:Name="lable" Content="All Fall Down" Foreground="White" VerticalContentAlignment="Center" FontSize="36" Height="74"></Label>
+                    <Label x:Name="des" Content="Alan walker - 3:12" Foreground="White" FontSize="20" Padding="10,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                </StackPanel>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,50">
+                <Button x:Name="pauseBtn" ToolTip="Resume/Pause" Height="70" Width="0" Background="#FF2F2F2F" BorderBrush="#FF5BECFF" BorderThickness="0" Margin="5,4,5,0">
+
+                    <Image x:Name="playpause" Source="/_Pause.png"/>
+
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="70"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,00">
+            <TextBlock x:Name="preLyric" Text="You the drug that i addicted to" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center" />
+            <TextBlock x:Name="lyric" Text="And i want you so badly" Foreground="White" FontSize="72" HorizontalAlignment="Center" Margin="20"/>
+            <TextBlock x:Name="postLyric" Text="But i'll but fine" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center"/>
+        </StackPanel>
+        <Border Background="#33FFFFFF" Width="00" Margin="20" Height="550" VerticalAlignment="Top" HorizontalAlignment="Right" CornerRadius="10">
             <StackPanel x:Name="setting" Orientation="Vertical"   Opacity="100">
                 <Label Content="Setting" Margin="10" FontSize="36" HorizontalAlignment="Center" Foreground="White" FontFamily="Arial Black"/>
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Spectrum bars:" Margin="10,0,0,0" FontSize="24" Foreground="White" FontFamily="Arial Black" VerticalAlignment="Top" Width="243"/>
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="0,0,0,10">
-
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Width"  FontSize="20" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="83"/>
                                 <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
@@ -144,6 +213,7 @@
                     <Button  Content="Close" BorderThickness="0" Width="200" Height="45" FontSize="18" Background="Transparent" Foreground="White" Click="change_bars_color"></Button>
                 </Border>
             </StackPanel>
+
         </Border>
 
     </Grid>

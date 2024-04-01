@@ -44,15 +44,17 @@ namespace NHMPh_music_player
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static bool FullscreenActive = false;
         bool isChromeOpen = false;
         bool isDragging = false;
         WaveOutEvent output = new WaveOutEvent();
         MediaFoundationReader _mf;
-        WaveChannel32 wave;
+        public static WaveChannel32 wave;
         MediaFoundationReader _mfSpectrum;
         WaveChannel32 waveSpectrum;
         // ThreadStart start;
         // Thread thread;
+        bool isLyrics;
         bool isChosingTimeStap;
         double timeInSong;
         bool isLoop;
@@ -60,7 +62,7 @@ namespace NHMPh_music_player
         bool isSpectrum;
         public static double[] fbands = new double[2048];
         float[] decreaserate = new float[512];
-        VideoInfo currenturl;
+        public static  VideoInfo currenturl;
         YoutubeDL ytdl = new YoutubeDL();
         public static string currentCustomPlayList;
         //Normal video info
@@ -68,7 +70,7 @@ namespace NHMPh_music_player
         //Normal video info for autoplay
         Queue<VideoInfo> videoAutoQueue = new Queue<VideoInfo>();
         List<CustomPlaylist> activeWindow = new List<CustomPlaylist>();
-        OptionSet options = new OptionSet() { Format = "m4a", GetUrl = true };
+        OptionSet options = new OptionSet() { Format = "mp4", GetUrl = true };
         RunResult<string[]> streamUrl;
         YoutubeClient youtube = new YoutubeClient();
         static HttpClient httpClient = new HttpClient();
@@ -78,6 +80,8 @@ namespace NHMPh_music_player
         MMDevice device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
         FullscreenSpectrum fullscreenSpectrum = new FullscreenSpectrum();
         private DispatcherTimer timer;
+        public static JArray songLyrics = new JArray();
+        public static event EventHandler OnSongChange;
         public MainWindow()
         {
             currenturl = new VideoInfo();
@@ -100,12 +104,56 @@ namespace NHMPh_music_player
             // thread = new Thread(start);
             Closed += MainWindow_Closed;
         }
-
         private void MainWindow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             isDragging = false;
         }
 
+        private async void PlayMusic(VideoInfo videoInfo)
+        {
+            isLyrics = false;
+            status.Text = "Loading (0%)...";
+            //Convert url to audiable link
+            streamUrl = await ytdl.RunWithOptions(
+                new[] { videoInfo.url },
+                options,
+                CancellationToken.None
+            );
+            Console.WriteLine(streamUrl.Data[0]);
+            //set _mf for playing audio
+            _mf = new MediaFoundationReader(streamUrl.Data[0]);
+            wave = new WaveChannel32(_mf);
+            _mfSpectrum = new MediaFoundationReader(streamUrl.Data[0]);
+            waveSpectrum = new WaveChannel32(_mfSpectrum);
+            status.Text = "Loading (50%)...";
+            //play audio
+            if (output != null)
+                output.Dispose();
+            output.Init(wave);
+            output.Play();
+            FindLyrics(videoInfo.title);
+            //Start track thread
+            if (!timer.IsEnabled)
+            {
+                timer.Start();
+            }
+            SetTrackVisual();
+            CheckQueue();
+            CheckNextSong();
+            status.Text = "Loaded";
+
+            currenturl.title = videoInfo.title;
+            currenturl.description = videoInfo.description;
+            currenturl.url = videoInfo.url;
+            currenturl.thumbnail = videoInfo.thumbnail;
+            EventArgs e = null;
+            OnSongChange?.Invoke(this, e);
+            SetVisual("" + videoInfo.title, videoInfo.description, videoInfo.thumbnail);
+            var des = await ytdl.RunVideoDataFetch(videoInfo.url);
+            currenturl.description = videoInfo.description + "\n" + des.Data.Description;
+            SetVisualDes(currenturl.description);
+
+        }
         private void UpdateGraph()
         {
             while (waveSpectrum.Position <= wave.Position)
@@ -220,7 +268,6 @@ namespace NHMPh_music_player
             }
 
         }
-
         private async void WarmUp()
         {
             var url = await Search("Rick roll");
@@ -253,7 +300,6 @@ namespace NHMPh_music_player
                 window.Close();
             }
         }
-
         private void LoadCustomPlayList(object sender, EventArgs e)
         {
 
@@ -306,49 +352,6 @@ namespace NHMPh_music_player
             comboboxCustomPlayList.Items.Add(_comboBoxItem);
             comboboxCustomPlayList.SelectionChanged += comboboxCustomPlayList_SelectionChanged;
         }
-
-        private async void PlayMusic(VideoInfo videoInfo)
-        {
-            status.Text = "Loading (0%)...";
-            //Convert url to audiable link
-            streamUrl = await ytdl.RunWithOptions(
-                new[] { videoInfo.url },
-                options,
-                CancellationToken.None
-            );
-            Console.WriteLine(streamUrl.Data[0]);
-            //set _mf for playing audio
-            _mf = new MediaFoundationReader(streamUrl.Data[0]);
-            wave = new WaveChannel32(_mf);
-            _mfSpectrum = new MediaFoundationReader(streamUrl.Data[0]);
-            waveSpectrum = new WaveChannel32(_mfSpectrum);
-            status.Text = "Loading (50%)...";
-            //play audio
-            if (output != null)
-                output.Dispose();
-            output.Init(wave);
-            output.Play();
-
-            //Start track thread
-            if (!timer.IsEnabled)
-            {
-                timer.Start();
-            }
-            SetTrackVisual();
-            CheckQueue();
-            CheckNextSong();
-            status.Text = "Loaded";
-
-            currenturl.title = videoInfo.url;
-            currenturl.description = videoInfo.description;
-            currenturl.url = videoInfo.url;
-            SetVisual("" + videoInfo.title, videoInfo.description, videoInfo.thumbnail);
-            currenturl.thumbnail = videoInfo.thumbnail;
-            var des = await ytdl.RunVideoDataFetch(videoInfo.url);
-            currenturl.description = videoInfo.description + "\n" + des.Data.Description;
-            SetVisualDes(currenturl.description);
-
-        }
         private void SetVisualDes(string des)
         {
             description.Text = des;
@@ -371,7 +374,7 @@ namespace NHMPh_music_player
                     // Console.WriteLine(_mf.Position);                      
 
                     //Song end
-                    if (songProgress.Value == _mf.TotalTime.TotalMilliseconds)
+                    if (songProgress.Value == wave.TotalTime.TotalMilliseconds)
                     {
                         //When loop is on
                         if (isLoop)
@@ -392,6 +395,7 @@ namespace NHMPh_music_player
                             {
                                 _mf = null;
                                 songProgress.Value = 0;
+                                isLyrics = false;
                                 PlayMusic(videoQueue.Dequeue());
 
                             }
@@ -402,8 +406,8 @@ namespace NHMPh_music_player
                                 {
                                     _mf = null;
                                     songProgress.Value = 0;
+                                    isLyrics = false;
                                     PlayMusic(videoAutoQueue.Dequeue());
-
                                     songProgress.Value = 0;
 
                                 }
@@ -415,13 +419,27 @@ namespace NHMPh_music_player
                     {
                         if (_mf != null)
                         {
-                            songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
+                            songProgress.Value = wave.CurrentTime.TotalMilliseconds;
                         }
 
                         if (!isDragging && output.PlaybackState == PlaybackState.Playing && isSpectrum)
                         {
                             UpdateGraph();
+                            //if(!FullscreenActive)
                             DrawGraph();
+                        }
+                        if (isLyrics)
+                        {
+
+                            foreach (var lyric in songLyrics)
+                            {
+                                if (lyric["seconds"].ToString() == ((int)wave.CurrentTime.TotalSeconds).ToString())
+                                {
+
+                                    description.Text = lyric["lyrics"].ToString();
+                                }
+                            }
+
                         }
                     }
                 });
@@ -536,12 +554,12 @@ namespace NHMPh_music_player
             IBrowser browser;
             try
             {
+                
                 browser = await Puppeteer.LaunchAsync(new LaunchOptions
                 {
                     Headless = true,
-                    ExecutablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+                    ExecutablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
                 });
-
             }
             catch
             {
@@ -550,7 +568,7 @@ namespace NHMPh_music_player
                     browser = await Puppeteer.LaunchAsync(new LaunchOptions
                     {
                         Headless = true,
-                        ExecutablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+                        ExecutablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
                     });
                 }
                 catch
@@ -631,15 +649,14 @@ namespace NHMPh_music_player
             CheckQueue();
 
         }
-        //Call when song change
         void CheckNextSong()
         {
             combobox.SelectionChanged -= Combobox_SelectionChanged;
             combobox.Items.Clear();
             if (videoQueue.Count + videoAutoQueue.Count > 0)
             {
-                
-                
+
+
                 //Add videoQueue 1st
                 int j = 0;
                 for (int i = 0; i < videoQueue.Count; i++)
@@ -744,7 +761,6 @@ namespace NHMPh_music_player
             }
             CheckNextSong();
         }
-
         private async void MoveTrackManager(string track)
         {
 
@@ -766,9 +782,57 @@ namespace NHMPh_music_player
             }
             CheckNextSong();
         }
+        private async void FindLyrics(string name)
+        {
+            name = ProcessInvailName(name);
+            Console.WriteLine($"https://api.textyl.co/api/lyrics?q={name}");
+            // Create an instance of HttpClient
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    // Send GET request to a URL
+                    HttpResponseMessage response = await client.GetAsync($"https://api.textyl.co/api/lyrics?q={name}");
 
+                    // Check if the response is successful
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Read the content as string
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        songLyrics = JArray.Parse(responseBody);
+                        Console.WriteLine(songLyrics);                 
+                        desGrid.Children.Add(new Button()
+                        {
+                            Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x28, 0x2B, 0x30)),
+                            Margin = new Thickness(50, 0, 0, 0),
+                            BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x43, 0xA6, 0xB3)),
+                            Padding = new Thickness(0),
+                            BorderThickness = new Thickness(0),
+                            Width = 90,
+                            Content = "- Lyric availible",
+                            Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                            FontSize = 12,
+                            VerticalAlignment = System.Windows.VerticalAlignment.Top,
+                        });
 
-
+                        // Apply the style for the border
+                        Style borderStyle = new Style(typeof(Border));
+                        borderStyle.Setters.Add(new Setter(Border.CornerRadiusProperty, new CornerRadius(3)));
+                        ((Button)desGrid.Children[desGrid.Children.Count - 1]).Resources.Add(typeof(Border), borderStyle);
+                        // Attach click event handler
+                        ((Button)desGrid.Children[desGrid.Children.Count - 1]).Click += enable_lyric;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to get data. Status code: {response.StatusCode}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                }
+            }
+        }
         //Support function
         public static int EvaluateKeyWord(string key)
         {
@@ -905,9 +969,78 @@ namespace NHMPh_music_player
 
             return null;
         }
+        public static string ReplaceNumbersWithWords(string input)
+        {
+            string[] parts = input.Split(' ');
+            for (int i = 0; i < parts.Length; i++)
+            {
+                // Attempt to parse the substring as an integer
+                if (int.TryParse(parts[i], out int num))
+                {
+                    // If the parsed number is less than 10, replace it with its string representation
+                    if (num < 10)
+                    {
+                        for (int j = 1; j <= 10; j++)
+                        {
+                            parts[i] = num.ToString().Replace(j.ToString(), NumberToWords(j));
+                        }
+                    }
+
+                }
+            }
+
+            input = string.Join(" ", parts);
+            return input;
+        }
+        public static string NumberToWords(int number)
+        {
+            if (number < 1 || number > 10)
+            {
+                throw new ArgumentOutOfRangeException("Number must be between 1 and 10.");
+            }
+
+            return numberWords[number];
+        }
+        private static readonly Dictionary<int, string> numberWords = new Dictionary<int, string>()
+    {
+    {1, "one"}, {2, "two"}, {3, "three"}, {4, "four"}, {5, "five"},
+    {6, "six"}, {7, "seven"}, {8, "eight"}, {9, "nine"}, {10, "ten"}
+    };
+        private string ProcessInvailName(string name)
+        {
+            if (name.Contains('‒'))
+                name = name.Replace('‒', '-');
+
+            string result = name;
+            if (!result.Contains("-")) return result.Replace(" ", "%20");
+            string[] parts = Regex.Split(result, @"(?<=\s-\s)|(?<=\s--\s)|(?<=-\s)");
+            parts[0] = Regex.Replace(parts[0], @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", "");
+            parts[1] = Regex.Replace(parts[1], @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", "");
+                if(parts[0].Contains(','))
+                    parts[0] = parts[0].Replace(',', '&');
+            if (parts[0].Contains('&'))
+            {
+    
+                parts[0] = parts[0].Split('&')[parts[0].Split('&').Length - 1];
+            }
+            parts[1] = ReplaceNumbersWithWords(parts[1]);
+            string processName = parts[0] + " " + parts[1];
+            return processName.Replace(" ", "%20");
+
+        }
+
         //////////////
 
         //event
+        private void enable_lyric(object sender, RoutedEventArgs e)
+        {
+            isLyrics = true;
+            description.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
+            if (sender is Button clickedButton)
+            {
+                desGrid.Children.Remove(clickedButton);
+            }
+        }
         private void volum_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             output.Volume = (float)volum.Value;
@@ -921,7 +1054,6 @@ namespace NHMPh_music_player
             }
 
         }
-
         private void thumb_GotMouseCapture(object sender, MouseEventArgs e)
         {
             if (isChosingTimeStap == false)
@@ -937,8 +1069,9 @@ namespace NHMPh_music_player
             int second = (int)Math.Floor(thumb.Value / 1000);
             int current = (int)Math.Floor(timeInSong / 1000);
             int secondToSkip = second - current;
-            wave.Skip(secondToSkip);
-            songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
+            //wave.Skip(secondToSkip);
+            wave.Position += wave.WaveFormat.AverageBytesPerSecond * secondToSkip;
+            songProgress.Value = wave.CurrentTime.TotalMilliseconds;
             isChosingTimeStap = false;
             if (output.PlaybackState != PlaybackState.Playing)
             {
@@ -957,9 +1090,11 @@ namespace NHMPh_music_player
             int second = (int)Math.Floor(thumbPostion / 1000);
             int current = (int)Math.Floor(thumb.Value / 1000);
             int secondToSkip = second - current;
+            // wave.Skip(secondToSkip);    
 
-            wave.Skip(secondToSkip);
-            songProgress.Value = _mf.CurrentTime.TotalMilliseconds;
+           wave.Position += wave.WaveFormat.AverageBytesPerSecond * secondToSkip;
+            
+            songProgress.Value = wave.CurrentTime.TotalMilliseconds;
 
             if (output.PlaybackState != PlaybackState.Playing)
             {
@@ -967,7 +1102,6 @@ namespace NHMPh_music_player
             }
             waveSpectrum.Position = wave.Position;
         }
-
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             if (currenturl.url == string.Empty) return;
@@ -1086,7 +1220,6 @@ namespace NHMPh_music_player
                         }*/
 
         }
-
         private async void Window_KeyDown(object sender, KeyEventArgs e)
         {
             //Add song to queue
@@ -1119,8 +1252,6 @@ namespace NHMPh_music_player
 
 
         }
-
-
         private void Combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var text = ((sender as ComboBox).SelectedItem as ComboBoxItem).Content as StackPanel;
@@ -1207,8 +1338,6 @@ namespace NHMPh_music_player
             comboboxCustomPlayList.SelectionChanged += comboboxCustomPlayList_SelectionChanged;
         }
         //Custom playlist
-
-
         private void load_custom_btn(object sender, RoutedEventArgs e)
         {
             var playlists = ReadJsonFile($".\\custom\\{currentCustomPlayList}.json");
