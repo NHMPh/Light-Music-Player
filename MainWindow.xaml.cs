@@ -51,7 +51,7 @@ namespace NHMPh_music_player
         MediaFoundationReader _mf;
         public static WaveChannel32 wave;
         MediaFoundationReader _mfSpectrum;
-        WaveChannel32 waveSpectrum;
+        public static WaveChannel32 waveSpectrum;
         // ThreadStart start;
         // Thread thread;
         bool isLyrics;
@@ -62,7 +62,7 @@ namespace NHMPh_music_player
         bool isSpectrum;
         public static double[] fbands = new double[2048];
         float[] decreaserate = new float[512];
-        public static  VideoInfo currenturl;
+        public static VideoInfo currenturl;
         YoutubeDL ytdl = new YoutubeDL();
         public static string currentCustomPlayList;
         //Normal video info
@@ -78,10 +78,10 @@ namespace NHMPh_music_player
         static MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
         List<ProgressBar> spectrumBars = new List<ProgressBar>();
         MMDevice device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
-        FullscreenSpectrum fullscreenSpectrum = new FullscreenSpectrum();
         private DispatcherTimer timer;
         public static JArray songLyrics = new JArray();
         public static event EventHandler OnSongChange;
+        public static int lyricsOffset = 0;
         public MainWindow()
         {
             currenturl = new VideoInfo();
@@ -112,6 +112,9 @@ namespace NHMPh_music_player
         private async void PlayMusic(VideoInfo videoInfo)
         {
             isLyrics = false;
+            lyricsOffset = 0;
+            try { desGrid.Children.Remove(((Button)desGrid.Children[desGrid.Children.Count - 1])); } catch (Exception) { }
+
             status.Text = "Loading (0%)...";
             //Convert url to audiable link
             streamUrl = await ytdl.RunWithOptions(
@@ -156,10 +159,15 @@ namespace NHMPh_music_player
         }
         private void UpdateGraph()
         {
-            while (waveSpectrum.Position <= wave.Position)
+            try
             {
-                fbands = GetFFTdata();
+                while (waveSpectrum.Position <= wave.Position)
+                {
+                    fbands = GetFFTdata();
+                }
             }
+            catch { }
+
         }
         private void DrawGraph()
         {
@@ -420,20 +428,21 @@ namespace NHMPh_music_player
                         if (_mf != null)
                         {
                             songProgress.Value = wave.CurrentTime.TotalMilliseconds;
+                            // title.Text = wave.CurrentTime.TotalSeconds.ToString();
                         }
 
                         if (!isDragging && output.PlaybackState == PlaybackState.Playing && isSpectrum)
                         {
                             UpdateGraph();
-                            //if(!FullscreenActive)
-                            DrawGraph();
+                            if (!FullscreenActive)
+                                DrawGraph();
                         }
                         if (isLyrics)
                         {
 
                             foreach (var lyric in songLyrics)
                             {
-                                if (lyric["seconds"].ToString() == ((int)wave.CurrentTime.TotalSeconds).ToString())
+                                if (lyric["seconds"].ToString() == ((int)wave.CurrentTime.TotalSeconds - lyricsOffset).ToString())
                                 {
 
                                     description.Text = lyric["lyrics"].ToString();
@@ -554,7 +563,7 @@ namespace NHMPh_music_player
             IBrowser browser;
             try
             {
-                
+
                 browser = await Puppeteer.LaunchAsync(new LaunchOptions
                 {
                     Headless = true,
@@ -800,7 +809,7 @@ namespace NHMPh_music_player
                         // Read the content as string
                         string responseBody = await response.Content.ReadAsStringAsync();
                         songLyrics = JArray.Parse(responseBody);
-                        Console.WriteLine(songLyrics);                 
+                        // Console.WriteLine(songLyrics);
                         desGrid.Children.Add(new Button()
                         {
                             Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x28, 0x2B, 0x30)),
@@ -980,9 +989,10 @@ namespace NHMPh_music_player
                     // If the parsed number is less than 10, replace it with its string representation
                     if (num < 10)
                     {
+                        Console.WriteLine(num + " Found " + parts[i]);
                         for (int j = 1; j <= 10; j++)
                         {
-                            parts[i] = num.ToString().Replace(j.ToString(), NumberToWords(j));
+                            parts[i] = NumberToWords(num);
                         }
                     }
 
@@ -1002,29 +1012,44 @@ namespace NHMPh_music_player
             return numberWords[number];
         }
         private static readonly Dictionary<int, string> numberWords = new Dictionary<int, string>()
-    {
-    {1, "one"}, {2, "two"}, {3, "three"}, {4, "four"}, {5, "five"},
-    {6, "six"}, {7, "seven"}, {8, "eight"}, {9, "nine"}, {10, "ten"}
-    };
+        {
+            {1, "one"}, {2, "two"}, {3, "three"}, {4, "four"}, {5, "five"},
+            {6, "six"}, {7, "seven"}, {8, "eight"}, {9, "nine"}, {10, "ten"}
+        };
+
+        private static readonly Dictionary<string, string> songException = new Dictionary<string, string>()
+        {
+            { "BoneyM-Rasputin", "Rasputin"},{ "BoneyM.-Rasputin", "Rasputin"},{"DMDOKURO-Stained,BrutalCalamity", "Stained, Brutal Calamity"},{"NineInchNails-HurtLyricsVideo","Nine Inch Nails - Hurt "}
+        };
         private string ProcessInvailName(string name)
         {
             if (name.Contains('‒'))
                 name = name.Replace('‒', '-');
-
+            name = Regex.Replace(name, @"(\([^)]*\)|\[[^\]]*\])|【|】", "");
             string result = name;
-            if (!result.Contains("-")) return result.Replace(" ", "%20");
+            if (!result.Contains("-")) {
+                result = Regex.Replace(result, @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", "");
+                return result.Replace(" ", "%20");
+            } 
             string[] parts = Regex.Split(result, @"(?<=\s-\s)|(?<=\s--\s)|(?<=-\s)");
             parts[0] = Regex.Replace(parts[0], @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", "");
             parts[1] = Regex.Replace(parts[1], @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", "");
-                if(parts[0].Contains(','))
-                    parts[0] = parts[0].Replace(',', '&');
+            if (parts[0].Contains(','))
+                parts[0] = parts[0].Replace(',', '&');
+            parts[0] = Regex.Replace(parts[0], @"(?<!\w)x(?!x|\w)", ",");
+
             if (parts[0].Contains('&'))
             {
-    
                 parts[0] = parts[0].Split('&')[parts[0].Split('&').Length - 1];
             }
             parts[1] = ReplaceNumbersWithWords(parts[1]);
-            string processName = parts[0] + " " + parts[1];
+            Console.WriteLine(parts[1]);
+            string processName = parts[0] + "" + parts[1];
+            Console.WriteLine(processName);
+            try { processName = songException[processName.Replace(" ", "")]; } catch { }
+           
+            Console.WriteLine(processName);
+           
             return processName.Replace(" ", "%20");
 
         }
@@ -1032,6 +1057,28 @@ namespace NHMPh_music_player
         //////////////
 
         //event
+        private void sync_lyric(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button clickedButton)
+            {
+                desGrid.Children.Remove(clickedButton);
+            }
+            SyncLyrics();
+        }
+        public void SyncLyrics()
+        {
+            if (lyricsOffset == 0)
+            {
+                lyricsOffset = (int)wave.CurrentTime.TotalSeconds - int.Parse(songLyrics[0]["seconds"].ToString());
+
+            }
+            else
+            {
+                wave.Seek(0, SeekOrigin.Begin);
+                lyricsOffset = 0;
+                waveSpectrum.Seek(0, SeekOrigin.Begin);
+            }
+        }
         private void enable_lyric(object sender, RoutedEventArgs e)
         {
             isLyrics = true;
@@ -1040,8 +1087,32 @@ namespace NHMPh_music_player
             {
                 desGrid.Children.Remove(clickedButton);
             }
+            desGrid.Children.Add(new Button()
+            {
+                Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x28, 0x2B, 0x30)),
+                Margin = new Thickness(100, 0, 0, 0),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x43, 0xA6, 0xB3)),
+                Padding = new Thickness(0),
+                BorderThickness = new Thickness(0),
+                Width = 90,
+                Content = "sync lyrics",
+                Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                FontSize = 12,
+                VerticalAlignment = System.Windows.VerticalAlignment.Top,
+            });
+
+            // Apply the style for the border
+            Style borderStyle = new Style(typeof(Border));
+            borderStyle.Setters.Add(new Setter(Border.CornerRadiusProperty, new CornerRadius(3)));
+            ((Button)desGrid.Children[desGrid.Children.Count - 1]).Resources.Add(typeof(Border), borderStyle);
+            // Attach click event handler
+            ((Button)desGrid.Children[desGrid.Children.Count - 1]).Click += sync_lyric;
         }
         private void volum_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            ChangeVolum(volum, volumVisual);
+        }
+        public void ChangeVolum(Slider volum, ProgressBar volumVisual)
         {
             output.Volume = (float)volum.Value;
             volumVisual.Value = volum.Value;
@@ -1056,28 +1127,13 @@ namespace NHMPh_music_player
         }
         private void thumb_GotMouseCapture(object sender, MouseEventArgs e)
         {
-            if (isChosingTimeStap == false)
-            {
-                timeInSong = thumb.Value;
-            }
             isChosingTimeStap = true;
-            Console.WriteLine(timeInSong);
         }
         private void thumb_LostMouseCapture(object sender, MouseEventArgs e)
         {
-
             int second = (int)Math.Floor(thumb.Value / 1000);
-            int current = (int)Math.Floor(timeInSong / 1000);
-            int secondToSkip = second - current;
-            //wave.Skip(secondToSkip);
-            wave.Position += wave.WaveFormat.AverageBytesPerSecond * secondToSkip;
-            songProgress.Value = wave.CurrentTime.TotalMilliseconds;
             isChosingTimeStap = false;
-            if (output.PlaybackState != PlaybackState.Playing)
-            {
-                output.Play();
-            }
-            waveSpectrum.Position = wave.Position;
+            SkipToSecond(second);
         }
         private void thumb_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -1088,12 +1144,13 @@ namespace NHMPh_music_player
             double mousePositionPercentage = position.X / songProgress.Width;
             double thumbPostion = thumb.Maximum * mousePositionPercentage;
             int second = (int)Math.Floor(thumbPostion / 1000);
-            int current = (int)Math.Floor(thumb.Value / 1000);
-            int secondToSkip = second - current;
-            // wave.Skip(secondToSkip);    
+            SkipToSecond(second);
 
-           wave.Position += wave.WaveFormat.AverageBytesPerSecond * secondToSkip;
-            
+
+        }
+        public void SkipToSecond(int seconds)
+        {
+            wave.Position = wave.WaveFormat.AverageBytesPerSecond * seconds;
             songProgress.Value = wave.CurrentTime.TotalMilliseconds;
 
             if (output.PlaybackState != PlaybackState.Playing)
@@ -1104,11 +1161,7 @@ namespace NHMPh_music_player
         }
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            if (currenturl.url == string.Empty) return;
-            output.Pause();
-
-
-
+            Pause();
             playpause.Source = new BitmapImage(
             new Uri($"{Environment.CurrentDirectory}\\Images\\_Play.png"));
             pauseBtn.Click -= Button_Click_1;
@@ -1116,16 +1169,29 @@ namespace NHMPh_music_player
 
 
         }
+        public void Pause()
+        {
+            if (currenturl.url == string.Empty) return;
+            output.Pause();
+        }
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
 
-            output.Play();
+            Resume();
             playpause.Source = new BitmapImage(
             new Uri($"{Environment.CurrentDirectory}\\Images\\_Pause.png"));
             pauseBtn.Click -= Button_Click_2;
             pauseBtn.Click += Button_Click_1;
         }
+        public void Resume()
+        {
+            output.Play();
+        }
         private void Skip_Btn(object sender, RoutedEventArgs e)
+        {
+            SkipSong();
+        }
+        public void SkipSong()
         {
             status.Text = "Skipping...";
             //When there's song(s) in queue
@@ -1142,10 +1208,14 @@ namespace NHMPh_music_player
         }
         private void loopBtn_Click(object sender, RoutedEventArgs e)
         {
+
+
+            Loop();
+        }
+        public void Loop()
+        {
             isLoop = !isLoop;
             loopTxt.Text = isLoop ? " on " : " off ";
-
-            Console.WriteLine(isLoop);
         }
         private void autoplay_btn_Click(object sender, RoutedEventArgs e)
         {
@@ -1247,8 +1317,11 @@ namespace NHMPh_music_player
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
+            {
+
                 isDragging = true;
-            this.DragMove();
+                this.DragMove();
+            }
 
 
         }
@@ -1395,15 +1468,17 @@ namespace NHMPh_music_player
 
         private void spectrum_btn_Click(object sender, RoutedEventArgs e)
         {
+
+            EnableSpectrum();
+        }
+        public void EnableSpectrum()
+        {
             isSpectrum = !isSpectrum;
             if (!isSpectrum)
             {
-                foreach (var spec in spectrumBars)
-                {
-                    spec.Value = 0;
-                }
                 description.Height = 76;
                 spectrum_ctn.Height = 0;
+                fbands.Clear();
 
             }
             if (isSpectrum)
@@ -1413,9 +1488,7 @@ namespace NHMPh_music_player
                 UpdateGraph();
                 DrawGraph();
             };
-
         }
-
         private void minimize_btn_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
@@ -1423,13 +1496,24 @@ namespace NHMPh_music_player
 
         private void spectrum_btn_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!fullscreenSpectrum.IsActive)
+            if (!FullscreenActive)
             {
+                if (!isSpectrum)
+                {
+                    EnableSpectrum();
+                    Console.WriteLine("---------------" + isSpectrum);
+                }
+                FullscreenActive = true;
+                FullscreenSpectrum fullscreenSpectrum = new FullscreenSpectrum(this);
                 fullscreenSpectrum.Show();
+                fullscreenSpectrum.Activate();
+                fullscreenSpectrum.UpdateVisual();
+
+
             }
             else
             {
-                fullscreenSpectrum.Focus();
+
             }
         }
     }
