@@ -113,7 +113,9 @@ namespace NHMPh_music_player
         {
             isLyrics = false;
             lyricsOffset = 0;
-            try { desGrid.Children.Remove(((Button)desGrid.Children[desGrid.Children.Count - 1])); } catch (Exception) { }
+
+            lyrics_btn.Width = 0;
+            lyricsSync_btn.Width = 0;
 
             status.Text = "Loading (0%)...";
             //Convert url to audiable link
@@ -809,27 +811,8 @@ namespace NHMPh_music_player
                         // Read the content as string
                         string responseBody = await response.Content.ReadAsStringAsync();
                         songLyrics = JArray.Parse(responseBody);
-                        // Console.WriteLine(songLyrics);
-                        desGrid.Children.Add(new Button()
-                        {
-                            Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x28, 0x2B, 0x30)),
-                            Margin = new Thickness(50, 0, 0, 0),
-                            BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x43, 0xA6, 0xB3)),
-                            Padding = new Thickness(0),
-                            BorderThickness = new Thickness(0),
-                            Width = 90,
-                            Content = "- Lyric availible",
-                            Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                            FontSize = 12,
-                            VerticalAlignment = System.Windows.VerticalAlignment.Top,
-                        });
-
-                        // Apply the style for the border
-                        Style borderStyle = new Style(typeof(Border));
-                        borderStyle.Setters.Add(new Setter(Border.CornerRadiusProperty, new CornerRadius(3)));
-                        ((Button)desGrid.Children[desGrid.Children.Count - 1]).Resources.Add(typeof(Border), borderStyle);
-                        // Attach click event handler
-                        ((Button)desGrid.Children[desGrid.Children.Count - 1]).Click += enable_lyric;
+                        lyrics_btn.Width = 20;
+                        lyricsSync_btn.Width = 10;
                     }
                     else
                     {
@@ -1059,10 +1042,6 @@ namespace NHMPh_music_player
         //event
         private void sync_lyric(object sender, RoutedEventArgs e)
         {
-            if (sender is Button clickedButton)
-            {
-                desGrid.Children.Remove(clickedButton);
-            }
             SyncLyrics();
         }
         public void SyncLyrics()
@@ -1081,32 +1060,11 @@ namespace NHMPh_music_player
         }
         private void enable_lyric(object sender, RoutedEventArgs e)
         {
-            isLyrics = true;
-            description.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
-            if (sender is Button clickedButton)
-            {
-                desGrid.Children.Remove(clickedButton);
-            }
-            desGrid.Children.Add(new Button()
-            {
-                Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x28, 0x2B, 0x30)),
-                Margin = new Thickness(100, 0, 0, 0),
-                BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x43, 0xA6, 0xB3)),
-                Padding = new Thickness(0),
-                BorderThickness = new Thickness(0),
-                Width = 90,
-                Content = "sync lyrics",
-                Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                FontSize = 12,
-                VerticalAlignment = System.Windows.VerticalAlignment.Top,
-            });
-
-            // Apply the style for the border
-            Style borderStyle = new Style(typeof(Border));
-            borderStyle.Setters.Add(new Setter(Border.CornerRadiusProperty, new CornerRadius(3)));
-            ((Button)desGrid.Children[desGrid.Children.Count - 1]).Resources.Add(typeof(Border), borderStyle);
-            // Attach click event handler
-            ((Button)desGrid.Children[desGrid.Children.Count - 1]).Click += sync_lyric;
+            isLyrics = !isLyrics;
+            if (isLyrics)
+                description.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
+            else
+                description.Text = currenturl.description;
         }
         private void volum_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {

@@ -20,14 +20,37 @@
                     <StackPanel Orientation="Horizontal"   Height="132" Margin="10,-3,0,0">
 
                         <StackPanel Orientation="Vertical" Margin="0" Width="380" Height="133">
-                            <TextBlock Padding="4,4,0,0" x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Text="Light music player v.1.0.0" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"  />
-                            <Grid x:Name="desGrid">
-                            <TextBlock Padding="4.5,0,0,0" x:Name="description"  Foreground="White" Height="76" Width="379" FontSize="12"  HorizontalAlignment="Left" TextWrapping="Wrap"><Run Text="Created by NHMPh" /></TextBlock>
-                            </Grid>
-                            <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="0" >
-                                
+                            <TextBlock Padding="4,4,0,0" x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Text="Light music player v.1.1.0" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"   />
+                            <Grid>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Padding="4.5,0,0,0" x:Name="description"  Foreground="White" Height="76" Width="379" FontSize="12"  HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap"><Run Text="Created by NHMPh" /></TextBlock>
 
-                            </StackPanel>
+                                    <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="0" >
+
+                                    </StackPanel>
+                                </StackPanel>
+                                
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Right" >
+                                    <Button x:Name="lyrics_btn" Click="enable_lyric"  ToolTip="View lyrics" Height="20" Width="0" Background="#FF484C52" BorderBrush="#FF5BECFF"  BorderThickness="1" Margin="0,0,0,2" >
+                                        <Image  Width="17"  Source="/lyrics.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="20"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                    <Button x:Name="lyricsSync_btn" Click="sync_lyric"  ToolTip="Press this when you about to hear the first line of the lyric to sync" Height="10" Width="0" Background="#FF484C52" BorderBrush="#FF5BECFF"  BorderThickness="1" Margin="0,0,0,0" >
+                                      <!--  <Image  Width="17"  Source="/synclyric.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="20"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                </StackPanel>
+                                
+                            </Grid>
+                            
                             <StackPanel Orientation="Horizontal" Margin="0,1,0,0" Height="14">
                                 <TextBlock Foreground="#FF007375" FontFamily="Global Sans Serif"  Text="Your custom playlists"  FontWeight="Bold" FontSize="12" Width="128" VerticalAlignment="Center"  />
                                 <Grid  Margin="0,0,5,0"  Width="80" ToolTip="Choose your custom playlist" >

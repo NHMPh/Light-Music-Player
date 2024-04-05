@@ -209,11 +209,12 @@ namespace NHMPh_music_player
         {
             try
             {
-                filter.Color = Color.FromArgb(byte.Parse(filter_mod.Text), filter.Color.R, filter.Color.G, filter.Color.B);
+                filter.Color = Color.FromArgb(byte.Parse(((int)(sender as Slider).Value).ToString()), filter.Color.R, filter.Color.G, filter.Color.B);
+                opacity_info.Text = ((int)(sender as Slider).Value).ToString();
             }
             catch
             {
-                MessageBox.Show("Invaild input");
+               // MessageBox.Show("Invaild input");
                 return;
             }
 
@@ -225,13 +226,13 @@ namespace NHMPh_music_player
 
                 foreach (var bar in spectrumBars)
                 {
-                    bar.Width = float.Parse(width_mod.Text);
-
+                    bar.Width = (int)(sender as Slider).Value;
                 }
+                width_info.Text = ((int)(sender as Slider).Value).ToString();
             }
             catch
             {
-                MessageBox.Show("Invaild input");
+               // MessageBox.Show("Invaild input");
                 return;
             }
 
@@ -240,17 +241,17 @@ namespace NHMPh_music_player
         {
             try
             {
-
                 foreach (var bar in spectrumBars)
                 {
 
-                    bar.Height = float.Parse(height_mod.Text);
+                    bar.Height = (int)(sender as Slider).Value;
 
                 }
+                height_info.Text = ((int)(sender as Slider).Value).ToString();
             }
             catch
             {
-                MessageBox.Show("Invaild input");
+               // MessageBox.Show("Invaild input");
                 return;
             }
 
@@ -263,12 +264,13 @@ namespace NHMPh_music_player
                 foreach (var bar in spectrumBars)
                 {
 
-                    bar.Margin = new Thickness(0, 0, float.Parse(space_mod.Text), 0);
+                    bar.Margin = new Thickness(0, 0, (int)(sender as Slider).Value, 0);
                 }
+                space_info.Text = ((int)(sender as Slider).Value).ToString();
             }
             catch
             {
-                MessageBox.Show("Invaild input");
+              //  MessageBox.Show("Invaild input");
                 return;
             }
 

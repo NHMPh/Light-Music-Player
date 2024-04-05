@@ -7,7 +7,15 @@
         mc:Ignorable="d"
         Title="FullscreenSpectrum" Height="1080" Width="1920" Background="Black" WindowStyle="None" WindowState="Maximized" >
     <Grid>
-
+        <Grid.Resources>
+            <Style TargetType="{x:Type TextBox}" x:Key="TextBoxWithColoredCaretStyle">
+                <Setter Property="CaretBrush">
+                    <Setter.Value>
+                        <SolidColorBrush Color="White"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
         <Border>
             <Border.Background>
                 <ImageBrush  x:Name="thumbnail" Stretch="Fill" ImageSource="https://getwallpapers.com/wallpaper/full/3/9/6/1086747-alan-walker-wallpapers-2048x1152-for-4k.jpg"/>
@@ -172,40 +180,33 @@
             <TextBlock x:Name="lyric" Text="Welcome" Foreground="White" FontSize="72" HorizontalAlignment="Center" Margin="20"/>
             <TextBlock x:Name="postLyric" Text="" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center"/>
         </StackPanel>
-        <Border x:Name="setting" Background="#33FFFFFF" Width="00" Margin="20" Height="550" VerticalAlignment="Top" HorizontalAlignment="Right" CornerRadius="10">
+        <Border x:Name="setting" Background="#33FFFFFF" Width="00" Margin="20" Height="600" VerticalAlignment="Top" HorizontalAlignment="Right" CornerRadius="10">
             <StackPanel  Orientation="Vertical"   Opacity="100">
                 <Label Content="Setting" Margin="10" FontSize="36" HorizontalAlignment="Center" Foreground="White" FontFamily="Arial Black"/>
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="Spectrum bars:" Margin="10,0,0,0" FontSize="24" Foreground="White" FontFamily="Arial Black" VerticalAlignment="Top" Width="243"/>
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="0,0,0,10">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="10,0,0,10">
+                        <Label Content="Spectrum bars" HorizontalAlignment="Center"  FontSize="24" Foreground="White" FontFamily="Arial Black" VerticalAlignment="Top"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Width"  FontSize="20" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="83"/>
-                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
-                                    <TextBox x:Name="width_mod" Width="100" Background="Transparent" BorderThickness="0" Text="1000" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+                                <Slider  Width="300" Height="15" Value="1" Margin="3,4,3,5" Maximum="10" ValueChanged="change_spectrum_width" Minimum="1"/>
+                                <Border Background="#33FFFFFF" Width="90" CornerRadius="5" >
+                                    <TextBox x:Name="width_info" Width="100" Background="Transparent" BorderThickness="0" Text="1" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
                                 </Border>
-                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
-                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White" Click="change_spectrum_width" HorizontalAlignment="Center"></Button>
-                                </Border>
-
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Height"  FontSize="20" HorizontalAlignment="Center" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center"/>
-                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
-                                    <TextBox x:Name="height_mod" Width="100" Background="Transparent" BorderThickness="0" Text="1000" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
-                                </Border>
-                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
-                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White"  Click="change_spectrum_height" ></Button>
+                                <Slider  Width="300" Height="15" Value="180" Margin="3,4,3,5" Maximum="700" Minimum="1" ValueChanged="change_spectrum_height"/>
+                                <Border Background="#33FFFFFF" Width="90" CornerRadius="5" >
+                                    <TextBox x:Name="height_info" Width="100" Background="Transparent" BorderThickness="0" Text="180" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
                                 </Border>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Spacing"  FontSize="16" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="82"/>
-                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
-                                    <TextBox x:Name="space_mod" Width="100" Background="Transparent" BorderThickness="0" Text="1000" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
-                                </Border>
-                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
-                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White"  Click="change_spectrum_spaceing" ></Button>
+                                <Slider  Width="300" Height="15" Value="6" Margin="3,4,3,5" Maximum="10" Minimum="1" ValueChanged="change_spectrum_spaceing"/>
+                                <Border Background="#33FFFFFF" Width="90" CornerRadius="5" >
+                                    <TextBox x:Name="space_info" Width="100" Background="Transparent" BorderThickness="0" Text="6" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
                                 </Border>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -227,8 +228,8 @@
                     </StackPanel>
                     <Rectangle Fill="White" Height="2" Width="300" Margin="0,0,0,10"/>
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="Background:" Margin="10,0,0,0" FontSize="24"  Foreground="White" FontFamily="Arial Black" Width="243" />
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="10,0,0,10">
+                        <Label Content="Background" HorizontalAlignment="Center" FontSize="24"  Foreground="White" FontFamily="Arial Black"/>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                 <Label Content="Local"  FontSize="20" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="83"/>
@@ -239,37 +240,24 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                 <Label Content="Url" Margin="0" FontSize="20" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="83"/>
 
-                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" Margin="0,5,0,5">
-                                    <TextBox x:Name="background_mod"  Width="100" Background="Transparent" BorderThickness="0" Text="Enter img url" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"/>
+                                <Border Background="#33FFFFFF" Width="300" Height="25" CornerRadius="5" Margin="0,5,0,5">
+                                    <TextBox x:Name="background_mod" Width="300" Height="25" Background="Transparent" BorderThickness="0" Foreground="White" TextAlignment="Left" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" Style="{StaticResource TextBoxWithColoredCaretStyle}"/>
                                 </Border>
 
 
-                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
+                                <Border Background="#33FFFFFF" Width="90" CornerRadius="5"  Margin="5">
                                     <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White" Click="change_background_url" HorizontalAlignment="Center"></Button>
                                 </Border>
 
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                <Label Content="Color"  FontSize="20"  Foreground="White" FontFamily="Arial Black" VerticalAlignment="Center" Width="83"  />
-                                <Border Background="#33FFFFFF" Margin="0,0,10,0" Width="100" CornerRadius="5">
-                                    <Button  Content="Change" BorderThickness="0" Width="100"  FontSize="18" Background="Transparent" Foreground="White" Click="change_bars_color"></Button>
-                                </Border>
-
-
-
-                            </StackPanel>
+                            
                         </StackPanel>
 
                     </StackPanel>
                     <Rectangle Fill="White" Height="2" Width="300" Margin="0,0,0,10"/>
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="Filter:" Margin="10,0,0,0" FontSize="24" Foreground="White" FontFamily="Arial Black" VerticalAlignment="Top" Width="243"/>
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="0,0,0,10">
-
-
-
-
-
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="10,0,0,10">
+                        <Label Content="Filter:" HorizontalAlignment="Center"  FontSize="24" Foreground="White" FontFamily="Arial Black" VerticalAlignment="Top"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Color"  FontSize="20"  Foreground="White" FontFamily="Arial Black" Width="82" />
                                 <Border Background="#33FFFFFF" Width="100" Height="25.94" Margin="0,0,10,0" CornerRadius="5">
@@ -279,11 +267,9 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Opacity"  FontSize="16" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="82"/>
-                                <Border Background="#33FFFFFF" Width="100" CornerRadius="5" >
-                                    <TextBox x:Name="filter_mod" Width="100" Background="Transparent" BorderThickness="0" Text="1000" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
-                                </Border>
-                                <Border Background="#33FFFFFF" Width="50" CornerRadius="5"  Margin="5">
-                                    <Button Padding="0,-3,0,0" Content="Apply" BorderThickness="0" Width="50"  FontSize="12" Background="Transparent" Foreground="White" Click="change_filter_opacity" ></Button>
+                                <Slider  Width="300" Height="15" Value="128" Margin="3,4,3,5" Maximum="255" ValueChanged="change_filter_opacity"/>
+                                <Border Background="#33FFFFFF" Width="90" CornerRadius="5" >
+                                    <TextBox x:Name="opacity_info" Width="100" Background="Transparent" BorderThickness="0" Text="128" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
                                 </Border>
                             </StackPanel>
 
@@ -293,7 +279,7 @@
 
 
                 <Border Background="#33FFFFFF" Width="200" Height="45" Margin="0,0,10,0" CornerRadius="5">
-                    <Button  Content="Close" BorderThickness="0" Width="200" Height="45" FontSize="18" Background="Transparent" Foreground="White" Click="change_bars_color"></Button>
+                    <Button  Content="Close" BorderThickness="0" Width="200" Height="45" FontSize="18" Background="Transparent" Foreground="White" Click="openclose_setting"></Button>
                 </Border>
             </StackPanel>
 
