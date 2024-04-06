@@ -103,6 +103,13 @@ namespace NHMPh_music_player
                     if(this.Topmost) this.Topmost = false;
                     if (MainWindow.wave == null) return;
                     songValue.Value = MainWindow.wave.CurrentTime.TotalMilliseconds;
+
+                    if (MainWindow.songLyrics == null&&isLyrics)
+                    {
+                        this.lyric.Text = "Can not find song lyrics";
+                        postLyric.Text = "Try to find your song by: [song name] + lyrics";
+
+                    }
                     foreach (var lyric in MainWindow.songLyrics)
                     {
                         if (lyric["seconds"].ToString() == ((int)MainWindow.wave.CurrentTime.TotalSeconds - MainWindow.lyricsOffset).ToString())
@@ -118,6 +125,7 @@ namespace NHMPh_music_player
 
                             if (isLyrics)
                             {
+                                
                                 this.lyric.Text = lyric["lyrics"].ToString();
 
                                 try { postLyric.Text = lyric.Next["lyrics"].ToString(); } catch { postLyric.Text = null; };

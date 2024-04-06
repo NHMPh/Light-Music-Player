@@ -25,8 +25,8 @@
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock Padding="4.5,0,0,0" x:Name="description"  Foreground="White" Height="76" Width="379" FontSize="12"  HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap"><Run Text="Created by NHMPh" /></TextBlock>
 
-                                    <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="0" >
-
+                                    <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="00">
+                                                                                                                                                                                                         
                                     </StackPanel>
                                 </StackPanel>
                                 

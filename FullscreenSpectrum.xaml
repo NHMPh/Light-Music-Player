@@ -178,7 +178,7 @@
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,00">
             <!-- <TextBlock x:Name="preLyric" Text="" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center" />-->
             <TextBlock x:Name="lyric" Text="Welcome" Foreground="White" FontSize="72" HorizontalAlignment="Center" Margin="20"/>
-            <TextBlock x:Name="postLyric" Text="" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="postLyric" Text="Press 'esc' to exit" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center"/>
         </StackPanel>
         <Border x:Name="setting" Background="#33FFFFFF" Width="00" Margin="20" Height="600" VerticalAlignment="Top" HorizontalAlignment="Right" CornerRadius="10">
             <StackPanel  Orientation="Vertical"   Opacity="100">
