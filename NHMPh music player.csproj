@@ -54,7 +54,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationIcon>_Images\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
@@ -333,7 +333,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Class1.cs" />
+    <Compile Include="MediaPlayer.cs" />
+    <Compile Include="SongsManager.cs" />
+    <Compile Include="StringUtilitiy.cs" />
+    <Compile Include="UIControl.cs" />
+    <Compile Include="VideoInfo.cs" />
     <Page Include="CustomPlaylist.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -390,7 +394,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="icon.ico" />
+    <Resource Include="_Images\icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
@@ -405,40 +409,52 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="_Pause.png" />
+    <Resource Include="_Images\_Pause.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Previous.png" />
+    <Resource Include="_Images\Previous.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Next.png" />
+    <Resource Include="_Images\Next.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\Loop_on.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\Spectrum.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\Loop_off.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\Setting.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\lyrics.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\synclyric.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\volum.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_Images\minimize.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="logo.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Loop_on.png" />
+    <Resource Include="_Pause.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Next.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Spectrum.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Loop_off.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Setting.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="lyrics.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="synclyric.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="volum.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="minimize.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />

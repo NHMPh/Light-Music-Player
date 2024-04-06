@@ -179,7 +179,7 @@
                         <Grid Margin="-5,0,0,0">
                         
                             <ProgressBar x:Name="volumVisual" ToolTip="Volume" Background="#FF484848" Orientation="Vertical" Value="1" Height="100" Foreground="#FF59ECFF"  Maximum="1" Width="4" Margin="4,16,4,16" Grid.RowSpan="2"  />
-                            <Slider x:Name="volum" Orientation="Vertical" Width="10" Height="100" ValueChanged="volum_ValueChanged" Maximum="1" Value="1" Margin="-0,16,0,16" Grid.RowSpan="2"  >
+                            <Slider x:Name="volume" Orientation="Vertical" Width="10" Height="100" ValueChanged="volum_ValueChanged" Maximum="1" Value="1" Margin="-0,16,0,16" Grid.RowSpan="2"  >
                                 <Slider.Template>
                                     <ControlTemplate TargetType="Slider">
                                         <Grid>
@@ -201,7 +201,7 @@
                             </Slider>
                         </Grid>
                     </StackPanel>
-                    <Grid Height="15" MouseLeftButtonDown="thumb_MouseLeftButtonDown" Background="#282b30" >
+                    <Grid Height="15" x:Name="Track" MouseLeftButtonDown="thumb_MouseLeftButtonDown" Background="#282b30" >
                         <ProgressBar x:Name="songProgress" Background="AliceBlue" Height="1" Foreground="#FF00E2FF" Margin="3,7,3,7" Maximum="255" ValueChanged="songProgress_ValueChanged" Width="500" Grid.ColumnSpan="2" />
                         <Slider x:Name="thumb" Width="500" Height="6" Margin="3,4,3,5" GotMouseCapture="thumb_GotMouseCapture" LostMouseCapture="thumb_LostMouseCapture" Grid.ColumnSpan="2">
                             <Slider.Template>

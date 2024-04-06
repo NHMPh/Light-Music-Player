@@ -83,9 +83,9 @@ namespace NHMPh_music_player
 
         public void UpdateVisual()
         {
-            lable.Content = Regex.Replace(MainWindow.currenturl.title, @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", ""); ;
-            des.Content = MainWindow.currenturl.description;
-            artist_cover.ImageSource = new BitmapImage(new Uri(MainWindow.currenturl.thumbnail));
+            lable.Content = Regex.Replace(MainWindow.currentVideo.Title, @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", ""); ;
+            des.Content = MainWindow.currentVideo.Description;
+            artist_cover.ImageSource = new BitmapImage(new Uri(MainWindow.currentVideo.Thumbnail));
             songValue.Value = 0;
             songValue.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
             thumb.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
@@ -104,13 +104,13 @@ namespace NHMPh_music_player
                     if (MainWindow.wave == null) return;
                     songValue.Value = MainWindow.wave.CurrentTime.TotalMilliseconds;
 
-                    if (MainWindow.songLyrics == null&&isLyrics)
+                    if (MainWindow.currentVideo.SongLyrics == null&&isLyrics)
                     {
                         this.lyric.Text = "Can not find song lyrics";
                         postLyric.Text = "Try to find your song by: [song name] + lyrics";
 
                     }
-                    foreach (var lyric in MainWindow.songLyrics)
+                    foreach (var lyric in MainWindow.currentVideo.SongLyrics)
                     {
                         if (lyric["seconds"].ToString() == ((int)MainWindow.wave.CurrentTime.TotalSeconds - MainWindow.lyricsOffset).ToString())
                         {

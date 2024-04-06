@@ -313,7 +313,7 @@ namespace NHMPh_music_player
         private async void Search(string key)
         {
             selectionPanel.Children.Clear();
-            int mode = MainWindow.EvaluateKeyWord(key);
+            int mode = StringUtilitiy.EvaluateKeyWord(key);
             var youtube = new YoutubeClient();
             switch (mode)
             {
@@ -422,13 +422,13 @@ namespace NHMPh_music_player
             button.FontSize = 15;
             button.VerticalAlignment = VerticalAlignment.Center;
             button.Height = 20;
-            button.CommandParameter = new VideoInfo()
+           /* button.CommandParameter = new VideoInfo()
             {
                 thumbnail = thumbnail,
                 title = title,
                 url = url,
                 description = "From custom playlist"
-            };
+            };*/
             button.Click += add_btn;
             Style borderStyle = new Style(typeof(Border));
             borderStyle.Setters.Add(new Setter(Border.CornerRadiusProperty, new CornerRadius(3)));
@@ -450,10 +450,10 @@ namespace NHMPh_music_player
         {
             var videoInfo = (sender as Button).CommandParameter as VideoInfo;
             var data = new JObject(
-            new JProperty("url", videoInfo.url),
-             new JProperty("title", videoInfo.title),
-             new JProperty("thumbnail", videoInfo.thumbnail),
-             new JProperty("description", videoInfo.description)
+           // new JProperty("url", videoInfo.url),
+           //  new JProperty("title", videoInfo.title),
+           //  new JProperty("thumbnail", videoInfo.thumbnail),
+           //  new JProperty("description", videoInfo.description)
              );
             ((JArray)currentCustomFile["songs"]).Add(data);
 
