@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -82,6 +84,8 @@ namespace NHMPh_music_player
                 name = name.Replace('‒', '-');
             if (name.Contains(" - Tik Tok"))
                 name = name.Replace(" - Tik Tok", "");
+            if(name.Contains(" x "))
+                name = name.Replace(" x ", " ");
             name = Regex.Replace(name, @"(\([^)]*\)|\[[^\]]*\])|【|】|""""[^""""]*""""""", "");
             string result = name;
             if (!result.Contains("-"))
@@ -90,12 +94,9 @@ namespace NHMPh_music_player
                 return result.Replace(" ", "%20");
             }
             string[] parts = Regex.Split(result, @"(?<=\s-\s)|(?<=\s--\s)|(?<=-\s)");
-            foreach (var part in parts)
-            {
-                Console.WriteLine(part);
-            }
-            parts[0] = Regex.Replace(parts[0], @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO", "");
-            parts[1] = Regex.Replace(parts[1], @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO", "");
+            string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO";
+            parts[0] = Regex.Replace(parts[0], combinedPattern, "");
+            parts[1] = Regex.Replace(parts[1], combinedPattern, "");
             if (parts[0].Contains(','))
                 parts[0] = parts[0].Replace(',', '&');
             parts[0] = Regex.Replace(parts[0], @"(?<!\w)x(?!x|\w)", ",");
@@ -105,13 +106,8 @@ namespace NHMPh_music_player
                 parts[0] = parts[0].Split('&')[parts[0].Split('&').Length - 1];
             }
             parts[1] = ReplaceNumbersWithWords(parts[1]);
-            Console.WriteLine(parts[1]);
             string processName = parts[0] + "" + parts[1];
-            Console.WriteLine(processName);
             try { processName = songException[processName.Replace(" ", "")]; } catch { }
-
-            Console.WriteLine(processName);
-
             return processName.Replace(" ", "%20");
 
         }
@@ -186,6 +182,20 @@ namespace NHMPh_music_player
             string result = Regex.Replace(input, pattern, "");
 
             return result;
+        }
+        public static JObject ReadJsonFile(string filePath)
+        {
+            if (System.IO.File.Exists(filePath))
+            {
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    string jsonString = reader.ReadToEnd();
+                    return JObject.Parse(jsonString);
+                }
+            }
+            else { Console.WriteLine("NotFOund"); }
+
+            return null;
         }
     }
 }

@@ -47,7 +47,7 @@ namespace NHMPh_music_player
             {
                 await UpadateSpectrum();
             };
-            MainWindow.OnSongChange += MainWindow_OnSongChange;
+          //  MainWindow.OnSongChange += MainWindow_OnSongChange;
             InitializeComponent();
             CreateSpectrumBar();
             Closed += FullscreenSpectrum_Closed;
@@ -72,7 +72,7 @@ namespace NHMPh_music_player
 
         private void FullscreenSpectrum_Closed(object sender, EventArgs e)
         {
-            MainWindow.FullscreenActive = false;
+           // MainWindow.FullscreenActive = false;
             Console.WriteLine("Close");
         }
 
@@ -83,15 +83,15 @@ namespace NHMPh_music_player
 
         public void UpdateVisual()
         {
-            lable.Content = Regex.Replace(MainWindow.currentVideo.Title, @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", ""); ;
+            /*lable.Content = Regex.Replace(MainWindow.currentVideo.Title, @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", ""); ;
             des.Content = MainWindow.currentVideo.Description;
             artist_cover.ImageSource = new BitmapImage(new Uri(MainWindow.currentVideo.Thumbnail));
             songValue.Value = 0;
             songValue.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
             thumb.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
-            volum.Value = mainWindow.volum.Value;
-            volumVisual.Value = mainWindow.volumVisual.Value;
-            
+            //  volum.Value = mainWindow.volum.Value;
+            volumVisual.Value = mainWindow.volumVisual.Value;*/
+
         }
 
         private async Task UpadateSpectrum()
@@ -100,11 +100,11 @@ namespace NHMPh_music_player
             {
                 Dispatcher.Invoke(() =>
                 {
-                    if(this.Topmost) this.Topmost = false;
+                   /* if (this.Topmost) this.Topmost = false;
                     if (MainWindow.wave == null) return;
                     songValue.Value = MainWindow.wave.CurrentTime.TotalMilliseconds;
 
-                    if (MainWindow.currentVideo.SongLyrics == null&&isLyrics)
+                    if (MainWindow.currentVideo.SongLyrics == null && isLyrics)
                     {
                         this.lyric.Text = "Can not find song lyrics";
                         postLyric.Text = "Try to find your song by: [song name] + lyrics";
@@ -125,16 +125,16 @@ namespace NHMPh_music_player
 
                             if (isLyrics)
                             {
-                                
+
                                 this.lyric.Text = lyric["lyrics"].ToString();
 
                                 try { postLyric.Text = lyric.Next["lyrics"].ToString(); } catch { postLyric.Text = null; };
-                              //  try { preLyric.Text = lyric.Previous["lyrics"].ToString(); } catch { preLyric.Text = null; };
+                                //  try { preLyric.Text = lyric.Previous["lyrics"].ToString(); } catch { preLyric.Text = null; };
                             }
-                           
+
                         }
                     }
-                    DrawGraph();
+                    DrawGraph();*/
 
                 });
             });
@@ -146,14 +146,14 @@ namespace NHMPh_music_player
                 int mutipler = 5000;
                 if (i < 50) mutipler = 2000;
                 if (i < 10) mutipler = 600;
-                if (MainWindow.fbands[i] * mutipler > spectrumBars[i].Value)
+              /*  if (MainWindow.fbands[i] * mutipler > spectrumBars[i].Value)
                 {
 
 
                     spectrumBars[i].Value = ((MainWindow.fbands[i + j] + MainWindow.fbands[i + j + 1]) / 2) * mutipler;
                     j++;
                     decreaserate[i] = 10f;
-                }
+                }*/
                 else
                 {
                     spectrumBars[i].Value -= 1 * decreaserate[i];
@@ -222,7 +222,7 @@ namespace NHMPh_music_player
             }
             catch
             {
-               // MessageBox.Show("Invaild input");
+                // MessageBox.Show("Invaild input");
                 return;
             }
 
@@ -240,7 +240,7 @@ namespace NHMPh_music_player
             }
             catch
             {
-               // MessageBox.Show("Invaild input");
+                // MessageBox.Show("Invaild input");
                 return;
             }
 
@@ -259,7 +259,7 @@ namespace NHMPh_music_player
             }
             catch
             {
-               // MessageBox.Show("Invaild input");
+                // MessageBox.Show("Invaild input");
                 return;
             }
 
@@ -278,7 +278,7 @@ namespace NHMPh_music_player
             }
             catch
             {
-              //  MessageBox.Show("Invaild input");
+                //  MessageBox.Show("Invaild input");
                 return;
             }
 
@@ -301,9 +301,9 @@ namespace NHMPh_music_player
                     Value = 0,
 
                 };
-                /*  if(i==125) progressBar.Value = 1000;
+                if (i == 125) progressBar.Value = 1000;
 
-                  spectrum_ctn.Children.Add(progressBar);*/
+                spectrum_ctn.Children.Add(progressBar);
                 spectrumBars.Add(progressBar);
             }
 
@@ -339,7 +339,7 @@ namespace NHMPh_music_player
         {
             int second = (int)Math.Floor(thumb.Value / 1000);
             isChosingTimeStap = false;
-            mainWindow.SkipToSecond(second);
+            // mainWindow.SkipToSecond(second);
         }
         private void thumb_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -348,7 +348,7 @@ namespace NHMPh_music_player
             double mousePositionPercentage = position.X / songValue.Width;
             double thumbPostion = thumb.Maximum * mousePositionPercentage;
             int second = (int)Math.Floor(thumbPostion / 1000);
-            mainWindow.SkipToSecond(second);
+            //  mainWindow.SkipToSecond(second);
         }
         private void openclose_setting(object sender, RoutedEventArgs e)
         {
@@ -360,11 +360,11 @@ namespace NHMPh_music_player
 
         private void skip_btn(object sender, RoutedEventArgs e)
         {
-            mainWindow.SkipSong();
+            //  mainWindow.SkipSong();
         }
         private void stop_btn(object sender, RoutedEventArgs e)
         {
-            mainWindow.Pause();
+            //   mainWindow.Pause();
             stopresumeimg.Source = new BitmapImage(
             new Uri($"{Environment.CurrentDirectory}\\Images\\_Play.png"));
             (sender as System.Windows.Controls.Button).Click -= stop_btn;
@@ -374,7 +374,7 @@ namespace NHMPh_music_player
         }
         private void resume_btn(object sender, RoutedEventArgs e)
         {
-            mainWindow.Resume();
+            // mainWindow.Resume();
             stopresumeimg.Source = new BitmapImage(
            new Uri($"{Environment.CurrentDirectory}\\Images\\_Pause.png"));
             (sender as System.Windows.Controls.Button).Click -= resume_btn;
@@ -385,7 +385,7 @@ namespace NHMPh_music_player
 
         private void spectrum_btn(object sender, RoutedEventArgs e)
         {
-            mainWindow.EnableSpectrum();
+          //  mainWindow.EnableSpectrum();
 
         }
         private void lyrics_btn(object sender, RoutedEventArgs e)
@@ -395,7 +395,7 @@ namespace NHMPh_music_player
             {
                 this.lyric.Text = null;
                 postLyric.Text = null;
-             //   preLyric.Text = null;
+                //   preLyric.Text = null;
             }
             if (isLyrics)
             {
@@ -405,11 +405,11 @@ namespace NHMPh_music_player
         }
         private void lyricsSync_btn(object sender, RoutedEventArgs e)
         {
-            mainWindow.SyncLyrics();
+            //  mainWindow.SyncLyrics();
         }
         private void loop_btn(object sender, RoutedEventArgs e)
         {
-            mainWindow.Loop();
+            //mainWindow.Loop();
             if (mainWindow.loopTxt.Text == " on ")
             {
                 loop_img.Source = new BitmapImage(
@@ -423,19 +423,19 @@ namespace NHMPh_music_player
 
 
         }
-        
+
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if(mainWindow.WindowState== WindowState.Normal)
+            if (mainWindow.WindowState == WindowState.Normal)
             {
                 mainWindow.WindowState = WindowState.Minimized;
             }
             else
-            mainWindow.WindowState=WindowState.Normal;
+                mainWindow.WindowState = WindowState.Normal;
         }
         private void volum_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            mainWindow.ChangeVolum(sender as Slider, volumVisual);
+            //  mainWindow.ChangeVolum(sender as Slider, volumVisual);
         }
     }
 

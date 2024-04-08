@@ -1,10 +1,13 @@
 ﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
@@ -13,13 +16,13 @@ namespace NHMPh_music_player
     internal class UIControl
     {
         MainWindow mainWindow;
-        MediaPlayer player;
-        SongsManager songManager;
+        MediaPlayer mediaPlayer;
+        SongsManager songsManager;
         public UIControl(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager)
         { 
             this.mainWindow = mainWindow;
-            this.player = mediaPlayer;
-            this.songManager = songManager;
+            this.mediaPlayer = mediaPlayer;
+            this.songsManager = songsManager;
 
 
             mainWindow.autoplay_btn.Click += AutoplayBtn;
@@ -40,79 +43,179 @@ namespace NHMPh_music_player
             mainWindow.volume.ValueChanged += Volume_ValueChanged;
 
             mainWindow.searchBar.KeyDown += SearchBarEnterKeyDown;
+
+
+            mainWindow.Closed += MainWindow_Closed;
+            mainWindow.MouseLeftButtonDown += MainWindow_MouseLeftButtonDown;
+
+            mainWindow.Topmost = true;
+            mainWindow.Icon = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\Images\\icon.ico"));
+        }
+
+        private void MainWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            mainWindow.DragMove();
+        }
+
+       
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            foreach (Window window in System.Windows.Application.Current.Windows)
+            {
+                window.Close();
+            }
         }
 
 
         #region Button control
         private void PauseResumeBtn(object sender, RoutedEventArgs e)
-        {
-
+        {   
+            if(mediaPlayer.PlaybackState == PlaybackState.Playing)
+                mediaPlayer.PauseMusic();
+            else if(mediaPlayer.PlaybackState == PlaybackState.Paused)
+                mediaPlayer.ResumeMusic();
         }
         private void SkipBtn(object sender, RoutedEventArgs e)
         {
-
+            songsManager.NextSong();
+            mediaPlayer.CurrentSong = songsManager.CurrentSong;
+            mediaPlayer.PlayMusic();
         }
         private void LoopBtn(object sender, RoutedEventArgs e)
         {
-
-        }
+            MusicSetting.isLoop = !MusicSetting.isLoop;
+            mainWindow.loopTxt.Text = MusicSetting.isLoop ? " on " : " off ";
+        }   
         private void SyncLyricsBtn(object sender, RoutedEventArgs e)
         {
-
+            if (MusicSetting.lyricsOffset == 0)
+            {
+                MusicSetting.lyricsOffset = (int)mediaPlayer.Wave.CurrentTime.TotalSeconds - int.Parse(mediaPlayer.CurrentSong.SongLyrics[0]["seconds"].ToString());
+            }
+            else
+            {
+                mediaPlayer.Seek(0);
+                MusicSetting.lyricsOffset = 0;
+            }
         }
         private void LyricBtn(object sender, RoutedEventArgs e)
         {
-
+            MusicSetting.isLyrics = !MusicSetting.isLyrics;
+            if (MusicSetting.isLyrics)
+               mainWindow.description.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
+            else
+               mainWindow.description.Text = mediaPlayer.CurrentSong.Description;
         }
         private void AutoplayBtn(object sender, RoutedEventArgs e)
         {
-           
-        }
-        private void ViewCustomBtn(object sender, RoutedEventArgs e)
-        {
+            if (MusicSetting.isBrowser)
+            {
+                MessageBox.Show("Task in progress please wait!");
+                return;
+            }
+            if (songsManager.CurrentSong == null)
+            {
+                MessageBox.Show("Play any song to use autoplay");
+                return;
+            }
+            MusicSetting.isAutoPlay = !MusicSetting.isAutoPlay;
+            mainWindow.auto_txt.Text = MusicSetting.isAutoPlay ? " on " : " off ";
+            
+            
+            if (MusicSetting.isAutoPlay)
+            {
+                if (songsManager.VideoInfosAutoPlayQueue.Count == 0)
+                {
+                    
+                    songsManager.AddSongAutoplay(mainWindow);
+                }
+            }
+            else
+            {
 
+                songsManager.RemoveSongAutoPlay();
+              
+            }
         }
+       
         private void CloseBtn(object sender, RoutedEventArgs e)
         {
-
+            foreach (Window window in System.Windows.Application.Current.Windows)
+            {
+                window.Close();
+            }
         }
         private void SpectrumBtn(object sender, RoutedEventArgs e)
         {
+            MusicSetting.isSpectrum = !MusicSetting.isSpectrum;
+         
+            if (!MusicSetting.isSpectrum)
+            {
+             mainWindow.description.Height = 76;
+                mainWindow.spectrum_ctn.Height = 0;
+               // fbands.Clear();
 
+            }
+            if (MusicSetting.isSpectrum)
+            {
+                mainWindow.description.Height = 16;
+                mainWindow.spectrum_ctn.Height = 60;
+              //  UpdateGraph();
+              //  DrawGraph();
+            };
         }
         private void MinimizeBtn(object sender, RoutedEventArgs e)
         {
-
+            mainWindow.WindowState= WindowState.Minimized;
         }
         private void FullSpectrumBtn(object sender, MouseButtonEventArgs e)
         {
-
+           
         }
         #endregion
 
         private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-           
-        }
-        private void SongProgress_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            
+            mediaPlayer.Volume = (float)mainWindow.volume.Value;
+            mainWindow.volumVisual.Value = mainWindow.volume.Value;
         }
         private void Thumb_GotMouseCapture(object sender, MouseEventArgs e)
         {
-           
+            MusicSetting.isChosingTimeStap = true;
         }
         private void Thumb_LostMouseCapture(object sender, MouseEventArgs e)
         {
-           
+            Console.WriteLine("Drop");
+            MusicSetting.isChosingTimeStap = false;
+            int second = (int)Math.Floor(mainWindow.thumb.Value / 1000);
+            mediaPlayer.Seek(second);
         }
         private void Thumb_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-           
+            System.Windows.Point position = Mouse.GetPosition(mainWindow.songProgress);
+            Console.WriteLine("Mouse position: X = " + position.X + ", Y = " + position.Y);
+            double mousePositionPercentage = position.X / mainWindow.songProgress.Width;
+            double thumbPostion = mainWindow.thumb.Maximum * mousePositionPercentage;
+            int second = (int)Math.Floor(thumbPostion / 1000);
+            mediaPlayer.Seek(second);
         }
         private async void SearchBarEnterKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key != Key.Enter) return;
 
+            string key = (sender as TextBox).Text;
+            (sender as TextBox).Text = "";
+            await Searcher.Search(key, songsManager);
+            
+            if (mediaPlayer.PlaybackState == PlaybackState.Stopped)
+            {
+                songsManager.NextSong();
+                mediaPlayer.CurrentSong = songsManager.CurrentSong;
+                Console.WriteLine(mediaPlayer.CurrentSong);
+                mediaPlayer.PlayMusic();
+
+            }
         }
 
     }

@@ -72,12 +72,13 @@ namespace NHMPh_music_player
             this.thumbnail = thumbnail;
         }
         //Method
-        public async void GetFullDescription(MainWindow mainWindow)
+        public async void GetFullDescription(StaticVisualUpdate staticVisualUpdate)
         {
             YoutubeDL ytdl = new YoutubeDL();
             var des = await ytdl.RunVideoDataFetch(this.url);
             description += "\n" + des.Data.Description;
-            mainWindow.SetVisualDes(description);
+            if (!MusicSetting.isLyrics)
+                staticVisualUpdate.SetVisualDes(description);
         }
         public async void GetLyrics(MainWindow mainWindow)
         {

@@ -334,10 +334,17 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="MediaPlayer.cs" />
+    <Compile Include="MusicSetting.cs" />
+    <Compile Include="Playlist.cs" />
+    <Compile Include="Searcher.cs" />
     <Compile Include="SongsManager.cs" />
+    <Compile Include="SpectrumVisualizer.cs" />
+    <Compile Include="StaticVisualUpdate.cs" />
     <Compile Include="StringUtilitiy.cs" />
     <Compile Include="UIControl.cs" />
     <Compile Include="VideoInfo.cs" />
+    <Compile Include="DynamicVisualUpdate.cs" />
+    <Compile Include="_CustomPlaylist.cs" />
     <Page Include="CustomPlaylist.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -433,10 +440,10 @@
     <Resource Include="_Images\Setting.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="_Images\lyrics.png" />
+    <Resource Include="lyrics.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="_Images\synclyric.png" />
+    <Resource Include="synclyric.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="_Images\volum.png" />

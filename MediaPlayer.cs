@@ -1,18 +1,11 @@
-﻿using AngleSharp.Media;
-using Microsoft.Extensions.Options;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using YoutubeDLSharp.Options;
-using YoutubeDLSharp;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using System.IO;
-using System.Runtime.CompilerServices;
+using YoutubeDLSharp;
+using YoutubeDLSharp.Options;
 
 namespace NHMPh_music_player
 {
@@ -21,20 +14,21 @@ namespace NHMPh_music_player
         private WaveOutEvent output = new WaveOutEvent();
         private MediaFoundationReader _mf;
         private WaveChannel32 wave;
-
+        private MainWindow mainWindow;
         private VideoInfo currentSong;
-
+        public event EventHandler OnSongChange;
+        public event EventHandler OnPositionChange;
         public VideoInfo CurrentSong { get { return currentSong; } set { currentSong = value; } }
-        public MediaPlayer()
-        {
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(1); // Set the interval as needed
-            timer.Tick += async (sender, e) =>
-            {
-                await TrackManager();
-            };
+        public WaveChannel32 Wave { get { return wave; } set { wave = value; } }
+        public PlaybackState PlaybackState { get { return output.PlaybackState; } }
+
+        public string PlayBackUrl;
+        public float Volume { set { output.Volume = (float)value; } }
+        public MediaPlayer(MainWindow mainWindow)
+        {        
+            this.mainWindow = mainWindow;
         }
-        private async void GetSongStream()
+        private async Task GetSongStream()
         {
             var ytdl = new YoutubeDL();
             OptionSet options = new OptionSet() { Format = "mp4", GetUrl = true };
@@ -45,6 +39,7 @@ namespace NHMPh_music_player
                CancellationToken.None
            );
             // description.Text = streamUrl.Data[0];
+            PlayBackUrl = streamUrl.Data[0];
             Console.WriteLine(streamUrl.Data[0]);
             //set _mf for playing audio
             _mf = new MediaFoundationReader(streamUrl.Data[0]);
@@ -54,39 +49,38 @@ namespace NHMPh_music_player
         {
             currentSong = videoInfo;
         }
-
-        public void PlayMusic()
+        
+        public async void PlayMusic()
         {
+            mainWindow.status.Text = "Loading...";
+            await GetSongStream();
+            OnSongChange?.Invoke(this, null);
             output?.Dispose();
             output.Init(wave);
             output.Play();
+            mainWindow.status.Text = "Playing";
         }
 
         public void PauseMusic()
         {
-
+            output.Pause();
+            mainWindow.status.Text = "Paused";
+            mainWindow.playpause.Source= new BitmapImage(
+            new Uri($"{Environment.CurrentDirectory}\\Images\\_Play.png"));
         }
         public void ResumeMusic()
         {
-
+            output.Play();
+            mainWindow.status.Text = "Playing";
+            mainWindow.playpause.Source = new BitmapImage(
+            new Uri($"{Environment.CurrentDirectory}\\Images\\_Pause.png"));
         }
-        public void SkipMusic()
-        {
-
-        }
-
         public void Seek(int seconds)
         {
-
-        }
-        private async Task TrackManager()
-        {
-
-
-            await Task.Run(() =>
-            {
-                
-            });
+            wave.Position = wave.WaveFormat.AverageBytesPerSecond * seconds;
+            if (output.PlaybackState != PlaybackState.Playing)
+                output.Play();
+            OnPositionChange?.Invoke(this, null);
         }
     }
 }

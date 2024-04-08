@@ -34,7 +34,7 @@ namespace NHMPh_music_player
     {
         bool isDelete = false;
         public event EventHandler OnHeadertextChange;
-        string playlistname = MainWindow.currentCustomPlayList;
+        string playlistname = _CustomPlaylist.currentCustomPlayList;
         public CustomPlaylist()
         {
             InitializeComponent();
@@ -75,8 +75,8 @@ namespace NHMPh_music_player
                 System.IO.File.Delete($".\\custom\\{playlistname}.json");
                 currentCustomFile["title"] = Header.Text;
                 System.IO.File.WriteAllText($".\\custom\\{Header.Text}.json", currentCustomFile.ToString());
-                MainWindow.currentCustomPlayList = Header.Text;
-                Console.WriteLine(MainWindow.currentCustomPlayList);
+                _CustomPlaylist.currentCustomPlayList = Header.Text;
+               // Console.WriteLine(MainWindow.currentCustomPlayList);
                 playlistname = Header.Text;
                 OnHeadertextChange?.Invoke(this, e);
             }
@@ -111,7 +111,8 @@ namespace NHMPh_music_player
         {
             
             playlist.Children.Clear();
-            currentCustomFile = MainWindow.ReadJsonFile($".\\custom\\{playlistname}.json");
+            currentCustomFile = StringUtilitiy.ReadJsonFile($".\\custom\\{playlistname}.json");
+            Console.WriteLine(currentCustomFile);
             Header.Text = playlistname.ToString();
             thumbnail.ImageSource = new BitmapImage(new Uri(currentCustomFile["thumbnail"].ToString()));
             songcount.Text = $"{currentCustomFile["songs"].Count()} song{(currentCustomFile["songs"].Count() > 1 ? "s" : "")}";
@@ -422,13 +423,8 @@ namespace NHMPh_music_player
             button.FontSize = 15;
             button.VerticalAlignment = VerticalAlignment.Center;
             button.Height = 20;
-           /* button.CommandParameter = new VideoInfo()
-            {
-                thumbnail = thumbnail,
-                title = title,
-                url = url,
-                description = "From custom playlist"
-            };*/
+            button.CommandParameter = new VideoInfo(title, "From custom playlist", url, thumbnail);
+           
             button.Click += add_btn;
             Style borderStyle = new Style(typeof(Border));
             borderStyle.Setters.Add(new Setter(Border.CornerRadiusProperty, new CornerRadius(3)));
@@ -450,10 +446,10 @@ namespace NHMPh_music_player
         {
             var videoInfo = (sender as Button).CommandParameter as VideoInfo;
             var data = new JObject(
-           // new JProperty("url", videoInfo.url),
-           //  new JProperty("title", videoInfo.title),
-           //  new JProperty("thumbnail", videoInfo.thumbnail),
-           //  new JProperty("description", videoInfo.description)
+                new JProperty("url", videoInfo.Url),
+               new JProperty("title", videoInfo.Title),
+               new JProperty("thumbnail", videoInfo.Thumbnail),
+               new JProperty("description", videoInfo.Description)
              );
             ((JArray)currentCustomFile["songs"]).Add(data);
 
@@ -474,7 +470,7 @@ namespace NHMPh_music_player
 
             isDelete = true;
             System.IO.File.Delete($".\\custom\\{playlistname}.json");
-            MainWindow.currentCustomPlayList = null;
+           _CustomPlaylist.currentCustomPlayList = null;
             OnHeadertextChange?.Invoke(this, e);
             this.Close();
         }
