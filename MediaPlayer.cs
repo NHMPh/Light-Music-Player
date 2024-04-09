@@ -9,7 +9,7 @@ using YoutubeDLSharp.Options;
 
 namespace NHMPh_music_player
 {
-    internal class MediaPlayer
+    public class MediaPlayer
     {
         private WaveOutEvent output = new WaveOutEvent();
         private MediaFoundationReader _mf;
@@ -68,6 +68,10 @@ namespace NHMPh_music_player
             mainWindow.playpause.Source= new BitmapImage(
             new Uri($"{Environment.CurrentDirectory}\\Images\\_Play.png"));
         }
+        public void _PauseMusic()
+        {
+            output.Pause();
+        }
         public void ResumeMusic()
         {
             output.Play();
@@ -80,6 +84,8 @@ namespace NHMPh_music_player
             wave.Position = wave.WaveFormat.AverageBytesPerSecond * seconds;
             if (output.PlaybackState != PlaybackState.Playing)
                 output.Play();
+            
+            mainWindow.songProgress.Value = wave.CurrentTime.TotalMilliseconds;
             OnPositionChange?.Invoke(this, null);
         }
     }

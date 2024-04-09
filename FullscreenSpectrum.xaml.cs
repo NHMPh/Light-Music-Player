@@ -30,6 +30,15 @@ namespace NHMPh_music_player
     /// </summary>
     public partial class FullscreenSpectrum : Window
     {
+
+        const int numBars = 256;
+        const int thresholdIndex = 50;
+        const int multiplierLow = 2000;
+        const int multiplierHigh = 5000;
+        const float decreaseRateFactor = 1.3f;
+        int[] multipliers = new int[numBars];
+
+
         private DispatcherTimer timer;
         float[] decreaserate = new float[512];
         List<ProgressBar> spectrumBars = new List<ProgressBar>();
@@ -39,6 +48,7 @@ namespace NHMPh_music_player
         public FullscreenSpectrum(MainWindow mainWindow)
         {
 
+            InitializeComponent();
             this.KeyDown += FullscreenSpectrum_KeyDown;
             this.mainWindow = mainWindow;
             timer = new DispatcherTimer();
@@ -47,16 +57,16 @@ namespace NHMPh_music_player
             {
                 await UpadateSpectrum();
             };
-          //  MainWindow.OnSongChange += MainWindow_OnSongChange;
-            InitializeComponent();
+            mainWindow.MediaPlayer.OnSongChange += MainWindow_OnSongChange;
             CreateSpectrumBar();
             Closed += FullscreenSpectrum_Closed;
-            //songValue.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
-            //thumb.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
             timer.Start();
-            // this.Topmost = true;
-            // mainWindow.WindowState = WindowState.Minimized;
             this.Topmost = true;
+            for (int i = 0; i < numBars; i++)
+            {
+                multipliers[i] = i < thresholdIndex ? multiplierLow : multiplierHigh;
+                multipliers[i] = i < 10 ? 600 : multipliers[i];
+            }
             mainWindow.WindowState = WindowState.Minimized;
         }
 
@@ -72,7 +82,7 @@ namespace NHMPh_music_player
 
         private void FullscreenSpectrum_Closed(object sender, EventArgs e)
         {
-           // MainWindow.FullscreenActive = false;
+            MusicSetting.isFullScreen = false;
             Console.WriteLine("Close");
         }
 
@@ -83,15 +93,34 @@ namespace NHMPh_music_player
 
         public void UpdateVisual()
         {
-            /*lable.Content = Regex.Replace(MainWindow.currentVideo.Title, @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", ""); ;
-            des.Content = MainWindow.currentVideo.Description;
-            artist_cover.ImageSource = new BitmapImage(new Uri(MainWindow.currentVideo.Thumbnail));
+            
+            lable.Content = Regex.Replace(mainWindow.MediaPlayer.CurrentSong.Title, @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", ""); ;
+            des.Content = mainWindow.MediaPlayer.CurrentSong.Description;
+            artist_cover.ImageSource = new BitmapImage(new Uri(mainWindow.MediaPlayer.CurrentSong.Thumbnail));
             songValue.Value = 0;
-            songValue.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
-            thumb.Maximum = MainWindow.wave.TotalTime.TotalMilliseconds;
-            //  volum.Value = mainWindow.volum.Value;
-            volumVisual.Value = mainWindow.volumVisual.Value;*/
+            songValue.Maximum = mainWindow.MediaPlayer.Wave.TotalTime.TotalMilliseconds;
+            thumb.Maximum = mainWindow.MediaPlayer.Wave.TotalTime.TotalMilliseconds;
+            volum.Value = mainWindow.volume.Value;
+            volumVisual.Value = mainWindow.volumVisual.Value;
 
+            mainWindow.MediaPlayer.CurrentSong.OnLyricsFound -= CurrentSong_OnLyricsFound;
+            mainWindow.MediaPlayer.CurrentSong.OnLyricsFound += CurrentSong_OnLyricsFound;
+
+        }
+
+        private void CurrentSong_OnLyricsFound(object sender, bool status)
+        {
+
+            if (status)
+            {
+                this.lyric.Text = "INTERMISSION";
+                postLyric.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\" or use sync lyrics button";
+            }
+            else
+            {
+                this.lyric.Text = "Lyrics Not Found";
+                postLyric.Text = "";
+            }
         }
 
         private async Task UpadateSpectrum()
@@ -100,41 +129,42 @@ namespace NHMPh_music_player
             {
                 Dispatcher.Invoke(() =>
                 {
-                   /* if (this.Topmost) this.Topmost = false;
-                    if (MainWindow.wave == null) return;
-                    songValue.Value = MainWindow.wave.CurrentTime.TotalMilliseconds;
+                    if (this.Topmost) this.Topmost = false;
+                    if (mainWindow.MediaPlayer.Wave == null) return;
 
-                    if (MainWindow.currentVideo.SongLyrics == null && isLyrics)
-                    {
-                        this.lyric.Text = "Can not find song lyrics";
-                        postLyric.Text = "Try to find your song by: [song name] + lyrics";
+                    songValue.Value = mainWindow.MediaPlayer.Wave.CurrentTime.TotalMilliseconds;
 
-                    }
-                    foreach (var lyric in MainWindow.currentVideo.SongLyrics)
+                    
+                    if (mainWindow.MediaPlayer.CurrentSong.SongLyrics != null)
                     {
-                        if (lyric["seconds"].ToString() == ((int)MainWindow.wave.CurrentTime.TotalSeconds - MainWindow.lyricsOffset).ToString())
+                        foreach (var lyric in mainWindow.MediaPlayer.CurrentSong.SongLyrics)
                         {
-                            if (lyric["lyrics"].ToString().Length > 10)
+                            if (lyric["seconds"].ToString() == ((int)mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset).ToString())
                             {
-                                this.lyric.FontSize = 60;
+                                if (lyric["lyrics"].ToString().Length > 10)
+                                {
+                                    this.lyric.FontSize = 60;
+                                }
+                                else
+                                {
+                                    this.lyric.FontSize = 72;
+                                }
+
+                                if (isLyrics)
+                                {
+
+                                    this.lyric.Text = lyric["lyrics"].ToString().Replace("\r", "");
+
+                                    try { postLyric.Text = lyric.Next["lyrics"].ToString(); } catch { postLyric.Text = null; };
+                                    //  try { preLyric.Text = lyric.Previous["lyrics"].ToString(); } catch { preLyric.Text = null; };
+                                }
+
                             }
-                            else
-                            {
-                                this.lyric.FontSize = 72;
-                            }
-
-                            if (isLyrics)
-                            {
-
-                                this.lyric.Text = lyric["lyrics"].ToString();
-
-                                try { postLyric.Text = lyric.Next["lyrics"].ToString(); } catch { postLyric.Text = null; };
-                                //  try { preLyric.Text = lyric.Previous["lyrics"].ToString(); } catch { preLyric.Text = null; };
-                            }
-
                         }
                     }
-                    DrawGraph();*/
+                   
+                    
+                    DrawGraph();
 
                 });
             });
@@ -143,21 +173,19 @@ namespace NHMPh_music_player
         {
             for (int i = 0, j = 0; i < 256; i++)
             {
-                int mutipler = 5000;
-                if (i < 50) mutipler = 2000;
-                if (i < 10) mutipler = 600;
-              /*  if (MainWindow.fbands[i] * mutipler > spectrumBars[i].Value)
+
+                if (mainWindow.DynamicVisualUpdate.Visualizer.fbands[i] * multipliers[i] > spectrumBars[i].Value)
                 {
 
 
-                    spectrumBars[i].Value = ((MainWindow.fbands[i + j] + MainWindow.fbands[i + j + 1]) / 2) * mutipler;
+                    spectrumBars[i].Value = ((mainWindow.DynamicVisualUpdate.Visualizer.fbands[i + j] + mainWindow.DynamicVisualUpdate.Visualizer.fbands[i + j + 1]) / 2) * multipliers[i];
                     j++;
                     decreaserate[i] = 10f;
-                }*/
+                }
                 else
                 {
                     spectrumBars[i].Value -= 1 * decreaserate[i];
-                    decreaserate[i] *= 1.3f;
+                    decreaserate[i] *= decreaseRateFactor;
                 }
             }
         }
@@ -218,7 +246,8 @@ namespace NHMPh_music_player
             try
             {
                 filter.Color = Color.FromArgb(byte.Parse(((int)(sender as Slider).Value).ToString()), filter.Color.R, filter.Color.G, filter.Color.B);
-                opacity_info.Text = ((int)(sender as Slider).Value).ToString();
+                if (opacity_info != null)
+                    opacity_info.Text = ((int)(sender as Slider).Value).ToString();
             }
             catch
             {
@@ -236,7 +265,8 @@ namespace NHMPh_music_player
                 {
                     bar.Width = (int)(sender as Slider).Value;
                 }
-                width_info.Text = ((int)(sender as Slider).Value).ToString();
+                if (width_info != null)
+                    width_info.Text = ((int)(sender as Slider).Value).ToString();
             }
             catch
             {
@@ -255,7 +285,8 @@ namespace NHMPh_music_player
                     bar.Height = (int)(sender as Slider).Value;
 
                 }
-                height_info.Text = ((int)(sender as Slider).Value).ToString();
+                if (height_info != null)
+                    height_info.Text = ((int)(sender as Slider).Value).ToString();
             }
             catch
             {
@@ -274,7 +305,8 @@ namespace NHMPh_music_player
 
                     bar.Margin = new Thickness(0, 0, (int)(sender as Slider).Value, 0);
                 }
-                space_info.Text = ((int)(sender as Slider).Value).ToString();
+                if (space_info != null)
+                    space_info.Text = ((int)(sender as Slider).Value).ToString();
             }
             catch
             {
@@ -301,9 +333,9 @@ namespace NHMPh_music_player
                     Value = 0,
 
                 };
-                if (i == 125) progressBar.Value = 1000;
 
-                spectrum_ctn.Children.Add(progressBar);
+
+                //   spectrum_ctn.Children.Add(progressBar);
                 spectrumBars.Add(progressBar);
             }
 
@@ -339,7 +371,7 @@ namespace NHMPh_music_player
         {
             int second = (int)Math.Floor(thumb.Value / 1000);
             isChosingTimeStap = false;
-            // mainWindow.SkipToSecond(second);
+            mainWindow.MediaPlayer.Seek(second);
         }
         private void thumb_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -348,7 +380,7 @@ namespace NHMPh_music_player
             double mousePositionPercentage = position.X / songValue.Width;
             double thumbPostion = thumb.Maximum * mousePositionPercentage;
             int second = (int)Math.Floor(thumbPostion / 1000);
-            //  mainWindow.SkipToSecond(second);
+            mainWindow.MediaPlayer.Seek(second);
         }
         private void openclose_setting(object sender, RoutedEventArgs e)
         {
@@ -360,11 +392,11 @@ namespace NHMPh_music_player
 
         private void skip_btn(object sender, RoutedEventArgs e)
         {
-            //  mainWindow.SkipSong();
+            mainWindow.UIControl.SkipBtn(sender, e);
         }
         private void stop_btn(object sender, RoutedEventArgs e)
         {
-            //   mainWindow.Pause();
+            mainWindow.UIControl.PauseResumeBtn(sender, e);
             stopresumeimg.Source = new BitmapImage(
             new Uri($"{Environment.CurrentDirectory}\\Images\\_Play.png"));
             (sender as System.Windows.Controls.Button).Click -= stop_btn;
@@ -374,7 +406,7 @@ namespace NHMPh_music_player
         }
         private void resume_btn(object sender, RoutedEventArgs e)
         {
-            // mainWindow.Resume();
+            mainWindow.UIControl.PauseResumeBtn(sender, e);
             stopresumeimg.Source = new BitmapImage(
            new Uri($"{Environment.CurrentDirectory}\\Images\\_Pause.png"));
             (sender as System.Windows.Controls.Button).Click -= resume_btn;
@@ -385,7 +417,7 @@ namespace NHMPh_music_player
 
         private void spectrum_btn(object sender, RoutedEventArgs e)
         {
-          //  mainWindow.EnableSpectrum();
+            mainWindow.UIControl.SpectrumBtn(sender, e);
 
         }
         private void lyrics_btn(object sender, RoutedEventArgs e)
@@ -399,17 +431,25 @@ namespace NHMPh_music_player
             }
             if (isLyrics)
             {
-                this.lyric.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
-                postLyric.Text = "Lyrics is enable";
+                if (mainWindow.MediaPlayer.CurrentSong.SongLyrics != null)
+                {
+                    this.lyric.Text = "INTERMISSION";
+                    postLyric.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
+                }
+                else
+                {
+                    this.lyric.Text = "Lyrics Not Found";
+                    postLyric.Text = "";
+                }
             }
         }
         private void lyricsSync_btn(object sender, RoutedEventArgs e)
         {
-            //  mainWindow.SyncLyrics();
+            mainWindow.UIControl.SyncLyricsBtn(sender, e);
         }
         private void loop_btn(object sender, RoutedEventArgs e)
         {
-            //mainWindow.Loop();
+            mainWindow.UIControl.LoopBtn(sender, e);
             if (mainWindow.loopTxt.Text == " on ")
             {
                 loop_img.Source = new BitmapImage(
@@ -435,7 +475,8 @@ namespace NHMPh_music_player
         }
         private void volum_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            //  mainWindow.ChangeVolum(sender as Slider, volumVisual);
+            if (mainWindow != null)
+                mainWindow.UIControl.ChangeVolume(volum, volumVisual);
         }
     }
 

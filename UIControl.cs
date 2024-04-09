@@ -13,13 +13,13 @@ using System.Windows.Media.Imaging;
 
 namespace NHMPh_music_player
 {
-    internal class UIControl
+    public class UIControl
     {
         MainWindow mainWindow;
         MediaPlayer mediaPlayer;
         SongsManager songsManager;
         public UIControl(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager)
-        { 
+        {
             this.mainWindow = mainWindow;
             this.mediaPlayer = mediaPlayer;
             this.songsManager = songsManager;
@@ -57,7 +57,7 @@ namespace NHMPh_music_player
             mainWindow.DragMove();
         }
 
-       
+
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
@@ -69,25 +69,30 @@ namespace NHMPh_music_player
 
 
         #region Button control
-        private void PauseResumeBtn(object sender, RoutedEventArgs e)
-        {   
-            if(mediaPlayer.PlaybackState == PlaybackState.Playing)
+        public void PauseResumeBtn(object sender, RoutedEventArgs e)
+        {
+            if (mediaPlayer.PlaybackState == PlaybackState.Playing)
                 mediaPlayer.PauseMusic();
-            else if(mediaPlayer.PlaybackState == PlaybackState.Paused)
+            else if (mediaPlayer.PlaybackState == PlaybackState.Paused)
                 mediaPlayer.ResumeMusic();
         }
-        private void SkipBtn(object sender, RoutedEventArgs e)
+        public void SkipBtn(object sender, RoutedEventArgs e)
         {
+            if (songsManager.TotalSongInQueue() == 0)
+            {
+                mediaPlayer.Seek(0);
+                return;
+            }
             songsManager.NextSong();
             mediaPlayer.CurrentSong = songsManager.CurrentSong;
             mediaPlayer.PlayMusic();
         }
-        private void LoopBtn(object sender, RoutedEventArgs e)
+        public void LoopBtn(object sender, RoutedEventArgs e)
         {
             MusicSetting.isLoop = !MusicSetting.isLoop;
             mainWindow.loopTxt.Text = MusicSetting.isLoop ? " on " : " off ";
-        }   
-        private void SyncLyricsBtn(object sender, RoutedEventArgs e)
+        }
+        public void SyncLyricsBtn(object sender, RoutedEventArgs e)
         {
             if (MusicSetting.lyricsOffset == 0)
             {
@@ -99,13 +104,13 @@ namespace NHMPh_music_player
                 MusicSetting.lyricsOffset = 0;
             }
         }
-        private void LyricBtn(object sender, RoutedEventArgs e)
+        public void LyricBtn(object sender, RoutedEventArgs e)
         {
             MusicSetting.isLyrics = !MusicSetting.isLyrics;
             if (MusicSetting.isLyrics)
-               mainWindow.description.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
+                mainWindow.description.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
             else
-               mainWindow.description.Text = mediaPlayer.CurrentSong.Description;
+                mainWindow.description.Text = mediaPlayer.CurrentSong.Description;
         }
         private void AutoplayBtn(object sender, RoutedEventArgs e)
         {
@@ -121,13 +126,13 @@ namespace NHMPh_music_player
             }
             MusicSetting.isAutoPlay = !MusicSetting.isAutoPlay;
             mainWindow.auto_txt.Text = MusicSetting.isAutoPlay ? " on " : " off ";
-            
-            
+
+
             if (MusicSetting.isAutoPlay)
             {
                 if (songsManager.VideoInfosAutoPlayQueue.Count == 0)
                 {
-                    
+
                     songsManager.AddSongAutoplay(mainWindow);
                 }
             }
@@ -135,10 +140,10 @@ namespace NHMPh_music_player
             {
 
                 songsManager.RemoveSongAutoPlay();
-              
+
             }
         }
-       
+
         private void CloseBtn(object sender, RoutedEventArgs e)
         {
             foreach (Window window in System.Windows.Application.Current.Windows)
@@ -146,39 +151,52 @@ namespace NHMPh_music_player
                 window.Close();
             }
         }
-        private void SpectrumBtn(object sender, RoutedEventArgs e)
+        public void SpectrumBtn(object sender, RoutedEventArgs e)
         {
             MusicSetting.isSpectrum = !MusicSetting.isSpectrum;
-         
+
             if (!MusicSetting.isSpectrum)
             {
-             mainWindow.description.Height = 76;
+                mainWindow.description.Height = 76;
                 mainWindow.spectrum_ctn.Height = 0;
-               // fbands.Clear();
+                // fbands.Clear();
 
             }
             if (MusicSetting.isSpectrum)
             {
                 mainWindow.description.Height = 16;
                 mainWindow.spectrum_ctn.Height = 60;
-              //  UpdateGraph();
-              //  DrawGraph();
+                //  UpdateGraph();
+                //  DrawGraph();
             };
         }
         private void MinimizeBtn(object sender, RoutedEventArgs e)
         {
-            mainWindow.WindowState= WindowState.Minimized;
+            mainWindow.WindowState = WindowState.Minimized;
         }
         private void FullSpectrumBtn(object sender, MouseButtonEventArgs e)
         {
-           
+            Console.WriteLine("Press");
+            if (!MusicSetting.isFullScreen)
+            {
+                FullscreenSpectrum fullscreenSpectrum = new FullscreenSpectrum(mainWindow);
+                MusicSetting.isFullScreen = true;
+                fullscreenSpectrum.Show();
+                fullscreenSpectrum.UpdateVisual();
+            }
+
         }
         #endregion
 
-        private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        public void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             mediaPlayer.Volume = (float)mainWindow.volume.Value;
             mainWindow.volumVisual.Value = mainWindow.volume.Value;
+        }
+        public void ChangeVolume(Slider volume, ProgressBar volumeVisual)
+        {
+            mediaPlayer.Volume = (float)volume.Value;
+            volumeVisual.Value = volume.Value;
         }
         private void Thumb_GotMouseCapture(object sender, MouseEventArgs e)
         {
@@ -207,7 +225,7 @@ namespace NHMPh_music_player
             string key = (sender as TextBox).Text;
             (sender as TextBox).Text = "";
             await Searcher.Search(key, songsManager);
-            
+
             if (mediaPlayer.PlaybackState == PlaybackState.Stopped)
             {
                 songsManager.NextSong();

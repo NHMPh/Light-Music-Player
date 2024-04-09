@@ -3,12 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Accord.Math.Distances;
 using NAudio.Wave;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace NHMPh_music_player
 {
-    internal class DynamicVisualUpdate
+    public class DynamicVisualUpdate
     {
         private DispatcherTimer timer;
         private MainWindow window;
@@ -17,6 +18,7 @@ namespace NHMPh_music_player
         private SpectrumVisualizer visualizer;
         private StaticVisualUpdate staticVisualUpdate;
 
+        public SpectrumVisualizer Visualizer { get { return visualizer; } }
         public DynamicVisualUpdate(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager)
         {
             window = mainWindow;
@@ -38,7 +40,7 @@ namespace NHMPh_music_player
         {
             window.queue_txt.Text = $" {songsManager.TotalSongInQueue().ToString()} ";
             window.next_txt.Text = songsManager.VideoInfosQueue.Count != 0 ? $"{songsManager.VideoInfosQueue.ElementAt(0).Title}" : songsManager.VideoInfosAutoPlayQueue.Count != 0 ? $"{songsManager.VideoInfosAutoPlayQueue.ElementAt(0).Title}" : $"Click to select song from queue";
-            
+
         }
 
         private void MediaPlayer_OnSongChange(object sender, EventArgs e)
@@ -48,7 +50,7 @@ namespace NHMPh_music_player
             MusicSetting.lyricsOffset = 0;
             UpdateStaticVisual();
             visualizer.SetSpectrumWave();
-            
+
             songsManager.InvokeVideoQueueChange();
         }
         private void UpdateStaticVisual()
@@ -96,7 +98,11 @@ namespace NHMPh_music_player
                                 mediaPlayer.CurrentSong = songsManager.CurrentSong;
                                 mediaPlayer.PlayMusic();
                             }
-                            
+                            else
+                            {
+                                mediaPlayer._PauseMusic();
+                            }
+
                             if (MusicSetting.isAutoPlay && songsManager.VideoInfosAutoPlayQueue.Count <= 1 && !MusicSetting.isBrowser)
                             {
                                 songsManager.AddSongAutoplay(window);
@@ -107,28 +113,30 @@ namespace NHMPh_music_player
                     {
                         if (mediaPlayer.Wave != null)
                         {
+                           
                             window.songProgress.Value = mediaPlayer.Wave.CurrentTime.TotalMilliseconds;
                             if (!MusicSetting.isChosingTimeStap)
                             {
                                 window.thumb.Value = window.songProgress.Value;
-                            }            
-                        }
-                        if ( mediaPlayer.PlaybackState == PlaybackState.Playing && MusicSetting.isSpectrum)
-                        {
-                          
-                            visualizer.UpdateGraph();
-                            visualizer.DrawGraph();
-                        }
-                        if (MusicSetting.isLyrics)
-                        {
-                            foreach (var lyric in mediaPlayer.CurrentSong.SongLyrics)
-                            {
-                                if (lyric["seconds"].ToString() == ((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset).ToString())
-                                {
-                                    window.description.Text = lyric["lyrics"].ToString();
-                                }
                             }
+                            if (mediaPlayer.PlaybackState == PlaybackState.Playing && MusicSetting.isSpectrum)
+                            {
 
+                                visualizer.UpdateGraph();
+                                if (!MusicSetting.isFullScreen)
+                                    visualizer.DrawGraph();
+                            }
+                            if (MusicSetting.isLyrics)
+                            {
+                                foreach (var lyric in mediaPlayer.CurrentSong.SongLyrics)
+                                {
+                                    if (lyric["seconds"].ToString() == ((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset).ToString())
+                                    {
+                                        window.description.Text = lyric["lyrics"].ToString();
+                                    }
+                                }
+
+                            }
                         }
                     }
 

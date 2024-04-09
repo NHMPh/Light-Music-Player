@@ -26,7 +26,10 @@ namespace NHMPh_music_player
         private string thumbnail;
 
         private JArray songLyrics = new JArray();
-        
+
+        public delegate void LyricsFoundEventHandler(object sender, bool status);
+
+        public event LyricsFoundEventHandler OnLyricsFound;
 
         //Get set property
 
@@ -99,6 +102,7 @@ namespace NHMPh_music_player
                         // Read the content as string
                         string responseBody = await response.Content.ReadAsStringAsync();
                         songLyrics = JArray.Parse(responseBody);
+                        OnLyricsFound?.Invoke(this,true);
                         mainWindow.lyrics_btn.Width = 20;
                         mainWindow.lyricsSync_btn.Width = 10;
                     }
@@ -106,6 +110,7 @@ namespace NHMPh_music_player
                     {
                         Console.WriteLine($"Failed to get data. Status code: {response.StatusCode}");
                         songLyrics =null;
+                        OnLyricsFound?.Invoke(this, false);
                     }
                 }
                 catch (Exception ex)

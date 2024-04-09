@@ -9,18 +9,29 @@ namespace NHMPh_music_player
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {   
+    {
+        MediaPlayer mediaPlayer;
+        SongsManager songManger;
+        UIControl uiControl;
+        DynamicVisualUpdate dynamicVisualUpdate;
+        Playlist playlist;
+        _CustomPlaylist customPlaylist;
+
+        public MediaPlayer MediaPlayer { get { return mediaPlayer; } }
+        public SongsManager SongsManager { get { return songManger; } }
+        public UIControl UIControl { get { return uiControl; } }
+        public DynamicVisualUpdate DynamicVisualUpdate { get { return dynamicVisualUpdate; } }
         public MainWindow()
         {
             InitializeComponent();
-            var mediaPlayer = new MediaPlayer(this);
-            var songManger = new SongsManager();
-            var uiControl = new UIControl(this, mediaPlayer,songManger);
-            var dynamicVisualUpdate = new DynamicVisualUpdate(this, mediaPlayer,songManger);
-            var playlist = new Playlist(this, songManger);
-            var customPlaylist = new _CustomPlaylist(this,songManger,mediaPlayer);  
-        }  
-   
+            mediaPlayer = new MediaPlayer(this);
+            songManger = new SongsManager();
+            uiControl = new UIControl(this, mediaPlayer, songManger);
+            dynamicVisualUpdate = new DynamicVisualUpdate(this, mediaPlayer, songManger);
+            playlist = new Playlist(this, songManger);
+            customPlaylist = new _CustomPlaylist(this, songManger, mediaPlayer);
+
+        }
     }
 
 }

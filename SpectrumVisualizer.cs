@@ -12,7 +12,7 @@ using System.Windows.Controls;
 
 namespace NHMPh_music_player
 {
-    internal class SpectrumVisualizer
+    public class SpectrumVisualizer
     {
      
         const int numBars = 126;
@@ -27,8 +27,10 @@ namespace NHMPh_music_player
         MainWindow mainWindow;
         MediaPlayer mediaPlayer;
         List<ProgressBar> spectrumBars = new List<ProgressBar>();
-        double[] fbands = new double[2048];
+        public double[] fbands = new double[2048];
         float[] decreaserate = new float[126];
+
+   
         public SpectrumVisualizer( MainWindow mainWindow, MediaPlayer mediaPlayer ) 
         {
             this.mediaPlayer = mediaPlayer;
