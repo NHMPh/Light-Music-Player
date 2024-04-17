@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using Microsoft.Win32;
+using NAudio.Wave;
 using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using YoutubeExplode.Common;
+using static System.Windows.Forms.LinkLabel;
 using MessageBox = System.Windows.MessageBox;
 using Orientation = System.Windows.Controls.Orientation;
 using ProgressBar = System.Windows.Controls.ProgressBar;
@@ -31,12 +33,12 @@ namespace NHMPh_music_player
     public partial class FullscreenSpectrum : Window
     {
 
-        const int numBars = 256;
-        const int thresholdIndex = 50;
-        const int multiplierLow = 2000;
-        const int multiplierHigh = 5000;
-        const float decreaseRateFactor = 1.3f;
-        int[] multipliers = new int[numBars];
+        
+        int thresholdIndex = 50;
+        int multiplierLow = 2000;
+        int multiplierHigh = 5000;
+        float decreaseRateFactor = 1.3f;
+        int[] multipliers = new int[256];
 
 
         private DispatcherTimer timer;
@@ -45,55 +47,59 @@ namespace NHMPh_music_player
         private bool isChosingTimeStap = false;
         MainWindow mainWindow;
         private bool isLyrics = true;
+        // Create and set the new BitmapImage
+        BitmapImage newImage = new BitmapImage();
+        Uri uri;
         public FullscreenSpectrum(MainWindow mainWindow)
         {
 
             InitializeComponent();
             this.KeyDown += FullscreenSpectrum_KeyDown;
+           // Closed += FullscreenSpectrum_Closed;
             this.mainWindow = mainWindow;
             timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(1); // Set the interval as needed
+            timer.Interval = TimeSpan.FromMilliseconds(1);
+          
             timer.Tick += async (sender, e) =>
             {
                 await UpadateSpectrum();
             };
-            mainWindow.MediaPlayer.OnSongChange += MainWindow_OnSongChange;
-            CreateSpectrumBar();
-            Closed += FullscreenSpectrum_Closed;
-            timer.Start();
-            this.Topmost = true;
-            for (int i = 0; i < numBars; i++)
+            this.mainWindow.MediaPlayer.OnSongChange += MainWindow_OnSongChange;
+            CreateSpectrumBar();      
+           
+            for (int i = 0; i < 256; i++)
             {
                 multipliers[i] = i < thresholdIndex ? multiplierLow : multiplierHigh;
                 multipliers[i] = i < 10 ? 600 : multipliers[i];
             }
-            mainWindow.WindowState = WindowState.Minimized;
+            Reopen();
+          
         }
 
         private void FullscreenSpectrum_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
             {
-                mainWindow.WindowState = WindowState.Normal;
-                this.Close();
-
+                mainWindow.WindowState = WindowState.Normal;          
+                timer.Stop();           
+                mainWindow.UIControl.CloseFullScreen();
             }
         }
 
-        private void FullscreenSpectrum_Closed(object sender, EventArgs e)
-        {
-            MusicSetting.isFullScreen = false;
-            Console.WriteLine("Close");
-        }
-
+     
         private void MainWindow_OnSongChange(object sender, EventArgs e)
         {
             UpdateVisual();
         }
-
+        public void Reopen()
+        {
+            timer.Start();
+            this.Topmost = true;
+            this.mainWindow.WindowState = WindowState.Minimized;
+        }
         public void UpdateVisual()
         {
-            
+
             lable.Content = Regex.Replace(mainWindow.MediaPlayer.CurrentSong.Title, @"(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】", ""); ;
             des.Content = mainWindow.MediaPlayer.CurrentSong.Description;
             artist_cover.ImageSource = new BitmapImage(new Uri(mainWindow.MediaPlayer.CurrentSong.Thumbnail));
@@ -134,7 +140,7 @@ namespace NHMPh_music_player
 
                     songValue.Value = mainWindow.MediaPlayer.Wave.CurrentTime.TotalMilliseconds;
 
-                    
+
                     if (mainWindow.MediaPlayer.CurrentSong.SongLyrics != null)
                     {
                         foreach (var lyric in mainWindow.MediaPlayer.CurrentSong.SongLyrics)
@@ -162,8 +168,8 @@ namespace NHMPh_music_player
                             }
                         }
                     }
-                   
-                    
+
+
                     DrawGraph();
 
                 });
@@ -213,15 +219,46 @@ namespace NHMPh_music_player
         }
         private void change_background_url(object sender, RoutedEventArgs e)
         {
-            thumbnail.ImageSource = new BitmapImage(new Uri(background_mod.Text));
+
+            thumbnail.ImageSource = null;
+
+
+            try { newImage.StreamSource.Dispose(); } catch { }
+
+            Console.WriteLine("G");
+            newImage = new BitmapImage(new Uri(background_mod.Text));
+
+
+            // Set the new BitmapImage as the source
+            thumbnail.ImageSource = newImage;
+            try { newImage.StreamSource.Dispose(); } catch { }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
         private void change_background_local(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
             openFileDialog.Filter = "Image Files (*.png;*.jpeg;*.jpg;*.gif)|*.png;*.jpeg;*.jpg;*.gif|All Files (*.*)|*.*";
             if (openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
-            thumbnail.ImageSource = new BitmapImage(new Uri(openFileDialog.FileName));
 
+            
+            thumbnail.ImageSource = null;
+
+
+            try { newImage.StreamSource.Dispose(); } catch { }
+            
+            Console.WriteLine("G");
+            newImage = new BitmapImage(new Uri(openFileDialog.FileName));
+           
+
+            // Set the new BitmapImage as the source
+            thumbnail.ImageSource =newImage;
+            try { newImage.StreamSource.Dispose(); } catch { }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
         private void change_filter_color(object sender, RoutedEventArgs e)
         {
@@ -477,6 +514,44 @@ namespace NHMPh_music_player
         {
             if (mainWindow != null)
                 mainWindow.UIControl.ChangeVolume(volum, volumVisual);
+        }
+        private void ReleaseMemory()
+        {
+            multipliers = null;
+            thresholdIndex = 0;
+            multiplierLow = 0;
+            multiplierHigh = 0;
+            decreaseRateFactor = 0;
+            
+            this.opacity_info = null;
+            this.postLyric=null;
+            this.setting = null;
+            this.songValue = null;
+            this.space_info = null;
+            this.spectrumBars = null;
+            this.spectrum_ctn = null;
+            this.stopresumeimg = null;
+            this.thresholdIndex = 0;
+            this.thumb = null;
+            this.thumbnail = null;
+            this.timer = null;
+            this.volum = null;
+            this.volumVisual = null;
+            this.width_info = null;
+            this.KeyDown -= FullscreenSpectrum_KeyDown;
+            //this.mainWindow= null;
+            this.artist_cover = null;
+            this.background_mod = null;
+            this.decreaserate = null;
+            this.decreaseRateFactor = 0;
+            this.des = null;
+            this.filter = null;
+            this.height_info = null;
+            this.lable= null;
+            this.loop_img = null;
+            this.lyric=null;
+
+
         }
     }
 

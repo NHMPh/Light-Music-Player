@@ -110,6 +110,8 @@ namespace NHMPh_music_player
                     {
                         Console.WriteLine($"Failed to get data. Status code: {response.StatusCode}");
                         songLyrics =null;
+                        mainWindow.lyrics_btn.Width = 0;
+                        mainWindow.lyricsSync_btn.Width = 0;
                         OnLyricsFound?.Invoke(this, false);
                     }
                 }

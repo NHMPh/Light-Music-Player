@@ -27,7 +27,7 @@
             </Border.Background>
         </Border>
         <StackPanel  Orientation="Horizontal" Margin="70" VerticalAlignment="Top" HorizontalAlignment="Left" >
-            <Border Height="80" Width="80" CornerRadius="50" MouseLeftButtonDown="Border_MouseLeftButtonDown">
+            <Border Height="80" Width="80" CornerRadius="50" MouseLeftButtonDown="Border_MouseLeftButtonDown" ToolTip="Open/close main window">
                 <Border.Background>
                     <ImageBrush Stretch="UniformToFill" ImageSource="./LOGO.PNG"/>
                 </Border.Background>
@@ -67,7 +67,7 @@
                         </Slider>
                     </Grid>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button ToolTip="Resume/Pause" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="5,4,5,0" Click="lyricsSync_btn">
+                        <Button ToolTip="Press this when you about to hear the first line of the lyric to sync" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="5,4,5,0" Click="lyricsSync_btn">
                             <Image Source="/synclyric.png"/>
                             <Button.Resources>
                                 <Style TargetType="Border">
@@ -75,7 +75,7 @@
                                 </Style>
                             </Button.Resources>
                         </Button>
-                        <Button ToolTip="Resume/Pause" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="5,4,5,0" Click="lyrics_btn">
+                        <Button ToolTip="View lyrics" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="5,4,5,0" Click="lyrics_btn">
                             <Image Source="/lyrics.png"/>
                             <Button.Resources>
                                 <Style TargetType="Border">
@@ -83,7 +83,7 @@
                                 </Style>
                             </Button.Resources>
                         </Button>
-                        <Button ToolTip="Resume/Pause" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="50,4,5,0" Click="loop_btn">
+                        <Button ToolTip="Loop" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="50,4,5,0" Click="loop_btn">
                             <Image x:Name="loop_img" Source="/Loop_off.png"/>
                             <Button.Resources>
                                 <Style TargetType="Border">
@@ -99,7 +99,7 @@
                                 </Style>
                             </Button.Resources>
                         </Button>
-                        <Button ToolTip="Resume/Pause" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="5,4,5,0" Click="skip_btn" >
+                        <Button ToolTip="Skip" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="5,4,5,0" Click="skip_btn" >
                             <Image Source="/Next.png"/>
                             <Button.Resources>
                                 <Style TargetType="Border">
@@ -107,7 +107,7 @@
                                 </Style>
                             </Button.Resources>
                         </Button>
-                        <Button ToolTip="Resume/Pause" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="50,4,5,0" Click="spectrum_btn">
+                        <Button ToolTip="Spectrum" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="50,4,5,0" Click="spectrum_btn">
                             <Image Source="/Spectrum.png"/>
                             <Button.Resources>
                                 <Style TargetType="Border">
@@ -115,7 +115,7 @@
                                 </Style>
                             </Button.Resources>
                         </Button>
-                        <Button ToolTip="Resume/Pause" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="5,4,5,0" Click="openclose_setting">
+                        <Button ToolTip="Setting" Height="40" Width="40" Background="Transparent" BorderThickness="0" Margin="5,4,5,0" Click="openclose_setting">
                             <Image Source="/Setting.png"/>
                             <Button.Resources>
                                 <Style TargetType="Border">

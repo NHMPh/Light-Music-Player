@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using Accord.Math;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,12 +19,14 @@ namespace NHMPh_music_player
         MainWindow mainWindow;
         MediaPlayer mediaPlayer;
         SongsManager songsManager;
+        FullscreenSpectrum fullscreenSpectrum =null;
         public UIControl(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager)
         {
             this.mainWindow = mainWindow;
             this.mediaPlayer = mediaPlayer;
             this.songsManager = songsManager;
 
+             
 
             mainWindow.autoplay_btn.Click += AutoplayBtn;
             mainWindow.close_btn.Click += CloseBtn;
@@ -150,7 +153,7 @@ namespace NHMPh_music_player
             {
                 window.Close();
             }
-        }
+        }       
         public void SpectrumBtn(object sender, RoutedEventArgs e)
         {
             MusicSetting.isSpectrum = !MusicSetting.isSpectrum;
@@ -159,7 +162,7 @@ namespace NHMPh_music_player
             {
                 mainWindow.description.Height = 76;
                 mainWindow.spectrum_ctn.Height = 0;
-                // fbands.Clear();
+                mainWindow.DynamicVisualUpdate.Visualizer.fbands.Clear();
 
             }
             if (MusicSetting.isSpectrum)
@@ -179,11 +182,22 @@ namespace NHMPh_music_player
             Console.WriteLine("Press");
             if (!MusicSetting.isFullScreen)
             {
-                FullscreenSpectrum fullscreenSpectrum = new FullscreenSpectrum(mainWindow);
+                if(fullscreenSpectrum == null)
+                {
+                    fullscreenSpectrum = new FullscreenSpectrum(mainWindow);
+                }
+                
                 MusicSetting.isFullScreen = true;
                 fullscreenSpectrum.Show();
+                fullscreenSpectrum.Reopen();
                 fullscreenSpectrum.UpdateVisual();
             }
+
+        }
+        public void CloseFullScreen()
+        {
+            MusicSetting.isFullScreen = false;
+            fullscreenSpectrum.Hide();
 
         }
         #endregion

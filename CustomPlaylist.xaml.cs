@@ -300,7 +300,7 @@ namespace NHMPh_music_player
             if (e.ChangedButton == MouseButton.Left)
                 this.DragMove();
         }
-        private async void Window_KeyDown(object sender, KeyEventArgs e)
+        private  void Window_KeyDown(object sender, KeyEventArgs e)
         {
 
             if (e.Key == Key.Enter)
