@@ -3,6 +3,7 @@ using NAudio.Wave;
 using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -40,6 +41,7 @@ namespace NHMPh_music_player
         float decreaseRateFactor = 1.3f;
         int[] multipliers = new int[256];
 
+        DispatcherTimer timer2 = new DispatcherTimer();
 
         private DispatcherTimer timer;
         float[] decreaserate = new float[512];
@@ -49,7 +51,7 @@ namespace NHMPh_music_player
         private bool isLyrics = true;
         // Create and set the new BitmapImage
         BitmapImage newImage = new BitmapImage();
-        Uri uri;
+        Uri currentUri;
         public FullscreenSpectrum(MainWindow mainWindow)
         {
 
@@ -73,15 +75,44 @@ namespace NHMPh_music_player
                 multipliers[i] = i < 10 ? 600 : multipliers[i];
             }
             Reopen();
-          
+
+            timer2.Interval = TimeSpan.FromSeconds(5);
+            timer2.Tick += Timer_Tick;
+            this.MouseMove += FullscreenSpectrum_MouseMove;
+        }
+
+        private void FullscreenSpectrum_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+
+            Cursor = System.Windows.Input.Cursors.Arrow;
+            if (controler.Width == 0 )
+                controler.Width = Double.NaN;
+            timer2.Stop();
+            timer2.Start();
+        }
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            controler.Width = 0;
+            Console.WriteLine("hit 0");
+            Cursor = System.Windows.Input.Cursors.None;
+            // Stop the timer
+            timer2.Stop();
         }
 
         private void FullscreenSpectrum_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
             {
+                this.MouseMove -= FullscreenSpectrum_MouseMove;
                 mainWindow.WindowState = WindowState.Normal;          
-                timer.Stop();           
+                timer.Stop();
+                thumbnail.ImageSource = null;
+                newImage = new BitmapImage(new Uri("https://i.stack.imgur.com/Pg49k.png"));
+                thumbnail.ImageSource = newImage;
+                try { newImage.StreamSource.Dispose(); } catch { }
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
                 mainWindow.UIControl.CloseFullScreen();
             }
         }
@@ -94,6 +125,13 @@ namespace NHMPh_music_player
         public void Reopen()
         {
             timer.Start();
+            if(currentUri != null)
+            {
+                newImage = new BitmapImage(currentUri);
+                thumbnail.ImageSource = newImage;
+                try { newImage.StreamSource.Dispose(); } catch { }
+            }
+            this.MouseMove += FullscreenSpectrum_MouseMove;
             this.Topmost = true;
             this.mainWindow.WindowState = WindowState.Minimized;
         }
@@ -116,6 +154,7 @@ namespace NHMPh_music_player
 
         private void CurrentSong_OnLyricsFound(object sender, bool status)
         {
+            if (!isLyrics) return;
 
             if (status)
             {
@@ -138,6 +177,7 @@ namespace NHMPh_music_player
                     if (this.Topmost) this.Topmost = false;
                     if (mainWindow.MediaPlayer.Wave == null) return;
 
+                   
                     songValue.Value = mainWindow.MediaPlayer.Wave.CurrentTime.TotalMilliseconds;
 
 
@@ -226,7 +266,8 @@ namespace NHMPh_music_player
             try { newImage.StreamSource.Dispose(); } catch { }
 
             Console.WriteLine("G");
-            newImage = new BitmapImage(new Uri(background_mod.Text));
+            currentUri = new Uri(background_mod.Text);
+            newImage = new BitmapImage(currentUri);
 
 
             // Set the new BitmapImage as the source
@@ -243,19 +284,12 @@ namespace NHMPh_music_player
             openFileDialog.Filter = "Image Files (*.png;*.jpeg;*.jpg;*.gif)|*.png;*.jpeg;*.jpg;*.gif|All Files (*.*)|*.*";
             if (openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
 
-            
             thumbnail.ImageSource = null;
-
-
-            try { newImage.StreamSource.Dispose(); } catch { }
-            
-            Console.WriteLine("G");
-            newImage = new BitmapImage(new Uri(openFileDialog.FileName));
-           
-
-            // Set the new BitmapImage as the source
+            currentUri = new Uri(openFileDialog.FileName);
+            newImage = new BitmapImage(currentUri);  
             thumbnail.ImageSource =newImage;
             try { newImage.StreamSource.Dispose(); } catch { }
+           
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();

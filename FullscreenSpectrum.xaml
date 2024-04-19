@@ -42,7 +42,7 @@
         </StackPanel>
         <StackPanel  VerticalAlignment="Top" Margin="0,860,0,0">
             <Grid Margin="0,-200,0,0" >
-                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,40,0,0">
+                <StackPanel x:Name="controler" Orientation="Vertical" VerticalAlignment="Center" Margin="0,40,0,0" Width="auto">
                     <Grid Height="25" MouseLeftButtonDown="thumb_MouseLeftButtonDown">
                         <ProgressBar ValueChanged="songValue_ValueChanged"  x:Name="songValue" Background="Gray" Height="4" Foreground="White" Margin="3,7,3,7" Maximum="255"  Width="500"  Value="0" />
                         <Slider x:Name="thumb" Width="500" Height="15" Value="0" Margin="3,4,3,5" Maximum="255"  Grid.ColumnSpan="2" GotMouseCapture="thumb_GotMouseCapture" LostMouseCapture="thumb_LostMouseCapture">
@@ -175,8 +175,9 @@
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,00">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0">
             <!-- <TextBlock x:Name="preLyric" Text="" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center" />-->
+            <TextBlock  Text="" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center"/>
             <TextBlock x:Name="lyric" Text="Welcome" Foreground="White" FontSize="72" HorizontalAlignment="Center" Margin="20"/>
             <TextBlock x:Name="postLyric" Text="Press 'esc' to exit" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center"/>
         </StackPanel>

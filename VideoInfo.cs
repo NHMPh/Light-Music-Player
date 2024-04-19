@@ -112,6 +112,7 @@ namespace NHMPh_music_player
                         songLyrics =null;
                         mainWindow.lyrics_btn.Width = 0;
                         mainWindow.lyricsSync_btn.Width = 0;
+                        MusicSetting.isLyrics = false;
                         OnLyricsFound?.Invoke(this, false);
                     }
                 }

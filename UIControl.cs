@@ -194,11 +194,16 @@ namespace NHMPh_music_player
             }
 
         }
-        public void CloseFullScreen()
+        public async void CloseFullScreen()
         {
             MusicSetting.isFullScreen = false;
+           
             fullscreenSpectrum.Hide();
-
+            fullscreenSpectrum.Show();    
+            fullscreenSpectrum.Hide();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
         #endregion
 
