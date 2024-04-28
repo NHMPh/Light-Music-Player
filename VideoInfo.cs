@@ -89,7 +89,11 @@ namespace NHMPh_music_player
             songName = StringUtilitiy.ProcessInvailName(songName);
             Console.WriteLine($"https://api.textyl.co/api/lyrics?q={songName}");
             // Create an instance of HttpClient
-            using (HttpClient client = new HttpClient())
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+            using (HttpClient client = new HttpClient(handler))
             {
                 try
                 {
