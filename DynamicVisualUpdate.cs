@@ -123,7 +123,7 @@ namespace NHMPh_music_player
                             {
 
                                 visualizer.UpdateGraph();
-                                if (!MusicSetting.isFullScreen)
+                               // if (!MusicSetting.isFullScreen)
                                     visualizer.DrawGraph();
                             }
                             if (MusicSetting.isLyrics)

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Win32;
 using NAudio.Wave;
+using NHMPh_music_player.LedStripCom;
 using PuppeteerSharp;
+using PuppeteerSharp.PageCoverage;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -34,58 +36,97 @@ namespace NHMPh_music_player
     public partial class FullscreenSpectrum : Window
     {
 
-        
+
         int thresholdIndex = 50;
         int multiplierLow = 2000;
-        int multiplierHigh = 5000;
-        float decreaseRateFactor = 1.3f;
+        int multiplierHigh = 1000000;
+        float decreaseRateFactor = 1.2f;
         int[] multipliers = new int[256];
 
+
         DispatcherTimer timer2 = new DispatcherTimer();
+        DispatcherTimer timer3 = new DispatcherTimer();
+        DispatcherTimer timer4 = new DispatcherTimer();
+        DispatcherTimer timer5 = new DispatcherTimer();
 
         private DispatcherTimer timer;
         float[] decreaserate = new float[512];
         List<ProgressBar> spectrumBars = new List<ProgressBar>();
+        List<ProgressBar> spectrumBarsTip = new List<ProgressBar>();
         private bool isChosingTimeStap = false;
         MainWindow mainWindow;
         private bool isLyrics = true;
         // Create and set the new BitmapImage
         BitmapImage newImage = new BitmapImage();
         Uri currentUri;
+
+
+        int thresholdIndex16 = 13;
+        int multiplierLow16 = 100;
+        int multiplierHigh16 = 100;
+        float decreaseRateFactor16 = 1.2f;
+        double[] heightestBand = new double[16];
+        int[] multipliers16 = new int[16];
+        int[] buffer = new int[16];
+        int[] snow = new int[16];
+        LedSpectrum ledSpectrum;
+
         public FullscreenSpectrum(MainWindow mainWindow)
         {
 
             InitializeComponent();
+
+            ledSpectrum = new LedSpectrum(16, 20);
             this.KeyDown += FullscreenSpectrum_KeyDown;
-           // Closed += FullscreenSpectrum_Closed;
+            // Closed += FullscreenSpectrum_Closed;
             this.mainWindow = mainWindow;
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(1);
-          
+
             timer.Tick += async (sender, e) =>
             {
                 await UpadateSpectrum();
             };
             this.mainWindow.MediaPlayer.OnSongChange += MainWindow_OnSongChange;
-            CreateSpectrumBar();      
-           
+            //  CreateSpectrumBar();
+            CreateSpectrumLed();
             for (int i = 0; i < 256; i++)
             {
+
                 multipliers[i] = i < thresholdIndex ? multiplierLow : multiplierHigh;
                 multipliers[i] = i < 10 ? 600 : multipliers[i];
+            }
+            for (int i = 0; i < 16; i++)
+            {
+
+                multipliers16[i] = i < thresholdIndex16 ? multiplierLow16 : multiplierHigh16;
+
             }
             Reopen();
 
             timer2.Interval = TimeSpan.FromSeconds(5);
             timer2.Tick += Timer_Tick;
+
+            timer3.Interval = TimeSpan.FromMilliseconds(100);
+            timer3.Tick += UpadateSpectrumSnow;
+
+            timer4.Interval = TimeSpan.FromMilliseconds(2);
+            timer4.Tick += UpadateSpectrumBar;
+
+            timer5.Interval = TimeSpan.FromMilliseconds(3);
+            timer5.Tick += UpadateSpectrumUpBar;
+
             this.MouseMove += FullscreenSpectrum_MouseMove;
         }
-
+        private void CreateSpectrumLed()
+        {
+            spectrum_ctn.Children.Add(ledSpectrum.LedStripContainer);
+        }
         private void FullscreenSpectrum_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
 
             Cursor = System.Windows.Input.Cursors.Arrow;
-            if (controler.Width == 0 )
+            if (controler.Width == 0)
                 controler.Width = Double.NaN;
             timer2.Stop();
             timer2.Start();
@@ -104,7 +145,7 @@ namespace NHMPh_music_player
             if (e.Key == Key.Escape)
             {
                 this.MouseMove -= FullscreenSpectrum_MouseMove;
-                mainWindow.WindowState = WindowState.Normal;          
+                mainWindow.WindowState = WindowState.Normal;
                 timer.Stop();
                 thumbnail.ImageSource = null;
                 newImage = new BitmapImage(new Uri("https://i.stack.imgur.com/Pg49k.png"));
@@ -117,7 +158,7 @@ namespace NHMPh_music_player
             }
         }
 
-     
+
         private void MainWindow_OnSongChange(object sender, EventArgs e)
         {
             UpdateVisual();
@@ -125,14 +166,17 @@ namespace NHMPh_music_player
         public void Reopen()
         {
             timer.Start();
-            if(currentUri != null)
+            timer3.Start();
+            timer4.Start();
+            timer5.Start();
+            if (currentUri != null)
             {
                 newImage = new BitmapImage(currentUri);
                 thumbnail.ImageSource = newImage;
                 try { newImage.StreamSource.Dispose(); } catch { }
             }
             this.MouseMove += FullscreenSpectrum_MouseMove;
-            this.Topmost = true;
+         //   this.Topmost = true;
             this.mainWindow.WindowState = WindowState.Minimized;
         }
         public void UpdateVisual()
@@ -177,7 +221,7 @@ namespace NHMPh_music_player
                     if (this.Topmost) this.Topmost = false;
                     if (mainWindow.MediaPlayer.Wave == null) return;
 
-                   
+
                     songValue.Value = mainWindow.MediaPlayer.Wave.CurrentTime.TotalMilliseconds;
 
 
@@ -208,13 +252,138 @@ namespace NHMPh_music_player
                             }
                         }
                     }
+                  //  DrawGraphLed16();
+                    
 
-
-                    DrawGraph();
+                    // DrawGraph16();
 
                 });
             });
         }
+        private void UpadateSpectrumSnow(object sender, EventArgs e)
+        {
+
+
+            for (int i = 0; i < 16; i++)
+            {
+                if (snow[i] > 0 && snow[i] > buffer[i])
+                {
+                    snow[i] -= 1;
+                }
+            }
+            ledSpectrum.DrawSpectrum(buffer, snow);
+
+        }
+        bool isIncrese = false;
+        private void UpadateSpectrumBar(object sender, EventArgs e)
+        {
+
+            if (isIncrese) return;
+            for (int i = 0; i < 16; i++)
+            {
+                if (buffer[i] > 0)
+                {
+                    buffer[i] -= 1;
+                }
+            }
+            ledSpectrum.DrawSpectrum(buffer, snow);
+
+        }
+        private void UpadateSpectrumUpBar(object sender, EventArgs e)
+        {
+
+            for(int i = 0; i < 15; i++)
+            {
+                double average = 0;
+                for (int j = 0; j < 6; j++)
+                {
+
+                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[i*6+j];
+                }
+                    average /= 6;
+                if (heightestBand[i] < average)
+                {
+                    heightestBand[i] = average;
+                }
+                if (average == 0) heightestBand[i] = 0;
+                var spectrumValue = (average / heightestBand[i]) * 19;
+                spectrumValue = (int)spectrumValue;
+                if (spectrumValue >= buffer[i])
+                {
+
+                    buffer[i] = (int)spectrumValue;
+                    if (snow[ i] < buffer[i])
+                    {
+                        snow[i] = buffer[i] - 1;
+                    }
+
+                }
+            }
+         /*   isIncrese = true;
+            for (int i = 0; i < 8; i++)
+            {
+
+                double average = 0;
+                for (int j = 0; j <= Math.Pow(2, i); j++)
+                {
+                    
+                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
+                    Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j)));
+                }
+                Console.WriteLine("----------------");
+                average /= Math.Pow(2, i);
+                if (heightestBand[2 * i] < average)
+                {
+                    heightestBand[2 * i] = average;
+                }
+                if (average == 0) heightestBand[2 * i] = 0;
+                var spectrumValue = (average / heightestBand[2 * i]) * 19;
+                spectrumValue = (int)spectrumValue;
+                if (spectrumValue > 18) spectrumValue--;
+
+                if (spectrumValue > buffer[2 * i])
+                {
+
+                    buffer[2 * i] = (int)spectrumValue;
+                    if (snow[2 * i] < buffer[2 * i])
+                    {
+                        snow[2 * i] = buffer[2 * i]-1;
+                    }
+
+
+
+                }
+
+                average = 0;
+                for (int j = 0; j < Math.Pow(2, i); j++)
+                {
+                    Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j))+1);
+                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
+                }
+                if (heightestBand[2 * i + 1] < average)
+                {
+                    heightestBand[2 * i + 1] = average;
+                }
+                if (average == 0) heightestBand[2 * i+1] = 0;
+                spectrumValue = (average / heightestBand[2 * i + 1]) * 19;
+                if ((int)spectrumValue == 19) spectrumValue--;
+                if (spectrumValue > buffer[2 * i + 1])
+                {
+
+                    buffer[2 * i + 1] = (int)spectrumValue;
+                    if (snow[2 * i + 1] < buffer[2 * i + 1])
+                    {
+                        snow[2 * i + 1] = buffer[2 * i + 1]-1;
+                    }
+
+
+                }
+            }
+                Console.WriteLine("----------------");
+            isIncrese = false;*/
+            ledSpectrum.DrawSpectrum(buffer, snow);
+        }
+
         private void DrawGraph()
         {
             for (int i = 0, j = 0; i < 256; i++)
@@ -232,6 +401,70 @@ namespace NHMPh_music_player
                 {
                     spectrumBars[i].Value -= 1 * decreaserate[i];
                     decreaserate[i] *= decreaseRateFactor;
+                }
+            }
+        }
+        private void DrawGraphLed16()
+        {
+
+
+           
+        }
+
+        private void DrawGraph16()
+        {
+
+
+            for (int i = 0; i < 8; i++)
+            {
+                double average = 0;
+                for (int j = 0; j < Math.Pow(2, i); j++)
+                {
+                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
+                }
+                average /= Math.Pow(2, i);
+                if (heightestBand[2 * i] < average)
+                {
+                    heightestBand[2 * i] = average;
+                }
+                var spectrumValue = average / heightestBand[2 * i] * 1000;
+                if (spectrumValue >= spectrumBars[2 * i].Value)
+                {
+
+                    spectrumBars[2 * i].Value = spectrumValue;
+                    decreaserate[2 * i] = 10f;
+
+                }
+                else
+                {
+
+                    spectrumBars[2 * i].Value -= 1 * decreaserate[2 * i];
+
+                    decreaserate[2 * i] *= decreaseRateFactor16;
+
+                }
+                average = 0;
+                for (int j = 0; j < Math.Pow(2, i); j++)
+                {
+                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j + (Math.Pow(2, i))))];
+                }
+                if (heightestBand[2 * i + 1] < average)
+                {
+                    heightestBand[2 * i + 1] = average;
+                }
+
+                spectrumValue = average / heightestBand[2 * i + 1] * 1000;
+                if (spectrumValue >= spectrumBars[2 * i + 1].Value)
+                {
+
+                    spectrumBars[2 * i + 1].Value = spectrumValue;
+                    decreaserate[2 * i + 1] = 10f;
+                }
+                else
+                {
+
+                    spectrumBars[2 * i + 1].Value -= 1 * decreaserate[2 * i + 1];
+                    decreaserate[2 * i + 1] *= decreaseRateFactor16;
                 }
             }
         }
@@ -286,10 +519,10 @@ namespace NHMPh_music_player
 
             thumbnail.ImageSource = null;
             currentUri = new Uri(openFileDialog.FileName);
-            newImage = new BitmapImage(currentUri);  
-            thumbnail.ImageSource =newImage;
+            newImage = new BitmapImage(currentUri);
+            thumbnail.ImageSource = newImage;
             try { newImage.StreamSource.Dispose(); } catch { }
-           
+
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
@@ -316,6 +549,7 @@ namespace NHMPh_music_player
         {
             try
             {
+
                 filter.Color = Color.FromArgb(byte.Parse(((int)(sender as Slider).Value).ToString()), filter.Color.R, filter.Color.G, filter.Color.B);
                 if (opacity_info != null)
                     opacity_info.Text = ((int)(sender as Slider).Value).ToString();
@@ -331,13 +565,13 @@ namespace NHMPh_music_player
         {
             try
             {
-
+                timer3.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
                     bar.Width = (int)(sender as Slider).Value;
                 }
                 if (width_info != null)
-                    width_info.Text = ((int)(sender as Slider).Value).ToString();
+                    width_info.Text = ((sender as Slider).Value).ToString();
             }
             catch
             {
@@ -350,6 +584,7 @@ namespace NHMPh_music_player
         {
             try
             {
+                timer4.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
 
@@ -357,7 +592,7 @@ namespace NHMPh_music_player
 
                 }
                 if (height_info != null)
-                    height_info.Text = ((int)(sender as Slider).Value).ToString();
+                    height_info.Text = ((sender as Slider).Value).ToString();
             }
             catch
             {
@@ -370,14 +605,14 @@ namespace NHMPh_music_player
         {
             try
             {
-
+                timer5.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
 
                     bar.Margin = new Thickness(0, 0, (int)(sender as Slider).Value, 0);
                 }
                 if (space_info != null)
-                    space_info.Text = ((int)(sender as Slider).Value).ToString();
+                    space_info.Text = ((sender as Slider).Value).ToString();
             }
             catch
             {
@@ -388,7 +623,7 @@ namespace NHMPh_music_player
         }
         private void CreateSpectrumBar()
         {
-            for (int i = 0; i < 256; i++)
+            for (int i = 0; i < 16; i++)
             {
 
                 ProgressBar progressBar = new ProgressBar()
@@ -406,24 +641,25 @@ namespace NHMPh_music_player
                 };
 
 
-                //   spectrum_ctn.Children.Add(progressBar);
                 spectrumBars.Add(progressBar);
+                spectrum_ctn.Children.Add(spectrumBars[i]);
             }
 
-            for (int i = 0; i < 256; i++)
-            {
-                if (i < 128)
-                {
-                    spectrum_ctn.Children.Add(spectrumBars[(127 - i) * 2]);
 
-                }
-                else
-                {
-                    spectrum_ctn.Children.Add(spectrumBars[Math.Abs((127 - i) * 2 + 1)]);
+            /* for (int i = 0; i < 256; i++)
+             {
+                 if (i < 128)
+                 {
+                     spectrum_ctn.Children.Add(spectrumBars[(127 - i) * 2]);
 
-                }
+                 }
+                 else
+                 {
+                     spectrum_ctn.Children.Add(spectrumBars[Math.Abs((127 - i) * 2 + 1)]);
 
-            }
+                 }
+
+             }*/
 
         }
 
@@ -556,9 +792,9 @@ namespace NHMPh_music_player
             multiplierLow = 0;
             multiplierHigh = 0;
             decreaseRateFactor = 0;
-            
+
             this.opacity_info = null;
-            this.postLyric=null;
+            this.postLyric = null;
             this.setting = null;
             this.songValue = null;
             this.space_info = null;
@@ -581,9 +817,9 @@ namespace NHMPh_music_player
             this.des = null;
             this.filter = null;
             this.height_info = null;
-            this.lable= null;
+            this.lable = null;
             this.loop_img = null;
-            this.lyric=null;
+            this.lyric = null;
 
 
         }

@@ -8,7 +8,7 @@
         Title="MainWindow" Height="153" Width="510" Background="Transparent" WindowStyle="None" AllowsTransparency="True" ResizeMode="NoResize" >
 
     <Grid>
-      
+        
         <Border CornerRadius="7" Background="Cyan">
             <StackPanel Background="#282b30" Margin="4,0,0,0">
                

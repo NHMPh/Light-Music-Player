@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-
+using System.IO.Ports;
 namespace NHMPh_music_player
 {
     /// <summary>
@@ -16,7 +16,7 @@ namespace NHMPh_music_player
         DynamicVisualUpdate dynamicVisualUpdate;
         Playlist playlist;
         _CustomPlaylist customPlaylist;
-
+        
         public MediaPlayer MediaPlayer { get { return mediaPlayer; } }
         public SongsManager SongsManager { get { return songManger; } }
         public UIControl UIControl { get { return uiControl; } }

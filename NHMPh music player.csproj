@@ -315,9 +315,11 @@
     <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\taglib-sharp-netstandard2.0.2.1.0\lib\netstandard2.0\taglib-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
     <Reference Include="YoutubeDLSharp, Version=1.1.0.246, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\YoutubeDLSharp.1.1.0\lib\net45\YoutubeDLSharp.dll</HintPath>
     </Reference>
@@ -333,6 +335,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="LedStripCom\Led.cs" />
+    <Compile Include="LedStripCom\LedSpectrum.cs" />
+    <Compile Include="LedStripCom\LedStrip.cs" />
     <Compile Include="MediaPlayer.cs" />
     <Compile Include="MusicSetting.cs" />
     <Compile Include="Playlist.cs" />
