@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO.Ports;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Accord.Math.Distances;
@@ -123,8 +126,10 @@ namespace NHMPh_music_player
                             {
 
                                 visualizer.UpdateGraph();
-                               // if (!MusicSetting.isFullScreen)
-                                    visualizer.DrawGraph();
+                                
+
+                                // if (!MusicSetting.isFullScreen)
+                                 visualizer.DrawGraph();
                             }
                             if (MusicSetting.isLyrics)
                             {
@@ -137,6 +142,7 @@ namespace NHMPh_music_player
                                 }
 
                             }
+
                         }
                     }
 

@@ -6,6 +6,7 @@ using PuppeteerSharp.PageCoverage;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -43,11 +44,13 @@ namespace NHMPh_music_player
         float decreaseRateFactor = 1.2f;
         int[] multipliers = new int[256];
 
+        System.IO.Ports.SerialPort serialPort;
 
         DispatcherTimer timer2 = new DispatcherTimer();
         DispatcherTimer timer3 = new DispatcherTimer();
         DispatcherTimer timer4 = new DispatcherTimer();
         DispatcherTimer timer5 = new DispatcherTimer();
+        DispatcherTimer timer6 = new DispatcherTimer();
 
         private DispatcherTimer timer;
         float[] decreaserate = new float[512];
@@ -75,6 +78,15 @@ namespace NHMPh_music_player
         {
 
             InitializeComponent();
+            serialPort = new SerialPort("COM4", 115200);
+            try
+            {
+                serialPort.Open();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
 
             ledSpectrum = new LedSpectrum(16, 20);
             this.KeyDown += FullscreenSpectrum_KeyDown;
@@ -110,13 +122,32 @@ namespace NHMPh_music_player
             timer3.Interval = TimeSpan.FromMilliseconds(100);
             timer3.Tick += UpadateSpectrumSnow;
 
-            timer4.Interval = TimeSpan.FromMilliseconds(2);
+            timer4.Interval = TimeSpan.FromMilliseconds(1);
             timer4.Tick += UpadateSpectrumBar;
 
-            timer5.Interval = TimeSpan.FromMilliseconds(3);
+            timer5.Interval = TimeSpan.FromMilliseconds(1);
             timer5.Tick += UpadateSpectrumUpBar;
 
+            timer6.Interval = TimeSpan.FromMilliseconds(20);
+            timer6.Tick += UpadateLed;
+
+
             this.MouseMove += FullscreenSpectrum_MouseMove;
+        }
+        private void UpadateLed(object sender, EventArgs e)
+        {
+
+            
+            String data = "";
+            for (int i = 0; i < 15; i++)
+            {
+
+                data += $"{buffer[i]} ";
+            }
+           
+            serialPort.Write(data);
+            ledSpectrum.DrawSpectrum(buffer, snow);
+
         }
         private void CreateSpectrumLed()
         {
@@ -167,8 +198,9 @@ namespace NHMPh_music_player
         {
             timer.Start();
             timer3.Start();
-            timer4.Start();
+           // timer4.Start();
             timer5.Start();
+            timer6.Start();
             if (currentUri != null)
             {
                 newImage = new BitmapImage(currentUri);
@@ -263,15 +295,15 @@ namespace NHMPh_music_player
         private void UpadateSpectrumSnow(object sender, EventArgs e)
         {
 
-
-            for (int i = 0; i < 16; i++)
+            string data = "";
+            for (int i = 0; i < 15; i++)
             {
                 if (snow[i] > 0 && snow[i] > buffer[i])
                 {
                     snow[i] -= 1;
                 }
             }
-            ledSpectrum.DrawSpectrum(buffer, snow);
+          //  ledSpectrum.DrawSpectrum(buffer, snow);
 
         }
         bool isIncrese = false;
@@ -279,54 +311,60 @@ namespace NHMPh_music_player
         {
 
             if (isIncrese) return;
-            for (int i = 0; i < 16; i++)
+           
+            for (int i = 0; i < 15; i++)
             {
                 if (buffer[i] > 0)
                 {
                     buffer[i] -= 1;
                 }
+          
             }
-            ledSpectrum.DrawSpectrum(buffer, snow);
+       
+         //   ledSpectrum.DrawSpectrum(buffer, snow);
 
         }
         private void UpadateSpectrumUpBar(object sender, EventArgs e)
         {
 
-            for(int i = 0; i < 15; i++)
-            {
-                double average = 0;
-                for (int j = 0; j < 6; j++)
-                {
+            /*           for(int i = 0; i < 15; i++)
+                       {
+                           double average = 0;
+                           for (int j = 0; j < 6; j++)
+                           {
 
-                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[i*6+j];
-                }
-                    average /= 6;
-                if (heightestBand[i] < average)
-                {
-                    heightestBand[i] = average;
-                }
-                if (average == 0) heightestBand[i] = 0;
-                var spectrumValue = (average / heightestBand[i]) * 19;
-                spectrumValue = (int)spectrumValue;
-                if (spectrumValue >= buffer[i])
-                {
+                               average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[i*6+j];
+                           }
+                               average /= 6;
+                           if (heightestBand[i] < average)
+                           {
+                               heightestBand[i] = average;
+                           }
+                           if (average == 0) heightestBand[i] = 0;
+                           var spectrumValue = (average / heightestBand[i]) * 19;
+                           if(spectrumValue < 0) spectrumValue = 1;
+                           spectrumValue = (int)spectrumValue;
+                           if (spectrumValue >= buffer[i]||true)
+                           {
 
-                    buffer[i] = (int)spectrumValue;
-                    if (snow[ i] < buffer[i])
-                    {
-                        snow[i] = buffer[i] - 1;
-                    }
+                               buffer[i] = (int)spectrumValue;
+                               if (snow[ i] < buffer[i])
+                               {
+                                   snow[i] = buffer[i] - 1;
+                               }
 
-                }
-            }
-         /*   isIncrese = true;
+                           }
+
+                       }*/
+
+            isIncrese = true;
             for (int i = 0; i < 8; i++)
             {
 
                 double average = 0;
                 for (int j = 0; j <= Math.Pow(2, i); j++)
                 {
-                    
+
                     average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
                     Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j)));
                 }
@@ -341,47 +379,56 @@ namespace NHMPh_music_player
                 spectrumValue = (int)spectrumValue;
                 if (spectrumValue > 18) spectrumValue--;
 
-                if (spectrumValue > buffer[2 * i])
+                if (spectrumValue > buffer[2 * i]||true)
                 {
 
                     buffer[2 * i] = (int)spectrumValue;
                     if (snow[2 * i] < buffer[2 * i])
                     {
-                        snow[2 * i] = buffer[2 * i]-1;
+                        snow[2 * i] = buffer[2 * i] - 1;
                     }
 
 
 
                 }
+                else
+                {
+                    buffer[2 * i] -= 1;
+                }
 
                 average = 0;
                 for (int j = 0; j < Math.Pow(2, i); j++)
                 {
-                    Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j))+1);
+                    Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j)) + 1);
                     average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
                 }
                 if (heightestBand[2 * i + 1] < average)
                 {
                     heightestBand[2 * i + 1] = average;
                 }
-                if (average == 0) heightestBand[2 * i+1] = 0;
+                if (average == 0) heightestBand[2 * i + 1] = 0;
                 spectrumValue = (average / heightestBand[2 * i + 1]) * 19;
                 if ((int)spectrumValue == 19) spectrumValue--;
-                if (spectrumValue > buffer[2 * i + 1])
+                if (spectrumValue > buffer[2 * i + 1]||true)
                 {
 
                     buffer[2 * i + 1] = (int)spectrumValue;
                     if (snow[2 * i + 1] < buffer[2 * i + 1])
                     {
-                        snow[2 * i + 1] = buffer[2 * i + 1]-1;
+                        snow[2 * i + 1] = buffer[2 * i + 1] - 1;
                     }
 
+                   
+                }
+                else
+                {
+                    buffer[2*i +1] -= 1;
 
                 }
             }
-                Console.WriteLine("----------------");
-            isIncrese = false;*/
-            ledSpectrum.DrawSpectrum(buffer, snow);
+            Console.WriteLine("----------------");
+            isIncrese = false;
+          //  ledSpectrum.DrawSpectrum(buffer, snow);
         }
 
         private void DrawGraph()
