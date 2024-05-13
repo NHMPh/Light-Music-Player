@@ -335,6 +335,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ArdunoSetting.xaml.cs">
+      <DependentUpon>ArdunoSetting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LedStripCom\Led.cs" />
     <Compile Include="LedStripCom\LedSpectrum.cs" />
     <Compile Include="LedStripCom\LedStrip.cs" />
@@ -350,6 +353,10 @@
     <Compile Include="VideoInfo.cs" />
     <Compile Include="DynamicVisualUpdate.cs" />
     <Compile Include="_CustomPlaylist.cs" />
+    <Page Include="ArdunoSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CustomPlaylist.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

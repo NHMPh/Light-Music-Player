@@ -1,0 +1,26 @@
+﻿<Window x:Class="NHMPh_music_player.ArdunoSetting"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NHMPh_music_player"
+        mc:Ignorable="d"
+        Title="ArdunoSetting"  Height="700" Width="850" Background="#282b30" WindowStyle="None" ResizeMode="NoResize" >
+    <Grid>
+        <Grid HorizontalAlignment="Left">
+            <Border Background="#FF32363C" Width="323" Height="103" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="10"  Margin="10">
+                <StackPanel Margin="5" Orientation="Vertical">
+                    <TextBlock Text="Select arduno connection" Foreground="White" FontSize="12" Margin="0,0,0,5"/>
+                    <Grid >
+                        <TextBlock  Width="100" HorizontalAlignment="Left" Text="COM4" Foreground="White" FontSize="12" Margin="5,0,0,0"></TextBlock>
+                        <ComboBox Width="100" Height="17" HorizontalAlignment="Left"  Background="White" BorderBrush="White" Opacity="0.1" />
+                    </Grid>
+              
+                </StackPanel>
+            </Border>
+
+
+        </Grid>
+
+    </Grid>
+</Window>
