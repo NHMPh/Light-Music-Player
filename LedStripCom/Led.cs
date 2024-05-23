@@ -20,8 +20,8 @@ namespace NHMPh_music_player.LedStripCom
 
         public SolidColorBrush Color { get { return color; } }
 
-        private Border ledDisplay = new Border();
-        public Border LedDisplay { get { return ledDisplay; } }
+        private Button ledDisplay = new Button();
+        public Button LedDisplay { get { return ledDisplay; } }
 
 
         public Led()
@@ -30,6 +30,15 @@ namespace NHMPh_music_player.LedStripCom
             ledDisplay.Height = 30;
             ledDisplay.Margin = new Thickness(20,5,20,0);
             ledDisplay.Background = color;
+            ledDisplay.BorderThickness = new Thickness(0);
+        }
+        public Led( int width, int height, int space)
+        {
+            ledDisplay.Width = width;
+            ledDisplay.Height = height;
+            ledDisplay.Margin = new Thickness(space, 5, space, 0);
+            ledDisplay.Background = color;
+            ledDisplay.BorderThickness = new Thickness(0);
         }
 
 

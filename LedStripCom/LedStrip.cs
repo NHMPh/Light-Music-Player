@@ -16,6 +16,8 @@ namespace NHMPh_music_player.LedStripCom
 
         private Led[] leds;
 
+        public Led[] Leds { get { return leds; } }
+
         private SolidColorBrush[] colorPallet = new SolidColorBrush[3];
         
 
@@ -41,6 +43,24 @@ namespace NHMPh_music_player.LedStripCom
             for (int i = 19; i >= 0; i--)
             {
                 leds[i] = new Led();
+                ledContainer.Children.Add(leds[i].LedDisplay);
+            }
+
+        }
+        public LedStrip(int numberOfLed,int width, int height, int space)
+        {
+            colorPallet[0] = new SolidColorBrush(Colors.Green);
+            colorPallet[1] = new SolidColorBrush(Colors.Yellow);
+            colorPallet[2] = new SolidColorBrush(Colors.Red);
+            this.numberOfLed = numberOfLed;
+            leds = new Led[numberOfLed];
+            ledContainer = new StackPanel()
+            {
+                Orientation = Orientation.Vertical,
+            };
+            for (int i = 19; i >= 0; i--)
+            {
+                leds[i] = new Led(width,height,space);
                 ledContainer.Children.Add(leds[i].LedDisplay);
             }
 

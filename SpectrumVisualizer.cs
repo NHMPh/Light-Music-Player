@@ -32,8 +32,8 @@ namespace NHMPh_music_player
         public double[] fbands = new double[2048];
         float[] decreaserate = new float[512];
         //15
-        public int[] buffer = new int[15];
-        double[] heightestBand = new double[15];
+        public int[] buffer = new int[16];
+        double[] heightestBand = new double[16];
         public SpectrumVisualizer(MainWindow mainWindow, MediaPlayer mediaPlayer)
         {
 
@@ -47,6 +47,10 @@ namespace NHMPh_music_player
             for (int i = 0; i < numBars; i++)
             {
                 multipliers[i] = i < thresholdIndex ? multiplierLow : multiplierHigh;
+            }
+            for (int i = 0;i < 16; i++)
+            {
+                heightestBand[i] = 50;
             }
         }
 
@@ -63,27 +67,37 @@ namespace NHMPh_music_player
         public void UpadateSpectrumBar15()
         {
 
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 8; i++)
             {
                 double average = 0;
-                for (int j = 0; j < 6; j++)
+                for (int j = 0; j <= Math.Pow(2, i); j++)
                 {
-
-                    average += fbands[i * 6 + j];
+                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
                 }
-                average /= 6;
-                if (heightestBand[i] < average)
+                average /= Math.Pow(2, i);
+                if (heightestBand[2 * i] < average)
                 {
-                    heightestBand[i] = average;
+                    heightestBand[2 * i] = average;
                 }
-                if (average == 0) heightestBand[i] = 0;
-                var spectrumValue = (average / heightestBand[i]) * 19;
-                spectrumValue = (int)spectrumValue;
-                if (spectrumValue >= buffer[i])
+                var spectrumValue = (average / heightestBand[2 * i]) * 19;
+                spectrumValue = Math.Ceiling(spectrumValue);
+                if (spectrumValue < 0) spectrumValue = 0;
+                if (spectrumValue > 19) spectrumValue = 19;
+                buffer[2 * i] = (int)spectrumValue;
+                average = 0;
+                for (int j = 0; j < Math.Pow(2, i); j++)
                 {
-                    buffer[i] = (int)spectrumValue;
-
+                    average += fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
                 }
+                if (heightestBand[2 * i + 1] < average)
+                {
+                    heightestBand[2 * i + 1] = average;
+                }
+                spectrumValue = (average / heightestBand[2 * i + 1]) * 19;
+                spectrumValue = Math.Ceiling(spectrumValue);
+                if (spectrumValue < 0) spectrumValue = 0;
+                if (spectrumValue > 19) spectrumValue = 19;
+                    buffer[2 * i + 1] = (int)spectrumValue;          
             }
         }
         public void UpdateGraph()
@@ -92,10 +106,13 @@ namespace NHMPh_music_player
             try
             {
 
-                //   waveSpectrum.Position = mediaPlayer.Wave.Position;
+                //waveSpectrum.Position = mediaPlayer.Wave.Position;
                 while (waveSpectrum.Position < mediaPlayer.Wave.Position)
+                {
                     fbands = GetFFTdata();
-                //  waveSpectrum.Position = mediaPlayer.Wave.Position;
+                }
+
+                // waveSpectrum.Position = mediaPlayer.Wave.Position;
                 // mediaPlayer.ResumeMusic();
             }
             catch { }
@@ -122,8 +139,8 @@ namespace NHMPh_music_player
             }
             niceProgressBars.RemoveAt(0);
             niceProgressBars.Add(existingProgressBars[0]);
-           // return existingProgressBars;
-             return niceProgressBars;
+            // return existingProgressBars;
+            return niceProgressBars;
         }
         private void SetSpectrumBar()
         {
@@ -131,7 +148,7 @@ namespace NHMPh_music_player
         }
         public void DrawGraph()
         {
-            for (int i = 0, j = 0; i < numBars; i++)
+            for (int i = 0, j = 0; i < numBars / 2; i++)
             {
                 int multiplier = multipliers[i];
 
@@ -155,7 +172,7 @@ namespace NHMPh_music_player
         private void CreateSpectrumBar()
         {
             mainWindow.spectrum_ctn.Children.Clear();
-            for (int i = 0; i < numBars/2; i++)
+            for (int i = 0; i < numBars / 2; i++)
             {
 
                 ProgressBar progressBar = new ProgressBar()
@@ -172,7 +189,7 @@ namespace NHMPh_music_player
 
 
                 };
-              
+
                 mainWindow.spectrum_ctn.Children.Add(progressBar);
 
             }
@@ -196,7 +213,17 @@ namespace NHMPh_music_player
             for (int i = 0; i < fftLength; i++)
             {
                 magnitude[i] = Math.Sqrt(Math.Pow(fftComplex[i].X, 2) + Math.Pow(fftComplex[i].Y, 2));
-                magnitude[i] = 20 * Math.Log10((double)magnitude[i]);
+                if (magnitude[i] >= 1)
+                {
+                    magnitude[i] = 20 * Math.Log10((double)magnitude[i]);
+                }
+                else
+                {
+                    magnitude[i] = 0;
+                }
+
+
+
             }
             return magnitude;
 

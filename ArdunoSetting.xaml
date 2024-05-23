@@ -7,20 +7,98 @@
         mc:Ignorable="d"
         Title="ArdunoSetting"  Height="700" Width="850" Background="#282b30" WindowStyle="None" ResizeMode="NoResize" >
     <Grid>
-        <Grid HorizontalAlignment="Left">
-            <Border Background="#FF32363C" Width="323" Height="103" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="10"  Margin="10">
-                <StackPanel Margin="5" Orientation="Vertical">
-                    <TextBlock Text="Select arduno connection" Foreground="White" FontSize="12" Margin="0,0,0,5"/>
-                    <Grid >
-                        <TextBlock  Width="100" HorizontalAlignment="Left" Text="COM4" Foreground="White" FontSize="12" Margin="5,0,0,0"></TextBlock>
-                        <ComboBox Width="100" Height="17" HorizontalAlignment="Left"  Background="White" BorderBrush="White" Opacity="0.1" />
-                    </Grid>
-              
-                </StackPanel>
-            </Border>
+        <StackPanel Orientation="Vertical" Margin="20">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left" >
+                <Grid HorizontalAlignment="Left" Width="250" Height="80">
+                    <Border Background="Cyan" Width="250" Height="90" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="2"  Margin="10,10,0,0"/>
+                    <Border Background="#FF32363C" Width="250" Height="80" HorizontalAlignment="Left" VerticalAlignment="Top"   Margin="12,10,0,0">
+                        <StackPanel Margin="5" Orientation="Vertical">
+                            <TextBlock Text="Select arduno connection" Foreground="White" FontSize="20" Margin="0,0,0,10"/>
+                            <Grid >
+                                <TextBlock  Width="100" HorizontalAlignment="Left" Text="COM4" Foreground="White" FontSize="14" Margin="5,0,0,0"></TextBlock>
+                                <ComboBox Width="200" Height="20" HorizontalAlignment="Left"  Background="White" BorderBrush="White" Opacity="0.1" />
+                            </Grid>
+
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Grid HorizontalAlignment="Left" Width="250" Height="80">
+                    <Border Background="Cyan" Width="250" Height="70" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="2"  Margin="10,10,0,0"/>
+                    <Border Background="#FF32363C" Width="238" Height="70" HorizontalAlignment="Left" VerticalAlignment="Top"   Margin="12,10,0,0">
+
+                        <StackPanel Margin="5" Orientation="Vertical">
+                            <TextBlock Text="Peak delay (ms)" Foreground="White" FontSize="20" Margin="0,0,0,10"/>
+                            <Grid >
+                                <StackPanel Orientation="Horizontal">
+                                    <Slider Maximum="3000" Minimum="0" Width="180" HorizontalAlignment="Left" SmallChange="2"/>
+                                    <TextBox Width="46" Background="#05FFFFFF" Foreground="White"></TextBox>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Grid HorizontalAlignment="Left" Width="250" Height="80">
+                    <Border Background="Cyan" Width="250" Height="70" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="2"  Margin="10,10,0,0"/>
+                    <Border Background="#FF32363C" Width="238" Height="70" HorizontalAlignment="Left" VerticalAlignment="Top"   Margin="12,10,0,0">
+
+                        <StackPanel Margin="5" Orientation="Vertical">
+                            <TextBlock Text="Drop delay (ms)" Foreground="White" FontSize="20" Margin="0,0,0,10"/>
+                            <Grid >
+                                <StackPanel Orientation="Horizontal">
+                                    <Slider Maximum="3000" Minimum="0" Width="180" HorizontalAlignment="Left" SmallChange="2"/>
+                                    <TextBox Width="46" Background="#05FFFFFF" Foreground="White"></TextBox>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Grid HorizontalAlignment="Left" Width="150" Height="600">
+                    <Border Background="Cyan" Width="150" Height="600" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="2"  Margin="10,10,0,0"/>
+                    <Border Background="#FF32363C" Width="150" Height="600" HorizontalAlignment="Left" VerticalAlignment="Top"   Margin="12,10,0,0">
+                        <StackPanel Orientation="Vertical" Margin="10" >
+                            <TextBlock Text="Color Setting" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,5" />
+                            <TextBlock Text="Peak" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,5" HorizontalAlignment="Center" />
+
+                            <Grid x:Name="Spectrum_ctn" Margin="0,0,0,0" HorizontalAlignment="Center">
+
+                            </Grid>
+
+                        </StackPanel>
+
+                    </Border>
 
 
-        </Grid>
+
+                </Grid>
+                <Grid HorizontalAlignment="Left" Width="250" Height="140" VerticalAlignment="Top">
+                    <Border Background="Cyan" Width="250" Height="130" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="2"  Margin="10,10,0,0"/>
+                    <Border Background="#FF32363C" Width="238" Height="130" HorizontalAlignment="Left" VerticalAlignment="Top"   Margin="12,10,0,0">
+
+                        <StackPanel Margin="5" Orientation="Vertical">
+                            <TextBlock Text="Debug color setting" Foreground="White" FontSize="20" Margin="0,0,0,10"/>
+                            <Grid >
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                                    <TextBox x:Name="redTxt" Width="100" Background="#05FFFFFF" BorderBrush="Red" Foreground="White" Margin="0,0,0,3"></TextBox>
+                                    <TextBox x:Name="greenTxt" Width="100" Background="#05FFFFFF" BorderBrush="Green" Foreground="White" Margin="0,0,0,3"></TextBox>
+                                    <TextBox x:Name="blueTxt" Width="100" Background="#05FFFFFF" BorderBrush="Blue" Foreground="White" Margin="0,0,0,3"></TextBox>
+                                  
+                                </StackPanel>
+                                <Button Content="Set color"  Background="#FF32363C" BorderBrush="Cyan" Margin="50,0,0,0"  Foreground="White" Width="61" Height="20" Click="SetColorData">
+
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Button Content="Send data"  Background="#FF32363C" BorderBrush="Cyan" Margin="10" Foreground="White" Width="181" Height="65" Click="SendColorData">
+
+                </Button>
+            </StackPanel>
+
+        </StackPanel>
+
 
     </Grid>
 </Window>

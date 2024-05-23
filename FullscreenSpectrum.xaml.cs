@@ -72,13 +72,13 @@ namespace NHMPh_music_player
         int[] multipliers16 = new int[16];
         int[] buffer = new int[16];
         int[] snow = new int[16];
-        LedSpectrum ledSpectrum;
+      //  LedSpectrum ledSpectrum;
 
         public FullscreenSpectrum(MainWindow mainWindow)
         {
 
             InitializeComponent();
-            serialPort = new SerialPort("COM4", 115200);
+            serialPort = new SerialPort("COM3", 115200);
             try
             {
                 serialPort.Open();
@@ -88,7 +88,7 @@ namespace NHMPh_music_player
                 MessageBox.Show(ex.Message);
             }
 
-            ledSpectrum = new LedSpectrum(16, 20);
+          //  ledSpectrum = new LedSpectrum(16, 20);
             this.KeyDown += FullscreenSpectrum_KeyDown;
             // Closed += FullscreenSpectrum_Closed;
             this.mainWindow = mainWindow;
@@ -112,8 +112,10 @@ namespace NHMPh_music_player
             {
 
                 multipliers16[i] = i < thresholdIndex16 ? multiplierLow16 : multiplierHigh16;
+                heightestBand[i] = 50;
 
             }
+
             Reopen();
 
             timer2.Interval = TimeSpan.FromSeconds(5);
@@ -141,17 +143,19 @@ namespace NHMPh_music_player
             String data = "";
             for (int i = 0; i < 15; i++)
             {
-
+     
                 data += $"{buffer[i]} ";
             }
-           
+            
+
+          
             serialPort.Write(data);
-            ledSpectrum.DrawSpectrum(buffer, snow);
+            //ledSpectrum.DrawSpectrum(buffer, snow);
 
         }
         private void CreateSpectrumLed()
         {
-            spectrum_ctn.Children.Add(ledSpectrum.LedStripContainer);
+           // spectrum_ctn.Children.Add(ledSpectrum.LedStripContainer);
         }
         private void FullscreenSpectrum_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
@@ -366,19 +370,20 @@ namespace NHMPh_music_player
                 {
 
                     average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
-                    Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j)));
+                    //Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j)));
                 }
-                Console.WriteLine("----------------");
+
                 average /= Math.Pow(2, i);
                 if (heightestBand[2 * i] < average)
                 {
                     heightestBand[2 * i] = average;
                 }
-                if (average == 0) heightestBand[2 * i] = 0;
+               // if (average == 0) heightestBand[2 * i] = 50;
                 var spectrumValue = (average / heightestBand[2 * i]) * 19;
-                spectrumValue = (int)spectrumValue;
-                if (spectrumValue > 18) spectrumValue--;
-
+                spectrumValue =Math.Ceiling (spectrumValue);
+                if(spectrumValue<0) spectrumValue = 0;
+                if (spectrumValue > 19) spectrumValue = 19;
+                Console.WriteLine(spectrumValue);
                 if (spectrumValue > buffer[2 * i]||true)
                 {
 
@@ -399,16 +404,19 @@ namespace NHMPh_music_player
                 average = 0;
                 for (int j = 0; j < Math.Pow(2, i); j++)
                 {
-                    Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j)) + 1);
+                    //Console.WriteLine((int)(2 * (Math.Pow(2, i) - 1 + j)) + 1);
                     average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
                 }
                 if (heightestBand[2 * i + 1] < average)
                 {
                     heightestBand[2 * i + 1] = average;
                 }
-                if (average == 0) heightestBand[2 * i + 1] = 0;
+             //   if (average == 0) heightestBand[2 * i + 1] = 50;
                 spectrumValue = (average / heightestBand[2 * i + 1]) * 19;
-                if ((int)spectrumValue == 19) spectrumValue--;
+                spectrumValue = Math.Ceiling(spectrumValue);
+                if (spectrumValue < 0) spectrumValue = 0;
+                if (spectrumValue > 19) spectrumValue = 19;
+                Console.WriteLine(spectrumValue);
                 if (spectrumValue > buffer[2 * i + 1]||true)
                 {
 
@@ -426,6 +434,7 @@ namespace NHMPh_music_player
 
                 }
             }
+            
             Console.WriteLine("----------------");
             isIncrese = false;
           //  ledSpectrum.DrawSpectrum(buffer, snow);

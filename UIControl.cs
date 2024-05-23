@@ -20,6 +20,7 @@ namespace NHMPh_music_player
         MediaPlayer mediaPlayer;
         SongsManager songsManager;
         FullscreenSpectrum fullscreenSpectrum =null;
+        ArdunoSetting ardunoSetting = null;
         public UIControl(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager)
         {
             this.mainWindow = mainWindow;
@@ -30,6 +31,9 @@ namespace NHMPh_music_player
 
             mainWindow.autoplay_btn.Click += AutoplayBtn;
             mainWindow.close_btn.Click += CloseBtn;
+
+            mainWindow.arduno_btn.Click += ArdunoBtn;
+
             mainWindow.lyricsSync_btn.Click += SyncLyricsBtn;
             mainWindow.lyrics_btn.Click += LyricBtn;
             mainWindow.minimize_btn.Click += MinimizeBtn;
@@ -53,6 +57,18 @@ namespace NHMPh_music_player
 
             mainWindow.Topmost = true;
             mainWindow.Icon = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\Images\\icon.ico"));
+        }
+
+        private void ArdunoBtn(object sender, RoutedEventArgs e)
+        {
+
+            if (ardunoSetting == null)
+            {
+               ardunoSetting = new ArdunoSetting(mainWindow.DynamicVisualUpdate.Visualizer);
+            }
+            ardunoSetting.Show();
+
+
         }
 
         private void MainWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -126,7 +126,7 @@ namespace NHMPh_music_player
                             {
 
                                 visualizer.UpdateGraph();
-                                
+                                visualizer.UpadateSpectrumBar15();
 
                                 // if (!MusicSetting.isFullScreen)
                                  visualizer.DrawGraph();

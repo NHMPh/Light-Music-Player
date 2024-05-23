@@ -15,7 +15,8 @@
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="minimize_btn" Height="13" Width="10" Background="Transparent" Foreground="White" FontSize="12" BorderThickness="0" HorizontalAlignment="Right"  Padding="0,-5,0,0">_</Button>
-                    <Button x:Name="close_btn" Height="13" Width="10" Background="Transparent" Foreground="White" FontSize="12" BorderThickness="0" HorizontalAlignment="Right" Padding="0,-5,0,0">x</Button>
+                        <Button x:Name="arduno_btn" Height="13" Width="10" Background="Transparent" Foreground="White" FontSize="12" BorderThickness="0" HorizontalAlignment="Right" Padding="0,0,0,0">*</Button>
+                        <Button x:Name="close_btn" Height="13" Width="10" Background="Transparent" Foreground="White" FontSize="12" BorderThickness="0" HorizontalAlignment="Right" Padding="0,-5,0,0">x</Button>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal"   Height="132" Margin="10,-3,0,0">
 

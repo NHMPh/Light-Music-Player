@@ -36,6 +36,20 @@ namespace NHMPh_music_player.LedStripCom
                 ledStripContainer.Children.Add(ledStrips[i].LedContainer);
             }
         }
+        public LedSpectrum(int numberOfBands, int numberOfLedPreBand,int width, int height, int space)
+        {
+            this.numberOfBands = numberOfBands;
+            ledStrips = new LedStrip[numberOfBands];
+            ledStripContainer = new StackPanel()
+            {
+                Orientation = Orientation.Horizontal,
+            };
+            for (int i = 0; i < ledStrips.Length; i++)
+            {
+                ledStrips[i] = new LedStrip(numberOfLedPreBand,width,height,space);
+                ledStripContainer.Children.Add(ledStrips[i].LedContainer);
+            }
+        }
 
         private SolidColorBrush color = new SolidColorBrush(Colors.DarkCyan);
         private SolidColorBrush color1 = new SolidColorBrush(Colors.Red);
@@ -63,6 +77,18 @@ namespace NHMPh_music_player.LedStripCom
                 }
                 ledStrips[i].FillColor(data[i], color);
                 ledStrips[i].SetIndividualColor(snow[i], scolor);
+            }
+        }
+         public void ChangeSpectrumColor(int id,int red, int green, int blue)
+        {
+            Color color = Color.FromRgb((byte)red, (byte)green, (byte)blue);
+            SolidColorBrush solidColorBrush = new SolidColorBrush(color);
+
+            for (int i = 0; i < ledStrips.Length; i++)
+            {
+               
+                ledStrips[i].FillColor(20, solidColorBrush);
+              
             }
         }
 
