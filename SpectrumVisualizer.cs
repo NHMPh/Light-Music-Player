@@ -50,7 +50,7 @@ namespace NHMPh_music_player
             }
             for (int i = 0;i < 16; i++)
             {
-                heightestBand[i] = 50;
+                heightestBand[i] = 1;
             }
         }
 

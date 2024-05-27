@@ -44,7 +44,7 @@ namespace NHMPh_music_player
         float decreaseRateFactor = 1.2f;
         int[] multipliers = new int[256];
 
-        System.IO.Ports.SerialPort serialPort;
+       // System.IO.Ports.SerialPort serialPort;
 
         DispatcherTimer timer2 = new DispatcherTimer();
         DispatcherTimer timer3 = new DispatcherTimer();
@@ -78,15 +78,15 @@ namespace NHMPh_music_player
         {
 
             InitializeComponent();
-            serialPort = new SerialPort("COM3", 115200);
-            try
+         //   serialPort = new SerialPort("COM3", 115200);
+            /*try
             {
                 serialPort.Open();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-            }
+            }*/
 
           //  ledSpectrum = new LedSpectrum(16, 20);
             this.KeyDown += FullscreenSpectrum_KeyDown;
@@ -100,19 +100,20 @@ namespace NHMPh_music_player
                 await UpadateSpectrum();
             };
             this.mainWindow.MediaPlayer.OnSongChange += MainWindow_OnSongChange;
-            //  CreateSpectrumBar();
-            CreateSpectrumLed();
+            CreateSpectrumBar();
+           
             for (int i = 0; i < 256; i++)
             {
 
                 multipliers[i] = i < thresholdIndex ? multiplierLow : multiplierHigh;
                 multipliers[i] = i < 10 ? 600 : multipliers[i];
+                multipliers[i] = 1;
             }
             for (int i = 0; i < 16; i++)
             {
 
                 multipliers16[i] = i < thresholdIndex16 ? multiplierLow16 : multiplierHigh16;
-                heightestBand[i] = 50;
+                heightestBand[i] = 1;
 
             }
 
@@ -130,8 +131,8 @@ namespace NHMPh_music_player
             timer5.Interval = TimeSpan.FromMilliseconds(1);
             timer5.Tick += UpadateSpectrumUpBar;
 
-            timer6.Interval = TimeSpan.FromMilliseconds(20);
-            timer6.Tick += UpadateLed;
+           // timer6.Interval = TimeSpan.FromMilliseconds(20);
+           // timer6.Tick += UpadateLed;
 
 
             this.MouseMove += FullscreenSpectrum_MouseMove;
@@ -149,7 +150,7 @@ namespace NHMPh_music_player
             
 
           
-            serialPort.Write(data);
+          //  serialPort.Write(data);
             //ledSpectrum.DrawSpectrum(buffer, snow);
 
         }
@@ -201,10 +202,10 @@ namespace NHMPh_music_player
         public void Reopen()
         {
             timer.Start();
-            timer3.Start();
+           // timer3.Start();
            // timer4.Start();
-            timer5.Start();
-            timer6.Start();
+           // timer5.Start();
+           // timer6.Start();
             if (currentUri != null)
             {
                 newImage = new BitmapImage(currentUri);
@@ -212,7 +213,7 @@ namespace NHMPh_music_player
                 try { newImage.StreamSource.Dispose(); } catch { }
             }
             this.MouseMove += FullscreenSpectrum_MouseMove;
-         //   this.Topmost = true;
+            this.Topmost = true;
             this.mainWindow.WindowState = WindowState.Minimized;
         }
         public void UpdateVisual()
@@ -288,6 +289,7 @@ namespace NHMPh_music_player
                             }
                         }
                     }
+                    DrawGraph();
                   //  DrawGraphLed16();
                     
 
@@ -451,7 +453,7 @@ namespace NHMPh_music_player
 
                     spectrumBars[i].Value = ((mainWindow.DynamicVisualUpdate.Visualizer.fbands[i + j] + mainWindow.DynamicVisualUpdate.Visualizer.fbands[i + j + 1]) / 2) * multipliers[i];
                     j++;
-                    decreaserate[i] = 10f;
+                    decreaserate[i] = 1;
                 }
                 else
                 {
@@ -621,7 +623,7 @@ namespace NHMPh_music_player
         {
             try
             {
-                timer3.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
+              //  timer3.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
                     bar.Width = (int)(sender as Slider).Value;
@@ -640,7 +642,7 @@ namespace NHMPh_music_player
         {
             try
             {
-                timer4.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
+              //  timer4.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
 
@@ -661,7 +663,7 @@ namespace NHMPh_music_player
         {
             try
             {
-                timer5.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
+              //  timer5.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
 
@@ -679,7 +681,7 @@ namespace NHMPh_music_player
         }
         private void CreateSpectrumBar()
         {
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < 256; i++)
             {
 
                 ProgressBar progressBar = new ProgressBar()
@@ -687,10 +689,10 @@ namespace NHMPh_music_player
                     BorderThickness = new Thickness(0),
                     Background = new SolidColorBrush(Colors.Transparent),
                     Foreground = new SolidColorBrush(Colors.Cyan),
-                    Width = 1,
+                    Width = 2,
                     Margin = new Thickness(0, 0, 6, 0),
                     Height = 180,
-                    Maximum = 1000,
+                    Maximum = 50,
                     Orientation = Orientation.Vertical,
                     Value = 0,
 
@@ -698,24 +700,24 @@ namespace NHMPh_music_player
 
 
                 spectrumBars.Add(progressBar);
-                spectrum_ctn.Children.Add(spectrumBars[i]);
+
             }
 
 
-            /* for (int i = 0; i < 256; i++)
-             {
-                 if (i < 128)
-                 {
-                     spectrum_ctn.Children.Add(spectrumBars[(127 - i) * 2]);
+            for (int i = 0; i < 256; i++)
+            {
+                if (i < 128)
+                {
+                    spectrum_ctn.Children.Add(spectrumBars[(127 - i) * 2]);
 
-                 }
-                 else
-                 {
-                     spectrum_ctn.Children.Add(spectrumBars[Math.Abs((127 - i) * 2 + 1)]);
+                }
+                else
+                {
+                    spectrum_ctn.Children.Add(spectrumBars[Math.Abs((127 - i) * 2 + 1)]);
 
-                 }
+                }
 
-             }*/
+            }
 
         }
 
