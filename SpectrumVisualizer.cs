@@ -148,7 +148,7 @@ namespace NHMPh_music_player
         }
         public void DrawGraph()
         {
-            for (int i = 0, j = 0; i < numBars / 2; i++)
+            for (int i = 0, j = 0; i < numBars / 4 -2; i++)
             {
                 int multiplier = multipliers[i];
 
@@ -172,7 +172,7 @@ namespace NHMPh_music_player
         private void CreateSpectrumBar()
         {
             mainWindow.spectrum_ctn.Children.Clear();
-            for (int i = 0; i < numBars / 2; i++)
+            for (int i = 0; i < numBars / 4 -2; i++)
             {
 
                 ProgressBar progressBar = new ProgressBar()
