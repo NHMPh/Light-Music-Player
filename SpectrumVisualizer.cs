@@ -21,7 +21,7 @@ namespace NHMPh_music_player
         const int thresholdIndex = 50;
         const int multiplierLow = 1;//2000;
         const int multiplierHigh = 1;//5000;
-        const float decreaseRateFactor = 1.2f;
+        const float decreaseRateFactor = 1.0f;
         int[] multipliers = new int[numBars];
 
         MediaFoundationReader _mfSpectrum;
@@ -48,7 +48,7 @@ namespace NHMPh_music_player
             {
                 multipliers[i] = i < thresholdIndex ? multiplierLow : multiplierHigh;
             }
-            for (int i = 0;i < 16; i++)
+            for (int i = 0; i < 16; i++)
             {
                 heightestBand[i] = 1;
             }
@@ -72,7 +72,7 @@ namespace NHMPh_music_player
                 double average = 0;
                 for (int j = 0; j <= Math.Pow(2, i); j++)
                 {
-                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
+                    average += 60 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
                 }
                 average /= Math.Pow(2, i);
                 if (heightestBand[2 * i] < average)
@@ -87,7 +87,7 @@ namespace NHMPh_music_player
                 average = 0;
                 for (int j = 0; j < Math.Pow(2, i); j++)
                 {
-                    average += fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
+                    average += 60+fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
                 }
                 if (heightestBand[2 * i + 1] < average)
                 {
@@ -97,7 +97,7 @@ namespace NHMPh_music_player
                 spectrumValue = Math.Ceiling(spectrumValue);
                 if (spectrumValue < 0) spectrumValue = 0;
                 if (spectrumValue > 19) spectrumValue = 19;
-                    buffer[2 * i + 1] = (int)spectrumValue;          
+                buffer[2 * i + 1] = (int)spectrumValue;
             }
         }
         public void UpdateGraph()
@@ -148,16 +148,18 @@ namespace NHMPh_music_player
         }
         public void DrawGraph()
         {
-            for (int i = 0, j = 0; i < numBars / 4 -2; i++)
+            int positiveThreshhold = 60;
+            for (int i = 0, j = 0; i < numBars / 4 - 2; i++)
             {
                 int multiplier = multipliers[i];
 
-                if (fbands[i] * multiplier > spectrumBars[i].Value)
+                if ((fbands[i]+ positiveThreshhold) > spectrumBars[i].Value )
                 {
-                    int nextIndex = i + j;
-                    spectrumBars[i].Value = ((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier; // (fbands[i]) * multiplier; //((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier;
+                     int nextIndex = i + j;
+                   // spectrumBars[i].Value = ((fbands[i] + positiveThreshhold)*1.5); // (fbands[i]) * multiplier; //((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier;
+                    spectrumBars[i].Value = ((fbands[nextIndex] + positiveThreshhold + fbands[nextIndex + 1] + positiveThreshhold) / 2)*1.5;
                     j++;
-                    decreaserate[i] = 1f;
+                    decreaserate[i] =2f;
                 }
                 else
                 {
@@ -172,7 +174,7 @@ namespace NHMPh_music_player
         private void CreateSpectrumBar()
         {
             mainWindow.spectrum_ctn.Children.Clear();
-            for (int i = 0; i < numBars / 4 -2; i++)
+            for (int i = 0; i < numBars / 4 - 2; i++)
             {
 
                 ProgressBar progressBar = new ProgressBar()
@@ -183,7 +185,7 @@ namespace NHMPh_music_player
                     Width = 2,
                     Margin = new Thickness(0, 0, 1, 0),
                     Height = 60,
-                    Maximum = 50,
+                    Maximum = 60,
                     Orientation = Orientation.Vertical,
                     Value = 0,
 
@@ -200,37 +202,45 @@ namespace NHMPh_music_player
         private double[] FFT(double[] data)
         {
             int fftLength = data.Length;
-            Complex[] fftComplex = new Complex[fftLength];
+            System.Numerics.Complex[] fftComplex = new System.Numerics.Complex[fftLength];
             for (int i = 0; i < fftLength; i++)
             {
-                fftComplex[i] = new Complex();
-                fftComplex[i].X = (float)data[i];
+                fftComplex[i] = new System.Numerics.Complex(data[i], 0.0);
             }
-            FastFourierTransform.FFT(true, (int)Math.Log(fftLength, 2.0), fftComplex);
+            Accord.Math.FourierTransform.FFT(fftComplex, Accord.Math.FourierTransform.Direction.Forward);
+            //    FastFourierTransform.FFT(true, (int)Math.Log(fftLength, 2.0), fftComplex);
 
             // Calculate the magnitude spectrum and only return the first half
             double[] magnitude = new double[fftLength];
             for (int i = 0; i < fftLength; i++)
             {
-                magnitude[i] = Math.Sqrt(Math.Pow(fftComplex[i].X, 2) + Math.Pow(fftComplex[i].Y, 2));
-                if (magnitude[i] >= 1)
+                magnitude[i] = fftComplex[i].Magnitude;//Math.Sqrt(Math.Pow(fftComplex[i].X, 2) + Math.Pow(fftComplex[i].Y, 2));
+                if (magnitude[i] != 0)
                 {
                     magnitude[i] = 20 * Math.Log10((double)magnitude[i]);
+                    //   if (magnitude[i] < -60)
+                    //    magnitude[i] = -60;
+
                 }
                 else
                 {
-                    magnitude[i] = 0;
+                    magnitude[i] = -60;
                 }
+                //Console.Write();
+
+
 
 
 
             }
+
             return magnitude;
 
         }
         private double[] GetFFTdata()
         {
-            int desireSamples = 4096;
+
+            int desireSamples =1024;
             double[] doublesData = new double[desireSamples];
             byte[] buffer = new byte[desireSamples * 4];
             int bytesRead;
@@ -238,7 +248,8 @@ namespace NHMPh_music_player
             bytesRead = waveSpectrum.Read(buffer, 0, buffer.Length);
             for (int i = 0; i < bytesRead / 4; i++)
             {
-                doublesData[i] = BitConverter.ToSingle(buffer, i * 4) * 1000;
+                doublesData[i] = BitConverter.ToSingle(buffer, i * 4);
+
             }
 
             // If bytesRead is less than desireSamples * 4, fill the rest of doublesData with zeros

@@ -41,7 +41,7 @@ namespace NHMPh_music_player
         int thresholdIndex = 50;
         int multiplierLow = 2000;
         int multiplierHigh = 1000000;
-        float decreaseRateFactor = 1.2f;
+        float decreaseRateFactor = 1.0f;
         int[] multipliers = new int[256];
 
        // System.IO.Ports.SerialPort serialPort;
@@ -447,13 +447,13 @@ namespace NHMPh_music_player
             for (int i = 0, j = 0; i < 256; i++)
             {
 
-                if (mainWindow.DynamicVisualUpdate.Visualizer.fbands[i] * multipliers[i] > spectrumBars[i].Value)
+                if (mainWindow.DynamicVisualUpdate.Visualizer.fbands[i]+60> spectrumBars[i].Value)
                 {
 
 
-                    spectrumBars[i].Value = ((mainWindow.DynamicVisualUpdate.Visualizer.fbands[i + j] + mainWindow.DynamicVisualUpdate.Visualizer.fbands[i + j + 1]) / 2) * multipliers[i];
+                    spectrumBars[i].Value = (mainWindow.DynamicVisualUpdate.Visualizer.fbands[i] +60 ) * 1.5f;
                     j++;
-                    decreaserate[i] = 1;
+                    decreaserate[i] = 1.5f;
                 }
                 else
                 {
@@ -692,7 +692,7 @@ namespace NHMPh_music_player
                     Width = 2,
                     Margin = new Thickness(0, 0, 6, 0),
                     Height = 180,
-                    Maximum = 50,
+                    Maximum = 60,
                     Orientation = Orientation.Vertical,
                     Value = 0,
 

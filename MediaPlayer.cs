@@ -43,6 +43,7 @@ namespace NHMPh_music_player
             Console.WriteLine(streamUrl.Data[0]);
             //set _mf for playing audio
             _mf = new MediaFoundationReader(streamUrl.Data[0]);
+           // _mf = new MediaFoundationReader("D:\\testau.mp3");
             wave = new WaveChannel32(_mf);
         }
         public MediaPlayer(VideoInfo videoInfo)
