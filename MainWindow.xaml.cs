@@ -18,8 +18,9 @@ namespace NHMPh_music_player
         DynamicVisualUpdate dynamicVisualUpdate;
         Playlist playlist;
         _CustomPlaylist customPlaylist;
-     
-     
+        SpectrumVisualizer visualizer;
+
+
         public MediaPlayer MediaPlayer { get { return mediaPlayer; } }
         public SongsManager SongsManager { get { return songManger; } }
         public UIControl UIControl { get { return uiControl; } }
@@ -27,12 +28,15 @@ namespace NHMPh_music_player
         public MainWindow()
         {
             InitializeComponent();
-            mediaPlayer = new MediaPlayer(this);
+            
+            visualizer = new SpectrumVisualizer(this);
+            mediaPlayer = new MediaPlayer(this,visualizer);
             songManger = new SongsManager();
             uiControl = new UIControl(this, mediaPlayer, songManger);
-            dynamicVisualUpdate = new DynamicVisualUpdate(this, mediaPlayer, songManger);
+            dynamicVisualUpdate = new DynamicVisualUpdate(this, mediaPlayer, songManger,visualizer);
             playlist = new Playlist(this, songManger);
             customPlaylist = new _CustomPlaylist(this, songManger, mediaPlayer);
+
         
 
         }

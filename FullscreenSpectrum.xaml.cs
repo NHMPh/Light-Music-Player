@@ -41,7 +41,7 @@ namespace NHMPh_music_player
         int thresholdIndex = 50;
         int multiplierLow = 2000;
         int multiplierHigh = 1000000;
-        float decreaseRateFactor = 1.0f;
+        float decreaseRateFactor = 1.2f;
         int[] multipliers = new int[256];
 
        // System.IO.Ports.SerialPort serialPort;
@@ -444,88 +444,34 @@ namespace NHMPh_music_player
 
         private void DrawGraph()
         {
+
+            int positiveThreshhold = 70;
             for (int i = 0, j = 0; i < 256; i++)
             {
+                float multiplier = multipliers[i];
+                var fbands = mainWindow.DynamicVisualUpdate.Visualizer.fbands;
 
-                if (mainWindow.DynamicVisualUpdate.Visualizer.fbands[i]+60> spectrumBars[i].Value)
+                if ((fbands[i] + positiveThreshhold) / positiveThreshhold > spectrumBars[i].Value)
                 {
-
-
-                    spectrumBars[i].Value = (mainWindow.DynamicVisualUpdate.Visualizer.fbands[i] +60 ) * 1.5f;
+                    int nextIndex = i + j;
+                     spectrumBars[i].Value = (((fbands[i] + positiveThreshhold))/positiveThreshhold)*1.5f; // (fbands[i]) * multiplier; //((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier;
+                    //spectrumBars[i].Value = (((fbands[nextIndex] + positiveThreshhold + fbands[nextIndex + 1] + positiveThreshhold) / 2) / 60) * 1.5f * multiplier;
                     j++;
-                    decreaserate[i] = 1.5f;
+                    decreaserate[i] = 0.005f;
                 }
                 else
                 {
-                    spectrumBars[i].Value -= 1 * decreaserate[i];
-                    decreaserate[i] *= decreaseRateFactor;
+                    if (spectrumBars[i].Value > 0)
+                    {
+                        spectrumBars[i].Value -= 1 * decreaserate[i];
+                        decreaserate[i] *= decreaseRateFactor;
+                    }
                 }
             }
-        }
-        private void DrawGraphLed16()
-        {
-
-
-           
+          
         }
 
-        private void DrawGraph16()
-        {
-
-
-            for (int i = 0; i < 8; i++)
-            {
-                double average = 0;
-                for (int j = 0; j < Math.Pow(2, i); j++)
-                {
-                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
-                }
-                average /= Math.Pow(2, i);
-                if (heightestBand[2 * i] < average)
-                {
-                    heightestBand[2 * i] = average;
-                }
-                var spectrumValue = average / heightestBand[2 * i] * 1000;
-                if (spectrumValue >= spectrumBars[2 * i].Value)
-                {
-
-                    spectrumBars[2 * i].Value = spectrumValue;
-                    decreaserate[2 * i] = 10f;
-
-                }
-                else
-                {
-
-                    spectrumBars[2 * i].Value -= 1 * decreaserate[2 * i];
-
-                    decreaserate[2 * i] *= decreaseRateFactor16;
-
-                }
-                average = 0;
-                for (int j = 0; j < Math.Pow(2, i); j++)
-                {
-                    average += mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j + (Math.Pow(2, i))))];
-                }
-                if (heightestBand[2 * i + 1] < average)
-                {
-                    heightestBand[2 * i + 1] = average;
-                }
-
-                spectrumValue = average / heightestBand[2 * i + 1] * 1000;
-                if (spectrumValue >= spectrumBars[2 * i + 1].Value)
-                {
-
-                    spectrumBars[2 * i + 1].Value = spectrumValue;
-                    decreaserate[2 * i + 1] = 10f;
-                }
-                else
-                {
-
-                    spectrumBars[2 * i + 1].Value -= 1 * decreaserate[2 * i + 1];
-                    decreaserate[2 * i + 1] *= decreaseRateFactor16;
-                }
-            }
-        }
+     
         private void change_bars_color(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
@@ -692,7 +638,7 @@ namespace NHMPh_music_player
                     Width = 2,
                     Margin = new Thickness(0, 0, 6, 0),
                     Height = 180,
-                    Maximum = 60,
+                    Maximum = 1,
                     Orientation = Orientation.Vertical,
                     Value = 0,
 

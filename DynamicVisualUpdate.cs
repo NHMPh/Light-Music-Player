@@ -15,6 +15,8 @@ namespace NHMPh_music_player
     public class DynamicVisualUpdate
     {
         private DispatcherTimer timer;
+        private DispatcherTimer lyricTimer;
+        private DispatcherTimer spectrumTimer;
         private MainWindow window;
         private MediaPlayer mediaPlayer;
         private SongsManager songsManager;
@@ -22,7 +24,7 @@ namespace NHMPh_music_player
         private StaticVisualUpdate staticVisualUpdate;
 
         public SpectrumVisualizer Visualizer { get { return visualizer; } }
-        public DynamicVisualUpdate(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager)
+        public DynamicVisualUpdate(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager, SpectrumVisualizer visualizer)
         {
             window = mainWindow;
             staticVisualUpdate = new StaticVisualUpdate(window);
@@ -30,7 +32,9 @@ namespace NHMPh_music_player
             this.mediaPlayer = mediaPlayer;
             this.mediaPlayer.OnSongChange += MediaPlayer_OnSongChange;
             this.songsManager.OnVideoQueueChange += SongsManager_OnVideoQueueChange;
-            visualizer = new SpectrumVisualizer(window, mediaPlayer);
+            // visualizer = new SpectrumVisualizer(window, mediaPlayer);
+            this.visualizer = visualizer;
+
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(1); // Set the interval as needed
             timer.Tick += async (sender, e) =>
@@ -38,6 +42,22 @@ namespace NHMPh_music_player
                 await Update();
             };
             timer.Start();
+
+            lyricTimer = new DispatcherTimer();
+            lyricTimer.Interval = TimeSpan.FromSeconds(1); // Set the interval as needed
+            lyricTimer.Tick += async (sender, e) =>
+            {
+                await LyricsUpdate();
+            };
+
+            lyricTimer.Start();
+            spectrumTimer = new DispatcherTimer();
+            spectrumTimer.Interval = TimeSpan.FromMilliseconds(1); // Set the interval as needed
+            spectrumTimer.Tick += async (sender, e) =>
+            {
+                await SpectrumUpdate();
+            };
+            spectrumTimer.Start();
         }
         private void SongsManager_OnVideoQueueChange(object sender, EventArgs e)
         {
@@ -52,7 +72,7 @@ namespace NHMPh_music_player
             window.lyrics_btn.Width = 0;
             MusicSetting.lyricsOffset = 0;
             UpdateStaticVisual();
-            visualizer.SetSpectrumWave();
+          
 
             songsManager.InvokeVideoQueueChange();
         }
@@ -69,6 +89,41 @@ namespace NHMPh_music_player
             window.thumb.Value = 0;
             window.songProgress.Maximum = mediaPlayer.Wave.TotalTime.TotalMilliseconds;
             window.thumb.Maximum = window.songProgress.Maximum;
+        }
+
+        private async Task LyricsUpdate()
+        {
+            await Task.Run(() =>
+            {
+                window.Dispatcher.Invoke(() =>
+                {
+                    if (MusicSetting.isLyrics&& mediaPlayer.CurrentSong.SongLyrics.Count>0)
+                    {
+                        foreach (var lyric in mediaPlayer.CurrentSong.SongLyrics)
+                        {
+                            if (lyric["seconds"].ToString() == ((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset).ToString())
+                            {
+                                window.description.Text = lyric["lyrics"].ToString();
+                            }
+                        }
+
+                    }
+                });
+            });
+        }
+        private async Task SpectrumUpdate()
+        {
+            await Task.Run(() =>
+            {
+                window.Dispatcher.Invoke(() =>
+                {
+                    if (mediaPlayer.PlaybackState == PlaybackState.Playing && MusicSetting.isSpectrum)
+                    { 
+                        if (!MusicSetting.isFullScreen)
+                            visualizer.DrawGraph();
+                    }
+                });
+            });
         }
         private async Task Update()
         {
@@ -116,32 +171,14 @@ namespace NHMPh_music_player
                     {
                         if (mediaPlayer.Wave != null)
                         {
-                           
+
                             window.songProgress.Value = mediaPlayer.Wave.CurrentTime.TotalMilliseconds;
                             if (!MusicSetting.isChosingTimeStap)
                             {
                                 window.thumb.Value = window.songProgress.Value;
                             }
-                            if (mediaPlayer.PlaybackState == PlaybackState.Playing && MusicSetting.isSpectrum)
-                            {
-
-                                visualizer.UpdateGraph();
-                                visualizer.UpadateSpectrumBar15();
-
-                                 if (!MusicSetting.isFullScreen)
-                                 visualizer.DrawGraph();
-                            }
-                            if (MusicSetting.isLyrics)
-                            {
-                                foreach (var lyric in mediaPlayer.CurrentSong.SongLyrics)
-                                {
-                                    if (lyric["seconds"].ToString() == ((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset).ToString())
-                                    {
-                                        window.description.Text = lyric["lyrics"].ToString();
-                                    }
-                                }
-
-                            }
+                          
+                           
 
                         }
                     }

@@ -2,10 +2,15 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using VideoLibrary;
 using YoutubeDLSharp;
 using YoutubeDLSharp.Options;
+using YoutubeExplode;
+using YoutubeExplode.Videos.Streams;
+using static System.Windows.Forms.LinkLabel;
 
 namespace NHMPh_music_player
 {
@@ -14,24 +19,32 @@ namespace NHMPh_music_player
         private WaveOutEvent output = new WaveOutEvent();
         private MediaFoundationReader _mf;
         private WaveChannel32 wave;
+        FFTSampleProvider fftProvider;
         private MainWindow mainWindow;
         private VideoInfo currentSong;
         public event EventHandler OnSongChange;
         public event EventHandler OnPositionChange;
+        private SpectrumVisualizer visualizer;
         public VideoInfo CurrentSong { get { return currentSong; } set { currentSong = value; } }
         public WaveChannel32 Wave { get { return wave; } set { wave = value; } }
         public PlaybackState PlaybackState { get { return output.PlaybackState; } }
 
         public string PlayBackUrl;
         public float Volume { set { output.Volume = (float)value; } }
-        public MediaPlayer(MainWindow mainWindow)
+        public MediaPlayer(MainWindow mainWindow, SpectrumVisualizer visualizer)
         {        
             this.mainWindow = mainWindow;
+            this.visualizer = visualizer;
         }
         private async Task GetSongStream()
         {
+
             var ytdl = new YoutubeDL();
             OptionSet options = new OptionSet() { Format = "mp4", GetUrl = true };
+            YouTube yt = YouTube.Default;
+            var youTube = YouTube.Default; // starting point for YouTube actions
+            var video = youTube.GetVideo(currentSong.Url); // gets a Video object with info about the video
+            Console.WriteLine(video.Uri);
             RunResult<string[]> streamUrl;
             streamUrl = await ytdl.RunWithOptions(
                new[] { currentSong.Url },
@@ -43,8 +56,10 @@ namespace NHMPh_music_player
             Console.WriteLine(streamUrl.Data[0]);
             //set _mf for playing audio
             _mf = new MediaFoundationReader(streamUrl.Data[0]);
-           // _mf = new MediaFoundationReader("D:\\testau.mp3");
+            // _mf = new MediaFoundationReader("D:\\testau.mp3");
+            var reader = new AudioFileReader("D:\\testau.mp3");
             wave = new WaveChannel32(_mf);
+            fftProvider = new FFTSampleProvider(wave.ToSampleProvider(),visualizer);
         }
         public MediaPlayer(VideoInfo videoInfo)
         {
@@ -57,7 +72,7 @@ namespace NHMPh_music_player
             await GetSongStream();
             OnSongChange?.Invoke(this, null);
             output?.Dispose();
-            output.Init(wave);
+            output.Init(fftProvider);
             output.Play();
             mainWindow.status.Text = "Playing";
         }

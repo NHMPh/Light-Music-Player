@@ -64,7 +64,7 @@ namespace NHMPh_music_player
 
             if (ardunoSetting == null)
             {
-               ardunoSetting = new ArdunoSetting(mainWindow.DynamicVisualUpdate.Visualizer);
+          //     ardunoSetting = new ArdunoSetting(mainWindow.DynamicVisualUpdate.Visualizer);
             }
             ardunoSetting.Show();
 
@@ -178,7 +178,7 @@ namespace NHMPh_music_player
             {
                 mainWindow.description.Height = 76;
                 mainWindow.spectrum_ctn.Height = 0;
-                mainWindow.DynamicVisualUpdate.Visualizer.fbands.Clear();
+             //   mainWindow.DynamicVisualUpdate.Visualizer.fbands.Clear();
 
             }
             if (MusicSetting.isSpectrum)
