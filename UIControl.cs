@@ -64,7 +64,7 @@ namespace NHMPh_music_player
 
             if (ardunoSetting == null)
             {
-          //     ardunoSetting = new ArdunoSetting(mainWindow.DynamicVisualUpdate.Visualizer);
+              ardunoSetting = new ArdunoSetting(mainWindow.DynamicVisualUpdate.Visualizer);
             }
             ardunoSetting.Show();
 
@@ -210,7 +210,7 @@ namespace NHMPh_music_player
             }
 
         }
-        public async void CloseFullScreen()
+        public void CloseFullScreen()
         {
             MusicSetting.isFullScreen = false;
            

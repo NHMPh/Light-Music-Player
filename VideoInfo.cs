@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YoutubeDLSharp;
+using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeSearchApi.Net.Models.Youtube;
 
@@ -77,9 +78,10 @@ namespace NHMPh_music_player
         //Method
         public async void GetFullDescription(StaticVisualUpdate staticVisualUpdate)
         {
-            YoutubeDL ytdl = new YoutubeDL();
-            var des = await ytdl.RunVideoDataFetch(this.url);
-            description += "\n" + des.Data.Description;
+
+            var youtube = new YoutubeClient();   
+            var des =  await youtube.Videos.GetAsync(this.url);
+            description += "\n" + des.Description;
             if (!MusicSetting.isLyrics)
                 staticVisualUpdate.SetVisualDes(description);
         }

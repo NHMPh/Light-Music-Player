@@ -38,26 +38,33 @@ namespace NHMPh_music_player
         }
         private async Task GetSongStream()
         {
+            
 
-            var ytdl = new YoutubeDL();
-            OptionSet options = new OptionSet() { Format = "mp4", GetUrl = true };
-            YouTube yt = YouTube.Default;
-            var youTube = YouTube.Default; // starting point for YouTube actions
-            var video = youTube.GetVideo(currentSong.Url); // gets a Video object with info about the video
-            Console.WriteLine(video.Uri);
-            RunResult<string[]> streamUrl;
+           // var ytdl = new YoutubeDL();
+          //  OptionSet options = new OptionSet() { Format = "mp4", GetUrl = true };
+            var youtube = new YoutubeClient();
+
+          
+
+           
+            var streamManifest = await youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
+
+            var streamUrl = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality().Url;
+
+
+          /*  RunResult<string[]> streamUrl;
             streamUrl = await ytdl.RunWithOptions(
                new[] { currentSong.Url },
                options,
                CancellationToken.None
-           );
+           );*/
             // description.Text = streamUrl.Data[0];
-            PlayBackUrl = streamUrl.Data[0];
-            Console.WriteLine(streamUrl.Data[0]);
+            PlayBackUrl = streamUrl;
+            Console.WriteLine(streamUrl);
             //set _mf for playing audio
-            _mf = new MediaFoundationReader(streamUrl.Data[0]);
+            _mf = new MediaFoundationReader(streamUrl);
             // _mf = new MediaFoundationReader("D:\\testau.mp3");
-            var reader = new AudioFileReader("D:\\testau.mp3");
+           // var reader = new AudioFileReader("D:\\testau.mp3");
             wave = new WaveChannel32(_mf);
             fftProvider = new FFTSampleProvider(wave.ToSampleProvider(),visualizer);
         }

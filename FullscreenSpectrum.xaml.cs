@@ -50,12 +50,10 @@ namespace NHMPh_music_player
         DispatcherTimer timer3 = new DispatcherTimer();
         DispatcherTimer timer4 = new DispatcherTimer();
         DispatcherTimer timer5 = new DispatcherTimer();
-        DispatcherTimer timer6 = new DispatcherTimer();
 
         private DispatcherTimer timer;
         float[] decreaserate = new float[512];
         List<ProgressBar> spectrumBars = new List<ProgressBar>();
-        List<ProgressBar> spectrumBarsTip = new List<ProgressBar>();
         private bool isChosingTimeStap = false;
         MainWindow mainWindow;
         private bool isLyrics = true;
@@ -67,7 +65,6 @@ namespace NHMPh_music_player
         int thresholdIndex16 = 13;
         int multiplierLow16 = 100;
         int multiplierHigh16 = 100;
-        float decreaseRateFactor16 = 1.2f;
         double[] heightestBand = new double[16];
         int[] multipliers16 = new int[16];
         int[] buffer = new int[16];
@@ -301,7 +298,6 @@ namespace NHMPh_music_player
         private void UpadateSpectrumSnow(object sender, EventArgs e)
         {
 
-            string data = "";
             for (int i = 0; i < 15; i++)
             {
                 if (snow[i] > 0 && snow[i] > buffer[i])
@@ -789,7 +785,7 @@ namespace NHMPh_music_player
             if (mainWindow != null)
                 mainWindow.UIControl.ChangeVolume(volum, volumVisual);
         }
-        private void ReleaseMemory()
+       /* private void ReleaseMemory()
         {
             multipliers = null;
             thresholdIndex = 0;
@@ -826,7 +822,7 @@ namespace NHMPh_music_player
             this.lyric = null;
 
 
-        }
+        }*/
     }
 
 }

@@ -44,6 +44,7 @@ namespace NHMPh_music_player
                     var videos = await youtube.Playlists.GetVideosAsync(key);
                     for (int i = 1; i < videos.Count; i++)
                     {
+                        
                         songsManager.AddSong(new VideoInfo(videos[i].Title, "Song by " + videos[i].Author, videos[i].Url, videos[i].Thumbnails.FirstOrDefault().Url));
                     }                  
                    

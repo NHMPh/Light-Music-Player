@@ -26,8 +26,6 @@ namespace NHMPh_music_player
         const float decreaseRateFactor = 1.2f;
         float[] multipliers = new float[numBars];
 
-        MediaFoundationReader _mfSpectrum;
-        WaveChannel32 waveSpectrum;
         MainWindow mainWindow;
      //   MediaPlayer mediaPlayer;
         List<ProgressBar> spectrumBars = new List<ProgressBar>();
@@ -151,7 +149,6 @@ namespace NHMPh_music_player
             mainWindow.spectrum_ctn.Children.Clear();
             for (int i = 0; i < 128; i++)
             {
-            int value=0;
                
                 ProgressBar progressBar = new ProgressBar()
                 {
@@ -175,7 +172,7 @@ namespace NHMPh_music_player
 
 
         }
-        private double[] FFT(double[] data)
+      /*  private double[] FFT(double[] data)
         {
             int fftLength = data.Length;
             System.Numerics.Complex[] fftComplex = new System.Numerics.Complex[fftLength];
@@ -212,7 +209,7 @@ namespace NHMPh_music_player
 
             return magnitude;
 
-        }
+        }*/
       /*  private double[] GetFFTdata()
         {
 

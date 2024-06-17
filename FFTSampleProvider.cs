@@ -1,14 +1,7 @@
 ﻿using NAudio.Dsp;
 using NAudio.Wave;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Threading;
-using System;
-using System.Windows; // For Application
-using System.Windows.Threading; // For DispatcherPriority
+
 namespace NHMPh_music_player
 {
     public class FFTSampleProvider : ISampleProvider
