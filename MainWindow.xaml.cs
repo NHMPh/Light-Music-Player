@@ -4,6 +4,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using YoutubeExplode;
 
 namespace NHMPh_music_player
 {
@@ -19,7 +20,9 @@ namespace NHMPh_music_player
         Playlist playlist;
         _CustomPlaylist customPlaylist;
         SpectrumVisualizer visualizer;
+         public YoutubeClient youtube;
 
+        Radio radio;
 
         public MediaPlayer MediaPlayer { get { return mediaPlayer; } }
         public SongsManager SongsManager { get { return songManger; } }
@@ -28,7 +31,7 @@ namespace NHMPh_music_player
         public MainWindow()
         {
             InitializeComponent();
-            
+            youtube = new YoutubeClient();
             visualizer = new SpectrumVisualizer(this);
             mediaPlayer = new MediaPlayer(this,visualizer);
             songManger = new SongsManager();
@@ -36,6 +39,7 @@ namespace NHMPh_music_player
             dynamicVisualUpdate = new DynamicVisualUpdate(this, mediaPlayer, songManger,visualizer);
             playlist = new Playlist(this, songManger);
             customPlaylist = new _CustomPlaylist(this, songManger, mediaPlayer);
+            radio = new Radio(mediaPlayer,this);
 
         
 

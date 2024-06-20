@@ -76,11 +76,11 @@ namespace NHMPh_music_player
             this.thumbnail = thumbnail;
         }
         //Method
-        public async void GetFullDescription(StaticVisualUpdate staticVisualUpdate)
+        public async void GetFullDescription(StaticVisualUpdate staticVisualUpdate , YoutubeClient youtube)
         {
 
-            var youtube = new YoutubeClient();   
-            var des =  await youtube.Videos.GetAsync(this.url);
+          
+            var des = await youtube.Videos.GetAsync(this.url);
             description += "\n" + des.Description;
             if (!MusicSetting.isLyrics)
                 staticVisualUpdate.SetVisualDes(description);

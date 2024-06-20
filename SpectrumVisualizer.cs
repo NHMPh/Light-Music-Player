@@ -58,7 +58,7 @@ namespace NHMPh_music_player
                 double average = 0;
                 for (int j = 0; j <= Math.Pow(2, i); j++)
                 {
-           //         average += 60 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
+                    average += 70 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
                 }
                 average /= Math.Pow(2, i);
                 if (heightestBand[2 * i] < average)
@@ -73,7 +73,7 @@ namespace NHMPh_music_player
                 average = 0;
                 for (int j = 0; j < Math.Pow(2, i); j++)
                 {
-                    average += 60+fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
+                    average += 70+fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
                 }
                 if (heightestBand[2 * i + 1] < average)
                 {
@@ -122,7 +122,7 @@ namespace NHMPh_music_player
         {
 
             int positiveThreshhold = 70;
-            for (int i = 0, j = 0; i <256; i++)
+            for (int i = 0, j = 0; i <128; i++)
             {
                 float multiplier = multipliers[i];
 

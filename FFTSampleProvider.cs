@@ -30,6 +30,8 @@ namespace NHMPh_music_player
         {
             int samplesRead = source.Read(buffer, offset, count);
 
+            
+
             for (int i = 0; i < samplesRead; i++)
             {
                 sampleBuffer[bufferPos++] = buffer[offset + i];

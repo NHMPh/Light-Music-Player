@@ -72,16 +72,21 @@ namespace NHMPh_music_player
             window.lyrics_btn.Width = 0;
             MusicSetting.lyricsOffset = 0;
             UpdateStaticVisual();
-          
 
+            if (MusicSetting.isRadio) return;
             songsManager.InvokeVideoQueueChange();
         }
         private void UpdateStaticVisual()
         {
-            staticVisualUpdate.SetVisual(mediaPlayer.CurrentSong);
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                staticVisualUpdate.SetVisual(mediaPlayer.CurrentSong);
+            });
+           
             UpdateTrackBarVisual();
+            if (MusicSetting.isRadio) return;
             mediaPlayer.CurrentSong.GetLyrics(window);
-            mediaPlayer.CurrentSong.GetFullDescription(staticVisualUpdate);
+            mediaPlayer.CurrentSong.GetFullDescription(staticVisualUpdate,window.youtube);
         }
         private void UpdateTrackBarVisual()
         {
@@ -118,7 +123,8 @@ namespace NHMPh_music_player
                 window.Dispatcher.Invoke(() =>
                 {
                     if (mediaPlayer.PlaybackState == PlaybackState.Playing && MusicSetting.isSpectrum)
-                    { 
+                    {
+                        visualizer.UpadateSpectrumBar15();
                         if (!MusicSetting.isFullScreen)
                             visualizer.DrawGraph();
                     }
@@ -132,6 +138,7 @@ namespace NHMPh_music_player
                 window.Dispatcher.Invoke(() =>
                 {
                     if (mediaPlayer.Wave == null) return;
+                    if (MusicSetting.isRadio) return;
                     //Song end
                     if (window.songProgress.Value == mediaPlayer.Wave.TotalTime.TotalMilliseconds)
                     {
@@ -169,6 +176,7 @@ namespace NHMPh_music_player
                     }
                     else
                     {
+                      
                         if (mediaPlayer.Wave != null)
                         {
 

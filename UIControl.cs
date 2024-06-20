@@ -42,6 +42,7 @@ namespace NHMPh_music_player
             mainWindow.pauseBtn.Click += PauseResumeBtn;
             mainWindow.skipBtn.Click += SkipBtn;
             mainWindow.spectrum_btn.MouseRightButtonDown += FullSpectrumBtn;
+            mainWindow.radio_btn.Click += Radio_btn_Click;
 
             mainWindow.Track.MouseLeftButtonDown += Thumb_MouseLeftButtonDown;
             mainWindow.thumb.GotMouseCapture += Thumb_GotMouseCapture;
@@ -57,6 +58,36 @@ namespace NHMPh_music_player
 
             mainWindow.Topmost = true;
             mainWindow.Icon = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\Images\\icon.ico"));
+        }
+
+        private void Radio_btn_Click(object sender, RoutedEventArgs e)
+        {
+
+           
+            if (mainWindow.radio_view.Height==0)
+            {
+                mainWindow.description.Height = 0;
+                mainWindow.spectrum_ctn.Height = 0;
+                mainWindow.radio_view.Height = 76;
+            }
+            else
+            {
+                if (!MusicSetting.isSpectrum)
+                {
+                    mainWindow.description.Height = 76;
+                    mainWindow.spectrum_ctn.Height = 0;
+       
+
+                }
+                if (MusicSetting.isSpectrum)
+                {
+                    mainWindow.description.Height = 16;
+                    mainWindow.spectrum_ctn.Height = 60;
+         
+                };
+                mainWindow.radio_view.Height = 0;
+            }
+           
         }
 
         private void ArdunoBtn(object sender, RoutedEventArgs e)
@@ -185,6 +216,7 @@ namespace NHMPh_music_player
             {
                 mainWindow.description.Height = 16;
                 mainWindow.spectrum_ctn.Height = 60;
+                mainWindow.radio_view.Height = 0;
                 //  UpdateGraph();
                 //  DrawGraph();
             };

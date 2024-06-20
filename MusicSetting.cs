@@ -14,6 +14,7 @@ namespace NHMPh_music_player
         public static bool isChosingTimeStap;
         public static bool isLoop;
         public static bool isAutoPlay;
+        public static bool isRadio=false;
         public static bool isSpectrum;
         public static int  lyricsOffset;
 
