@@ -1,17 +1,13 @@
-﻿using AngleSharp.Media;
-using NAudio.Wave;
+﻿
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using YoutubeDLSharp;
 using YoutubeExplode;
-using YoutubeExplode.Videos;
+using YoutubeExplode.Videos.ClosedCaptions;
 using YoutubeSearchApi.Net.Models.Youtube;
+using Video = YoutubeExplode.Videos.Video;
 
 namespace NHMPh_music_player
 {
@@ -26,7 +22,8 @@ namespace NHMPh_music_player
 
         private string thumbnail;
 
-        private JArray songLyrics = new JArray();
+        private List<(int, string)> songLyrics = new List<(int, string)>();
+        private ClosedCaptionTrack _songLyrics = null;
 
         public delegate void LyricsFoundEventHandler(object sender, bool status);
 
@@ -37,15 +34,17 @@ namespace NHMPh_music_player
         public string Title { get { return title; } }
         public string Description { get { return description; } set { description = value; } }
         public string Url { get { return url; } }
-        public string Thumbnail { get { return thumbnail; }  }
+        public string Thumbnail { get { return thumbnail; } }
 
-        public JArray SongLyrics { get { return songLyrics; } }
-       
-        
+        public List<(int, string)> SongLyrics { get { return songLyrics; } }
+
+        public ClosedCaptionTrack _SongLyrics { get { return _songLyrics; } }
+
+
         //Constructor
         public VideoInfo()
         {
-           
+
         }
         public VideoInfo(VideoInfo videoInfo)
         {
@@ -76,20 +75,20 @@ namespace NHMPh_music_player
             this.thumbnail = thumbnail;
         }
         //Method
-        public async void GetFullDescription(StaticVisualUpdate staticVisualUpdate , YoutubeClient youtube)
+        public async void GetFullDescription(StaticVisualUpdate staticVisualUpdate, YoutubeClient youtube)
         {
 
-          
+
             var des = await youtube.Videos.GetAsync(this.url);
             description += "\n" + des.Description;
             if (!MusicSetting.isLyrics)
                 staticVisualUpdate.SetVisualDes(description);
         }
-        public async void GetLyrics(MainWindow mainWindow)
+        public async void GetLyricsLib(MainWindow mainWindow)
         {
             var songName = Title;
             songName = StringUtilitiy.ProcessInvailName(songName);
-            Console.WriteLine($"https://api.textyl.co/api/lyrics?q={songName}");
+            Console.WriteLine($"https://lrclib.net/api/search?q={songName}");
             // Create an instance of HttpClient
             var handler = new HttpClientHandler
             {
@@ -100,33 +99,69 @@ namespace NHMPh_music_player
                 try
                 {
                     // Send GET request to a URL
-                    HttpResponseMessage response = await client.GetAsync($"https://api.textyl.co/api/lyrics?q={songName}");
-
+                    HttpResponseMessage response = await client.GetAsync($"https://lrclib.net/api/search?q={songName}");                 
                     // Check if the response is successful
                     if (response.IsSuccessStatusCode)
                     {
-                        // Read the content as string
+                      
                         string responseBody = await response.Content.ReadAsStringAsync();
-                        songLyrics = JArray.Parse(responseBody);
-                        OnLyricsFound?.Invoke(this,true);
+                        songLyrics=StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds( JArray.Parse(responseBody)[0]["syncedLyrics"].ToString().Trim());
+                        Console.WriteLine(songLyrics.Count);
+                        Console.WriteLine(songLyrics.First());
+                        OnLyricsFound?.Invoke(this, true);
                         mainWindow.lyrics_btn.Width = 20;
                         mainWindow.lyricsSync_btn.Width = 10;
+
                     }
                     else
                     {
                         Console.WriteLine($"Failed to get data. Status code: {response.StatusCode}");
-                        songLyrics =null;
+                        songLyrics = new List<(int, string)>();
                         mainWindow.lyrics_btn.Width = 0;
                         mainWindow.lyricsSync_btn.Width = 0;
                         MusicSetting.isLyrics = false;
+                        MusicSetting.lyricsOffset = 0;
                         OnLyricsFound?.Invoke(this, false);
-                    }
+
+                    }                  
+
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"An error occurred: {ex.Message}");
                 }
+
             }
+        }
+        public async void GetLyrics(MainWindow mainWindow, YoutubeClient youtube)
+        {
+            try
+            {
+                var videoUrl = url;
+                var trackManifest = await youtube.Videos.ClosedCaptions.GetManifestAsync(videoUrl);
+                var trackInfo = trackManifest.GetByLanguage("en");
+                if (trackInfo.IsAutoGenerated)
+                {
+                    _songLyrics = null;
+                    GetLyricsLib(mainWindow);
+                    return;
+                }
+                    
+                _songLyrics = await youtube.Videos.ClosedCaptions.GetAsync(trackInfo);
+                OnLyricsFound?.Invoke(this, true);
+                mainWindow.lyrics_btn.Width = 20;
+                mainWindow.lyricsSync_btn.Width = 10;
+
+            }
+            catch (Exception ex)
+            {
+                _songLyrics = null;
+                GetLyricsLib(mainWindow);
+            }
+
+
+            
+
         }
     }
 }

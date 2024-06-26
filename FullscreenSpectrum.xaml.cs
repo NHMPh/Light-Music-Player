@@ -1,30 +1,22 @@
-﻿using Microsoft.Win32;
-using NAudio.Wave;
-using NHMPh_music_player.LedStripCom;
-using PuppeteerSharp;
-using PuppeteerSharp.PageCoverage;
+﻿
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO.Ports;
+
 using System.Linq;
-using System.Text;
-using System.Text.Json.Nodes;
+
 using System.Text.RegularExpressions;
-using System.Threading;
+
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Forms;
+
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+
 using System.Windows.Threading;
-using YoutubeExplode.Common;
-using static System.Windows.Forms.LinkLabel;
+
+
 using MessageBox = System.Windows.MessageBox;
 using Orientation = System.Windows.Controls.Orientation;
 using ProgressBar = System.Windows.Controls.ProgressBar;
@@ -34,7 +26,7 @@ namespace NHMPh_music_player
     /// <summary>
     /// Interaction logic for FullscreenSpectrum.xaml
     /// </summary>
-    public partial class FullscreenSpectrum : Window
+    public partial class FullscreenSpectrum : System.Windows.Window
     {
 
 
@@ -47,7 +39,7 @@ namespace NHMPh_music_player
        // System.IO.Ports.SerialPort serialPort;
 
         DispatcherTimer timer2 = new DispatcherTimer();
-        DispatcherTimer timer3 = new DispatcherTimer();
+        DispatcherTimer lyricTimer = new DispatcherTimer();
         DispatcherTimer timer4 = new DispatcherTimer();
         DispatcherTimer timer5 = new DispatcherTimer();
 
@@ -119,8 +111,11 @@ namespace NHMPh_music_player
             timer2.Interval = TimeSpan.FromSeconds(5);
             timer2.Tick += Timer_Tick;
 
-            timer3.Interval = TimeSpan.FromMilliseconds(100);
-            timer3.Tick += UpadateSpectrumSnow;
+            lyricTimer.Interval = TimeSpan.FromMilliseconds(100);
+            lyricTimer.Tick += async (sender, e) =>
+            {
+                await LyricsUpdate();
+            };
 
             timer4.Interval = TimeSpan.FromMilliseconds(1);
             timer4.Tick += UpadateSpectrumBar;
@@ -134,6 +129,81 @@ namespace NHMPh_music_player
 
             this.MouseMove += FullscreenSpectrum_MouseMove;
         }
+
+        private async Task LyricsUpdate()
+        {
+            await Task.Run(() =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (mainWindow.MediaPlayer.CurrentSong.SongLyrics != null)
+                    {
+
+                        try
+                        {
+                            if (mainWindow.MediaPlayer.CurrentSong._SongLyrics.Captions.Count > 0)
+                            {
+                                double seconds = mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
+                                var caption = mainWindow.MediaPlayer.CurrentSong._SongLyrics.GetByTime(TimeSpan.FromSeconds(seconds));
+
+
+
+                                if (caption.Text.ToString().Length > 10)
+                                {
+                                    this.lyric.FontSize = 60;
+                                }
+                                else
+                                {
+                                    this.lyric.FontSize = 72;
+                                }
+                                if (isLyrics)
+                                {
+
+                                    this.lyric.Text = caption.Text.Replace("\r", "").Replace("\n", " ");
+                                    postLyric.Text = mainWindow.MediaPlayer.CurrentSong._SongLyrics.GetByTime(TimeSpan.FromSeconds(caption.Offset.TotalSeconds + caption.Duration.TotalSeconds + 1)).Text.Replace("\r", "").Replace("\n", " ");
+
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+
+                       
+                           
+                       
+
+                        if (mainWindow.MediaPlayer.CurrentSong.SongLyrics.Count > 0)
+                        {
+                            for (int i = 0; i < mainWindow.MediaPlayer.CurrentSong.SongLyrics.Count; i++)
+                            {
+                                var lyric = mainWindow.MediaPlayer.CurrentSong.SongLyrics.ElementAt(i);
+                                if (lyric.Item2.ToString().Length > 10)
+                                {
+                                    this.lyric.FontSize = 60;
+                                }
+                                else
+                                {
+                                    this.lyric.FontSize = 72;
+                                }
+                                if (lyric.Item1 / 1000 == ((int)mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset))
+                                {
+                                    this.lyric.Text = lyric.Item2.ToString().Replace("\r", "").Replace("\n", " ");
+                                    if (i != mainWindow.MediaPlayer.CurrentSong.SongLyrics.Count - 1)
+                                        postLyric.Text = mainWindow.MediaPlayer.CurrentSong.SongLyrics.ElementAt(i + 1).Item2;
+                                }
+                            }
+
+                        }
+
+
+                    }
+
+                });
+            });
+        }
+
         private void UpadateLed(object sender, EventArgs e)
         {
 
@@ -199,7 +269,7 @@ namespace NHMPh_music_player
         public void Reopen()
         {
             timer.Start();
-           // timer3.Start();
+            lyricTimer.Start();
            // timer4.Start();
            // timer5.Start();
            // timer6.Start();
@@ -254,60 +324,12 @@ namespace NHMPh_music_player
                 {
                     if (this.Topmost) this.Topmost = false;
                     if (mainWindow.MediaPlayer.Wave == null) return;
-
-
                     songValue.Value = mainWindow.MediaPlayer.Wave.CurrentTime.TotalMilliseconds;
-
-
-                    if (mainWindow.MediaPlayer.CurrentSong.SongLyrics != null)
-                    {
-                        foreach (var lyric in mainWindow.MediaPlayer.CurrentSong.SongLyrics)
-                        {
-                            if (lyric["seconds"].ToString() == ((int)mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset).ToString())
-                            {
-                                if (lyric["lyrics"].ToString().Length > 10)
-                                {
-                                    this.lyric.FontSize = 60;
-                                }
-                                else
-                                {
-                                    this.lyric.FontSize = 72;
-                                }
-
-                                if (isLyrics)
-                                {
-
-                                    this.lyric.Text = lyric["lyrics"].ToString().Replace("\r", "");
-
-                                    try { postLyric.Text = lyric.Next["lyrics"].ToString(); } catch { postLyric.Text = null; };
-                                    //  try { preLyric.Text = lyric.Previous["lyrics"].ToString(); } catch { preLyric.Text = null; };
-                                }
-
-                            }
-                        }
-                    }
                     DrawGraph();
-                  //  DrawGraphLed16();
-                    
-
-                    // DrawGraph16();
-
                 });
             });
         }
-        private void UpadateSpectrumSnow(object sender, EventArgs e)
-        {
 
-            for (int i = 0; i < 15; i++)
-            {
-                if (snow[i] > 0 && snow[i] > buffer[i])
-                {
-                    snow[i] -= 1;
-                }
-            }
-          //  ledSpectrum.DrawSpectrum(buffer, snow);
-
-        }
         bool isIncrese = false;
         private void UpadateSpectrumBar(object sender, EventArgs e)
         {

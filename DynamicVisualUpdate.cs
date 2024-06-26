@@ -44,7 +44,7 @@ namespace NHMPh_music_player
             timer.Start();
 
             lyricTimer = new DispatcherTimer();
-            lyricTimer.Interval = TimeSpan.FromSeconds(1); // Set the interval as needed
+            lyricTimer.Interval = TimeSpan.FromSeconds(0.01); // Set the interval as needed
             lyricTimer.Tick += async (sender, e) =>
             {
                 await LyricsUpdate();
@@ -82,11 +82,11 @@ namespace NHMPh_music_player
             {
                 staticVisualUpdate.SetVisual(mediaPlayer.CurrentSong);
             });
-           
+
             UpdateTrackBarVisual();
             if (MusicSetting.isRadio) return;
-            mediaPlayer.CurrentSong.GetLyrics(window);
-            mediaPlayer.CurrentSong.GetFullDescription(staticVisualUpdate,window.youtube);
+            mediaPlayer.CurrentSong.GetLyrics(window, window.youtube);
+            mediaPlayer.CurrentSong.GetFullDescription(staticVisualUpdate, window.youtube);
         }
         private void UpdateTrackBarVisual()
         {
@@ -102,16 +102,40 @@ namespace NHMPh_music_player
             {
                 window.Dispatcher.Invoke(() =>
                 {
-                    if (MusicSetting.isLyrics&& mediaPlayer.CurrentSong.SongLyrics.Count>0)
+                    if (MusicSetting.isLyrics)
                     {
-                        foreach (var lyric in mediaPlayer.CurrentSong.SongLyrics)
+
+                        try
                         {
-                            if (lyric["seconds"].ToString() == ((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset).ToString())
+                            if (mediaPlayer.CurrentSong._SongLyrics.Captions.Count > 0)
                             {
-                                window.description.Text = lyric["lyrics"].ToString();
+
+                                double seconds = mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
+                                var caption = mediaPlayer.CurrentSong._SongLyrics.GetByTime(TimeSpan.FromSeconds(seconds));                           
+                                window.description.Text = caption.Text.Replace("\n", " ");
+                            }
+                        }catch (Exception ex) { }
+                           
+                       
+
+                        if (mediaPlayer.CurrentSong.SongLyrics.Count > 0)
+                        {
+
+                            foreach (var lyric in mediaPlayer.CurrentSong.SongLyrics)
+                            {
+
+                              
+                                if (lyric.Item1 / 1000 == ((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset))
+                                {
+                                    window.description.Text = lyric.Item2.ToString().Replace("\n", " ");
+                                    if (lyric.Item2.ToString() == "")
+                                        window.description.Text = "[Music]";
+                                }
+
+
+
                             }
                         }
-
                     }
                 });
             });
@@ -176,7 +200,7 @@ namespace NHMPh_music_player
                     }
                     else
                     {
-                      
+
                         if (mediaPlayer.Wave != null)
                         {
 
@@ -185,8 +209,8 @@ namespace NHMPh_music_player
                             {
                                 window.thumb.Value = window.songProgress.Value;
                             }
-                          
-                           
+
+
 
                         }
                     }

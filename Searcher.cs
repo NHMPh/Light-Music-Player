@@ -4,8 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using YoutubeDLSharp;
-using YoutubeSearchApi.Net.Models.Youtube;
+
 using YoutubeSearchApi.Net.Services;
 using YoutubeExplode;
 using System.Windows;

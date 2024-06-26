@@ -16,9 +16,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using TagLib.Ape;
-using YoutubeDLSharp;
+
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeSearchApi.Net.Models.Youtube;

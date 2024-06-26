@@ -146,7 +146,7 @@ namespace NHMPh_music_player
         {
             if (MusicSetting.lyricsOffset == 0)
             {
-                MusicSetting.lyricsOffset = (int)mediaPlayer.Wave.CurrentTime.TotalSeconds - int.Parse(mediaPlayer.CurrentSong.SongLyrics[0]["seconds"].ToString());
+                MusicSetting.lyricsOffset = (int)mediaPlayer.Wave.CurrentTime.TotalSeconds - int.Parse((mediaPlayer.CurrentSong.SongLyrics.First().Item1/1000).ToString());
             }
             else
             {

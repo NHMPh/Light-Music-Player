@@ -197,5 +197,32 @@ namespace NHMPh_music_player
 
             return null;
         }
+       public static List<(int, string)> ExtractAndParseTimestampsAndLyricsToMilliseconds(string text)
+        {
+            List<(int, string)> timestampedLyrics = new List<(int, string)>();
+            // Regular expression to match the timestamps and lyrics
+            Regex regex = new Regex(@"\[(\d{2}):(\d{2})\.(\d{2})\] (.*)");
+            MatchCollection matches = regex.Matches(text);
+
+            foreach (Match match in matches)
+            {
+                if (match.Success)
+                {
+                    // Extract minutes, seconds, and milliseconds from the match
+                    int minutes = int.Parse(match.Groups[1].Value);
+                    int seconds = int.Parse(match.Groups[2].Value);
+                    int milliseconds = int.Parse(match.Groups[3].Value) * 10; // Convert to milliseconds
+
+                    // Convert the entire timestamp to milliseconds
+                    int totalMilliseconds = (minutes * 60 * 1000) + (seconds * 1000) + milliseconds;
+                    string lyric = match.Groups[4].Value; // Extract the lyric
+
+                    // Add the total milliseconds and lyric to the list
+                    timestampedLyrics.Add((totalMilliseconds, lyric));
+                }
+            }
+
+            return timestampedLyrics;
+        }
     }
 }

@@ -1,17 +1,12 @@
-﻿using Accord.Math;
-using NAudio.Wave;
+﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Controls;
 using NAudio.Dsp;
 using Complex = NAudio.Dsp.Complex;
-using PuppeteerSharp;
 using System.Windows.Threading;
 
 namespace NHMPh_music_player

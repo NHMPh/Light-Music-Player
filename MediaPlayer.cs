@@ -1,23 +1,13 @@
 ﻿using NAudio.Wave;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
-using VideoLibrary;
-using YoutubeDLSharp;
-using YoutubeDLSharp.Options;
-using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
-using static System.Windows.Forms.LinkLabel;
 
 namespace NHMPh_music_player
 {
     public class MediaPlayer
     {
-        private DispatcherTimer timer;
 
         private WaveOutEvent output = new WaveOutEvent();
         private MediaFoundationReader _mf;
@@ -38,52 +28,18 @@ namespace NHMPh_music_player
         {
             this.mainWindow = mainWindow;
             this.visualizer = visualizer;
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(2000); // Set the interval as needed
-            timer.Tick += async (sender, e) =>
-            {
-                await Play();
-            };
-
         }
 
-        private async Task Play()
-        {
-            output.Play();
-            timer.Stop();
-            //  mainWindow.status.Text = "Playing";
-        }
+      
 
         private async Task GetSongStream()
         {
-
-
-            // var ytdl = new YoutubeDL();
-            //  OptionSet options = new OptionSet() { Format = "mp4", GetUrl = true };
-
-
-
-
-
             var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
-
             var streamUrl = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality().Url;
-
-
-            /*  RunResult<string[]> streamUrl;
-              streamUrl = await ytdl.RunWithOptions(
-                 new[] { currentSong.Url },
-                 options,
-                 CancellationToken.None
-             );*/
-            // description.Text = streamUrl.Data[0];
             PlayBackUrl = streamUrl;
             Console.WriteLine(streamUrl);
             //set _mf for playing audio
-
-
             _mf = new MediaFoundationReader(streamUrl);
-            ;
             wave = new WaveChannel32(_mf);
             fftProvider = new FFTSampleProvider(wave.ToSampleProvider(), visualizer);
         }
@@ -113,9 +69,6 @@ namespace NHMPh_music_player
             output.Init(fftProvider);
             output.Play();
             mainWindow.status.Text = "Playing";
-            //   timer.Start();
-
-
         }
         public async void PlayMusic()
         {

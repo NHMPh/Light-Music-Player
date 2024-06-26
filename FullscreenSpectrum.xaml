@@ -181,7 +181,7 @@
             <TextBlock x:Name="lyric" Text="Welcome" Foreground="White" FontSize="72" HorizontalAlignment="Center" Margin="20"/>
             <TextBlock x:Name="postLyric" Text="Press 'esc' to exit" Foreground="#E59E9E9E" FontSize="20" HorizontalAlignment="Center"/>
         </StackPanel>
-        <Border x:Name="setting" Background="#33FFFFFF" Width="500" Margin="20" Height="600" VerticalAlignment="Top" HorizontalAlignment="Right" CornerRadius="10">
+        <Border x:Name="setting" Background="#33FFFFFF" Width="00" Margin="20" Height="600" VerticalAlignment="Top" HorizontalAlignment="Right" CornerRadius="10">
             <StackPanel  Orientation="Vertical"   Opacity="100">
                 <Label Content="Setting" Margin="10" FontSize="36" HorizontalAlignment="Center" Foreground="White" FontFamily="Arial Black"/>
                 <StackPanel Orientation="Vertical">
@@ -190,7 +190,7 @@
                         <Label Content="Spectrum bars" HorizontalAlignment="Center"  FontSize="24" Foreground="White" FontFamily="Arial Black" VerticalAlignment="Top"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Width"  FontSize="20" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="83"/>
-                                <Slider  Width="300" Height="15" Value="1" Margin="3,4,3,5" Maximum="1000" ValueChanged="change_spectrum_width" Minimum="1"/>
+                                <Slider  Width="300" Height="15" Value="1" Margin="3,4,3,5" Maximum="10" ValueChanged="change_spectrum_width" Minimum="1"/>
                                 <Border Background="#33FFFFFF" Width="90" CornerRadius="5" >
                                     <TextBox x:Name="width_info" Width="100" Background="Transparent" BorderThickness="0" Text="1" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
                                 </Border>
@@ -198,14 +198,14 @@
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Height"  FontSize="20" HorizontalAlignment="Center" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center"/>
-                                <Slider  Width="300" Height="15" Value="180" Margin="3,4,3,5" Maximum="1000" Minimum="1" ValueChanged="change_spectrum_height"/>
+                                <Slider  Width="300" Height="15" Value="180" Margin="3,4,3,5" Maximum="500" Minimum="1" ValueChanged="change_spectrum_height"/>
                                 <Border Background="#33FFFFFF" Width="90" CornerRadius="5" >
                                     <TextBox x:Name="height_info" Width="100" Background="Transparent" BorderThickness="0" Text="180" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
                                 </Border>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
                                 <Label Content="Spacing"  FontSize="16" Foreground="White" FontFamily="Arial Black" VerticalContentAlignment="Center" Width="82"/>
-                                <Slider  Width="300" Height="15" Value="6" Margin="3,4,3,5" Maximum="1000" Minimum="1" ValueChanged="change_spectrum_spaceing"/>
+                                <Slider  Width="300" Height="15" Value="6" Margin="3,4,3,5" Maximum="10" Minimum="1" ValueChanged="change_spectrum_spaceing"/>
                                 <Border Background="#33FFFFFF" Width="90" CornerRadius="5" >
                                     <TextBox x:Name="space_info" Width="100" Background="Transparent" BorderThickness="0" Text="6" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
                                 </Border>
