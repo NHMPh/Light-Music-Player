@@ -152,6 +152,10 @@ namespace NHMPh_music_player
                                 {
                                     this.lyric.FontSize = 60;
                                 }
+                                else if (caption.Text.ToString().Length > 12)
+                                {
+                                    this.lyric.FontSize = 50;
+                                }
                                 else
                                 {
                                     this.lyric.FontSize = 72;
@@ -183,11 +187,15 @@ namespace NHMPh_music_player
                                 {
                                     this.lyric.FontSize = 60;
                                 }
+                                else if(lyric.Item2.ToString().Length > 12)
+                                {
+                                    this.lyric.FontSize = 50;
+                                }
                                 else
                                 {
                                     this.lyric.FontSize = 72;
                                 }
-                                if (lyric.Item1 / 1000 == ((int)mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset))
+                                if (lyric.Item1 == ((int)mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset))
                                 {
                                     this.lyric.Text = lyric.Item2.ToString().Replace("\r", "").Replace("\n", " ");
                                     if (i != mainWindow.MediaPlayer.CurrentSong.SongLyrics.Count - 1)

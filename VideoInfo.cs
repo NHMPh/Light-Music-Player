@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Windows.Documents;
+using System.Windows.Media;
 using YoutubeExplode;
 using YoutubeExplode.Videos.ClosedCaptions;
 using YoutubeSearchApi.Net.Models.Youtube;
@@ -22,7 +24,9 @@ namespace NHMPh_music_player
 
         private string thumbnail;
 
-        private List<(int, string)> songLyrics = new List<(int, string)>();
+        private int duration;
+
+        private List<(double, string)> songLyrics = new List<(double, string)>();
         private ClosedCaptionTrack _songLyrics = null;
 
         public delegate void LyricsFoundEventHandler(object sender, bool status);
@@ -36,7 +40,8 @@ namespace NHMPh_music_player
         public string Url { get { return url; } }
         public string Thumbnail { get { return thumbnail; } }
 
-        public List<(int, string)> SongLyrics { get { return songLyrics; } }
+        
+        public List<(double, string)> SongLyrics { get { return songLyrics; } }
 
         public ClosedCaptionTrack _SongLyrics { get { return _songLyrics; } }
 
@@ -58,7 +63,7 @@ namespace NHMPh_music_player
             this.title = videoInfo.Title;
             this.description = $"{videoInfo.Author} - {videoInfo.Duration}";
             this.url = videoInfo.Url;
-            this.thumbnail = videoInfo.ThumbnailUrl;
+            this.thumbnail = videoInfo.ThumbnailUrl;           
         }
         public VideoInfo(Video videoInfo)
         {
@@ -80,6 +85,7 @@ namespace NHMPh_music_player
 
 
             var des = await youtube.Videos.GetAsync(this.url);
+            duration =(int)des.Duration.Value.TotalSeconds;
             description += "\n" + des.Description;
             if (!MusicSetting.isLyrics)
                 staticVisualUpdate.SetVisualDes(description);
@@ -99,7 +105,8 @@ namespace NHMPh_music_player
                 try
                 {
                     // Send GET request to a URL
-                    HttpResponseMessage response = await client.GetAsync($"https://lrclib.net/api/search?q={songName}");                 
+                    HttpResponseMessage response = await client.GetAsync($"https://lrclib.net/api/search?q={songName}");
+                    Console.WriteLine($"https://lrclib.net/api/search?q={songName}&duration={duration}");
                     // Check if the response is successful
                     if (response.IsSuccessStatusCode)
                     {
@@ -116,7 +123,7 @@ namespace NHMPh_music_player
                     else
                     {
                         Console.WriteLine($"Failed to get data. Status code: {response.StatusCode}");
-                        songLyrics = new List<(int, string)>();
+                        songLyrics = new List<(double, string)>();
                         mainWindow.lyrics_btn.Width = 0;
                         mainWindow.lyricsSync_btn.Width = 0;
                         MusicSetting.isLyrics = false;
@@ -162,6 +169,31 @@ namespace NHMPh_music_player
 
             
 
+        }
+        public string GetLyricBytime(double seconds)
+        {
+
+            string line = "";
+            if (songLyrics.Count>0)
+            {
+               
+                foreach (var lyric in songLyrics)
+                {
+                
+                    if (lyric.Item1 < seconds)
+                    {
+                       line = lyric.Item2.ToString().Replace("\n", " ");
+                        if (lyric.Item2.ToString() == "")
+                           line = "[Music]";
+                    }
+                }
+            }
+            else 
+            {
+                line= _songLyrics.GetByTime(TimeSpan.FromSeconds(seconds)).Text.Replace("\n", " ");
+            }
+
+            return line;
         }
     }
 }

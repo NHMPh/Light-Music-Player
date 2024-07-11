@@ -44,7 +44,7 @@ namespace NHMPh_music_player
             timer.Start();
 
             lyricTimer = new DispatcherTimer();
-            lyricTimer.Interval = TimeSpan.FromSeconds(0.01); // Set the interval as needed
+            lyricTimer.Interval = TimeSpan.FromMilliseconds(1); // Set the interval as needed
             lyricTimer.Tick += async (sender, e) =>
             {
                 await LyricsUpdate();
@@ -104,38 +104,13 @@ namespace NHMPh_music_player
                 {
                     if (MusicSetting.isLyrics)
                     {
-
-                        try
+                        double seconds = mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
+                        string line = mediaPlayer.CurrentSong.GetLyricBytime(seconds);
+                        if(line != "")
                         {
-                            if (mediaPlayer.CurrentSong._SongLyrics.Captions.Count > 0)
-                            {
-
-                                double seconds = mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
-                                var caption = mediaPlayer.CurrentSong._SongLyrics.GetByTime(TimeSpan.FromSeconds(seconds));                           
-                                window.description.Text = caption.Text.Replace("\n", " ");
-                            }
-                        }catch (Exception ex) { }
-                           
-                       
-
-                        if (mediaPlayer.CurrentSong.SongLyrics.Count > 0)
-                        {
-
-                            foreach (var lyric in mediaPlayer.CurrentSong.SongLyrics)
-                            {
-
-                              
-                                if (lyric.Item1 / 1000 == ((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset))
-                                {
-                                    window.description.Text = lyric.Item2.ToString().Replace("\n", " ");
-                                    if (lyric.Item2.ToString() == "")
-                                        window.description.Text = "[Music]";
-                                }
-
-
-
-                            }
+                            window.description.Text = line;
                         }
+                      
                     }
                 });
             });

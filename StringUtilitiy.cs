@@ -76,7 +76,7 @@ namespace NHMPh_music_player
 
         private static readonly Dictionary<string, string> songException = new Dictionary<string, string>()
         {
-            { "BoneyM-Rasputin", "Rasputin"},{ "BoneyM.-Rasputin", "Rasputin"},{"DMDOKURO-Stained,BrutalCalamity", "Stained, Brutal Calamity"},{"NineInchNails-HurtLyricsVideo","Nine Inch Nails - Hurt " },{"FoolsGarden-LemonTree","Lemon Tree"},{"Fool'sGarden-LemonTree","Lemon Tree"}
+            { "BoneyM-Rasputin", "Rasputin"},{ "BoneyM.-Rasputin", "Rasputin"},{"DMDOKURO-Stained,BrutalCalamity", "Stained, Brutal Calamity"},{"NineInchNails-HurtLyricsVideo","Nine Inch Nails - Hurt " },{"FoolsGarden-LemonTree","Lemon Tree"},{"Fool'sGarden-LemonTree","Lemon Tree"},{"O-Zone-DragosteaDinTei","O-zone"}
         };
         public static string ProcessInvailName(string name)
         {
@@ -94,7 +94,8 @@ namespace NHMPh_music_player
                 return result.Replace(" ", "%20");
             }
             string[] parts = Regex.Split(result, @"(?<=\s-\s)|(?<=\s--\s)|(?<=-\s)");
-            string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO";
+           // string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO";
+            string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|【|】|""[^""]*""|LYRICS|VIDEO";
             parts[0] = Regex.Replace(parts[0], combinedPattern, "");
             parts[1] = Regex.Replace(parts[1], combinedPattern, "");
             if (parts[0].Contains(','))
@@ -197,9 +198,9 @@ namespace NHMPh_music_player
 
             return null;
         }
-       public static List<(int, string)> ExtractAndParseTimestampsAndLyricsToMilliseconds(string text)
+       public static List<(double, string)> ExtractAndParseTimestampsAndLyricsToMilliseconds(string text)
         {
-            List<(int, string)> timestampedLyrics = new List<(int, string)>();
+            List<(double, string)> timestampedLyrics = new List<(double, string)>();
             // Regular expression to match the timestamps and lyrics
             Regex regex = new Regex(@"\[(\d{2}):(\d{2})\.(\d{2})\] (.*)");
             MatchCollection matches = regex.Matches(text);
@@ -211,14 +212,16 @@ namespace NHMPh_music_player
                     // Extract minutes, seconds, and milliseconds from the match
                     int minutes = int.Parse(match.Groups[1].Value);
                     int seconds = int.Parse(match.Groups[2].Value);
-                    int milliseconds = int.Parse(match.Groups[3].Value) * 10; // Convert to milliseconds
+                    int milliseconds = int.Parse(match.Groups[3].Value); // Convert to milliseconds
 
+                    TimeSpan timeSpan = new TimeSpan(0,0,minutes, seconds, milliseconds);
                     // Convert the entire timestamp to milliseconds
-                    int totalMilliseconds = (minutes * 60 * 1000) + (seconds * 1000) + milliseconds;
+                    //  int totalMilliseconds = (minutes * 60 * 1000) + (seconds * 1000) + milliseconds;
+                    double totalSeconds = timeSpan.TotalSeconds;
                     string lyric = match.Groups[4].Value; // Extract the lyric
 
                     // Add the total milliseconds and lyric to the list
-                    timestampedLyrics.Add((totalMilliseconds, lyric));
+                    timestampedLyrics.Add((totalSeconds, lyric));
                 }
             }
 
