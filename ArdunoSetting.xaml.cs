@@ -35,8 +35,10 @@ namespace NHMPh_music_player
         public ArdunoSetting( SpectrumVisualizer spectrumVisualizer)
         {
             InitializeComponent();
-
-            serialPort = new SerialPort("COM3", 115200);
+           /* string[] ports = SerialPort.GetPortNames();
+            SerialPort port = new SerialPort(ports[0]);
+            MessageBox.Show(port.PortName.ToString());*/
+            serialPort = new SerialPort("COM6", 115200);
             try
             {
                 serialPort.Open();
