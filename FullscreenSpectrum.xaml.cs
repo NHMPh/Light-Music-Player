@@ -36,7 +36,7 @@ namespace NHMPh_music_player
         float decreaseRateFactor = 1.2f;
         int[] multipliers = new int[256];
 
-       // System.IO.Ports.SerialPort serialPort;
+        // System.IO.Ports.SerialPort serialPort;
 
         DispatcherTimer timer2 = new DispatcherTimer();
         DispatcherTimer lyricTimer = new DispatcherTimer();
@@ -61,13 +61,13 @@ namespace NHMPh_music_player
         int[] multipliers16 = new int[16];
         int[] buffer = new int[16];
         int[] snow = new int[16];
-      //  LedSpectrum ledSpectrum;
+        //  LedSpectrum ledSpectrum;
 
         public FullscreenSpectrum(MainWindow mainWindow)
         {
 
             InitializeComponent();
-         //   serialPort = new SerialPort("COM3", 115200);
+            //   serialPort = new SerialPort("COM3", 115200);
             /*try
             {
                 serialPort.Open();
@@ -77,7 +77,7 @@ namespace NHMPh_music_player
                 MessageBox.Show(ex.Message);
             }*/
 
-          //  ledSpectrum = new LedSpectrum(16, 20);
+            //  ledSpectrum = new LedSpectrum(16, 20);
             this.KeyDown += FullscreenSpectrum_KeyDown;
             // Closed += FullscreenSpectrum_Closed;
             this.mainWindow = mainWindow;
@@ -90,7 +90,7 @@ namespace NHMPh_music_player
             };
             this.mainWindow.MediaPlayer.OnSongChange += MainWindow_OnSongChange;
             CreateSpectrumBar();
-           
+
             for (int i = 0; i < 256; i++)
             {
 
@@ -123,8 +123,8 @@ namespace NHMPh_music_player
             timer5.Interval = TimeSpan.FromMilliseconds(1);
             timer5.Tick += UpadateSpectrumUpBar;
 
-           // timer6.Interval = TimeSpan.FromMilliseconds(20);
-           // timer6.Tick += UpadateLed;
+            // timer6.Interval = TimeSpan.FromMilliseconds(20);
+            // timer6.Tick += UpadateLed;
 
 
             this.MouseMove += FullscreenSpectrum_MouseMove;
@@ -136,77 +136,22 @@ namespace NHMPh_music_player
             {
                 Dispatcher.Invoke(() =>
                 {
-                    if (mainWindow.MediaPlayer.CurrentSong.SongLyrics != null)
+                    double seconds = mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
+                    var line = mainWindow.MediaPlayer.CurrentSong.GetLyricBytime(seconds);
+                    if (line.Length > 10)
                     {
-
-                        try
-                        {
-                            if (mainWindow.MediaPlayer.CurrentSong._SongLyrics.Captions.Count > 0)
-                            {
-                                double seconds = mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
-                                var caption = mainWindow.MediaPlayer.CurrentSong._SongLyrics.GetByTime(TimeSpan.FromSeconds(seconds));
-
-
-
-                                if (caption.Text.ToString().Length > 10)
-                                {
-                                    this.lyric.FontSize = 60;
-                                }
-                                else if (caption.Text.ToString().Length > 12)
-                                {
-                                    this.lyric.FontSize = 50;
-                                }
-                                else
-                                {
-                                    this.lyric.FontSize = 72;
-                                }
-                                if (isLyrics)
-                                {
-
-                                    this.lyric.Text = caption.Text.Replace("\r", "").Replace("\n", " ");
-                                    postLyric.Text = mainWindow.MediaPlayer.CurrentSong._SongLyrics.GetByTime(TimeSpan.FromSeconds(caption.Offset.TotalSeconds + caption.Duration.TotalSeconds + 1)).Text.Replace("\r", "").Replace("\n", " ");
-
-                                }
-                            }
-                        }
-                        catch
-                        {
-
-                        }
-
-                       
-                           
-                       
-
-                        if (mainWindow.MediaPlayer.CurrentSong.SongLyrics.Count > 0)
-                        {
-                            for (int i = 0; i < mainWindow.MediaPlayer.CurrentSong.SongLyrics.Count; i++)
-                            {
-                                var lyric = mainWindow.MediaPlayer.CurrentSong.SongLyrics.ElementAt(i);
-                                if (lyric.Item2.ToString().Length > 10)
-                                {
-                                    this.lyric.FontSize = 60;
-                                }
-                                else if(lyric.Item2.ToString().Length > 12)
-                                {
-                                    this.lyric.FontSize = 50;
-                                }
-                                else
-                                {
-                                    this.lyric.FontSize = 72;
-                                }
-                                if (lyric.Item1 == ((int)mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset))
-                                {
-                                    this.lyric.Text = lyric.Item2.ToString().Replace("\r", "").Replace("\n", " ");
-                                    if (i != mainWindow.MediaPlayer.CurrentSong.SongLyrics.Count - 1)
-                                        postLyric.Text = mainWindow.MediaPlayer.CurrentSong.SongLyrics.ElementAt(i + 1).Item2;
-                                }
-                            }
-
-                        }
-
-
+                        this.lyric.FontSize = 60;
                     }
+                    else if (line.Length > 12)
+                    {
+                        this.lyric.FontSize = 50;
+                    }
+                    else
+                    {
+                        this.lyric.FontSize = 72;
+                    }
+                    this.lyric.Text = line;
+                    this.postLyric.Text = "";
 
                 });
             });
@@ -215,23 +160,23 @@ namespace NHMPh_music_player
         private void UpadateLed(object sender, EventArgs e)
         {
 
-            
+
             String data = "";
             for (int i = 0; i < 15; i++)
             {
-     
+
                 data += $"{buffer[i]} ";
             }
-            
 
-          
-          //  serialPort.Write(data);
+
+
+            //  serialPort.Write(data);
             //ledSpectrum.DrawSpectrum(buffer, snow);
 
         }
         private void CreateSpectrumLed()
         {
-           // spectrum_ctn.Children.Add(ledSpectrum.LedStripContainer);
+            // spectrum_ctn.Children.Add(ledSpectrum.LedStripContainer);
         }
         private void FullscreenSpectrum_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
@@ -278,9 +223,9 @@ namespace NHMPh_music_player
         {
             timer.Start();
             lyricTimer.Start();
-           // timer4.Start();
-           // timer5.Start();
-           // timer6.Start();
+            // timer4.Start();
+            // timer5.Start();
+            // timer6.Start();
             if (currentUri != null)
             {
                 newImage = new BitmapImage(currentUri);
@@ -343,17 +288,17 @@ namespace NHMPh_music_player
         {
 
             if (isIncrese) return;
-           
+
             for (int i = 0; i < 15; i++)
             {
                 if (buffer[i] > 0)
                 {
                     buffer[i] -= 1;
                 }
-          
+
             }
-       
-         //   ledSpectrum.DrawSpectrum(buffer, snow);
+
+            //   ledSpectrum.DrawSpectrum(buffer, snow);
 
         }
         private void UpadateSpectrumUpBar(object sender, EventArgs e)
@@ -406,13 +351,13 @@ namespace NHMPh_music_player
                 {
                     heightestBand[2 * i] = average;
                 }
-               // if (average == 0) heightestBand[2 * i] = 50;
+                // if (average == 0) heightestBand[2 * i] = 50;
                 var spectrumValue = (average / heightestBand[2 * i]) * 19;
-                spectrumValue =Math.Ceiling (spectrumValue);
-                if(spectrumValue<0) spectrumValue = 0;
+                spectrumValue = Math.Ceiling(spectrumValue);
+                if (spectrumValue < 0) spectrumValue = 0;
                 if (spectrumValue > 19) spectrumValue = 19;
                 Console.WriteLine(spectrumValue);
-                if (spectrumValue > buffer[2 * i]||true)
+                if (spectrumValue > buffer[2 * i] || true)
                 {
 
                     buffer[2 * i] = (int)spectrumValue;
@@ -439,13 +384,13 @@ namespace NHMPh_music_player
                 {
                     heightestBand[2 * i + 1] = average;
                 }
-             //   if (average == 0) heightestBand[2 * i + 1] = 50;
+                //   if (average == 0) heightestBand[2 * i + 1] = 50;
                 spectrumValue = (average / heightestBand[2 * i + 1]) * 19;
                 spectrumValue = Math.Ceiling(spectrumValue);
                 if (spectrumValue < 0) spectrumValue = 0;
                 if (spectrumValue > 19) spectrumValue = 19;
                 Console.WriteLine(spectrumValue);
-                if (spectrumValue > buffer[2 * i + 1]||true)
+                if (spectrumValue > buffer[2 * i + 1] || true)
                 {
 
                     buffer[2 * i + 1] = (int)spectrumValue;
@@ -454,18 +399,18 @@ namespace NHMPh_music_player
                         snow[2 * i + 1] = buffer[2 * i + 1] - 1;
                     }
 
-                   
+
                 }
                 else
                 {
-                    buffer[2*i +1] -= 1;
+                    buffer[2 * i + 1] -= 1;
 
                 }
             }
-            
+
             Console.WriteLine("----------------");
             isIncrese = false;
-          //  ledSpectrum.DrawSpectrum(buffer, snow);
+            //  ledSpectrum.DrawSpectrum(buffer, snow);
         }
 
         private void DrawGraph()
@@ -479,10 +424,8 @@ namespace NHMPh_music_player
 
                 if ((fbands[i] + positiveThreshhold) / positiveThreshhold > spectrumBars[i].Value)
                 {
-                    int nextIndex = i + j;
-                     spectrumBars[i].Value = (((fbands[i] + positiveThreshhold))/positiveThreshhold)*1.5f; // (fbands[i]) * multiplier; //((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier;
+                    spectrumBars[i].Value = (((fbands[i] + positiveThreshhold)) / positiveThreshhold) * 1.5f; // (fbands[i]) * multiplier; //((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier;
                     //spectrumBars[i].Value = (((fbands[nextIndex] + positiveThreshhold + fbands[nextIndex + 1] + positiveThreshhold) / 2) / 60) * 1.5f * multiplier;
-                    j++;
                     decreaserate[i] = 0.005f;
                 }
                 else
@@ -494,10 +437,10 @@ namespace NHMPh_music_player
                     }
                 }
             }
-          
+
         }
 
-     
+
         private void change_bars_color(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
@@ -595,7 +538,7 @@ namespace NHMPh_music_player
         {
             try
             {
-              //  timer3.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
+                //  timer3.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
                     bar.Width = (int)(sender as Slider).Value;
@@ -614,7 +557,7 @@ namespace NHMPh_music_player
         {
             try
             {
-              //  timer4.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
+                //  timer4.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
 
@@ -635,7 +578,7 @@ namespace NHMPh_music_player
         {
             try
             {
-              //  timer5.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
+                //  timer5.Interval = TimeSpan.FromMilliseconds((int)(sender as Slider).Value);
                 foreach (var bar in spectrumBars)
                 {
 
@@ -815,44 +758,44 @@ namespace NHMPh_music_player
             if (mainWindow != null)
                 mainWindow.UIControl.ChangeVolume(volum, volumVisual);
         }
-       /* private void ReleaseMemory()
-        {
-            multipliers = null;
-            thresholdIndex = 0;
-            multiplierLow = 0;
-            multiplierHigh = 0;
-            decreaseRateFactor = 0;
+        /* private void ReleaseMemory()
+         {
+             multipliers = null;
+             thresholdIndex = 0;
+             multiplierLow = 0;
+             multiplierHigh = 0;
+             decreaseRateFactor = 0;
 
-            this.opacity_info = null;
-            this.postLyric = null;
-            this.setting = null;
-            this.songValue = null;
-            this.space_info = null;
-            this.spectrumBars = null;
-            this.spectrum_ctn = null;
-            this.stopresumeimg = null;
-            this.thresholdIndex = 0;
-            this.thumb = null;
-            this.thumbnail = null;
-            this.timer = null;
-            this.volum = null;
-            this.volumVisual = null;
-            this.width_info = null;
-            this.KeyDown -= FullscreenSpectrum_KeyDown;
-            //this.mainWindow= null;
-            this.artist_cover = null;
-            this.background_mod = null;
-            this.decreaserate = null;
-            this.decreaseRateFactor = 0;
-            this.des = null;
-            this.filter = null;
-            this.height_info = null;
-            this.lable = null;
-            this.loop_img = null;
-            this.lyric = null;
+             this.opacity_info = null;
+             this.postLyric = null;
+             this.setting = null;
+             this.songValue = null;
+             this.space_info = null;
+             this.spectrumBars = null;
+             this.spectrum_ctn = null;
+             this.stopresumeimg = null;
+             this.thresholdIndex = 0;
+             this.thumb = null;
+             this.thumbnail = null;
+             this.timer = null;
+             this.volum = null;
+             this.volumVisual = null;
+             this.width_info = null;
+             this.KeyDown -= FullscreenSpectrum_KeyDown;
+             //this.mainWindow= null;
+             this.artist_cover = null;
+             this.background_mod = null;
+             this.decreaserate = null;
+             this.decreaseRateFactor = 0;
+             this.des = null;
+             this.filter = null;
+             this.height_info = null;
+             this.lable = null;
+             this.loop_img = null;
+             this.lyric = null;
 
 
-        }*/
+         }*/
     }
 
 }

@@ -106,11 +106,11 @@ namespace NHMPh_music_player
                     {
                         double seconds = mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
                         string line = mediaPlayer.CurrentSong.GetLyricBytime(seconds);
-                        if(line != "")
+                        if (line != "")
                         {
                             window.description.Text = line;
                         }
-                      
+
                     }
                 });
             });
@@ -121,6 +121,7 @@ namespace NHMPh_music_player
             {
                 window.Dispatcher.Invoke(() =>
                 {
+
                     if (mediaPlayer.PlaybackState == PlaybackState.Playing && MusicSetting.isSpectrum)
                     {
                         visualizer.UpadateSpectrumBar15();

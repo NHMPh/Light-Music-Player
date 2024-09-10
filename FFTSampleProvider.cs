@@ -1,13 +1,14 @@
 ﻿using NAudio.Dsp;
 using NAudio.Wave;
 using System;
+using System.Windows;
 
 namespace NHMPh_music_player
 {
     public class FFTSampleProvider : ISampleProvider
     {
         private readonly ISampleProvider source;
-        private readonly int fftLength =2048; // Must be a power of 2
+        private readonly int fftLength = 2048; // Must be a power of 2
         private readonly Complex[] fftBuffer;
         private float[] sampleBuffer;
         private double[] magnitude;
@@ -30,7 +31,7 @@ namespace NHMPh_music_player
         {
             int samplesRead = source.Read(buffer, offset, count);
 
-            
+
 
             for (int i = 0; i < samplesRead; i++)
             {
@@ -49,28 +50,31 @@ namespace NHMPh_music_player
                     for (int j = 0; j < fftLength; j++)
                     {
                         magnitude[j] = Math.Sqrt(Math.Pow(fftBuffer[j].X, 2) + Math.Pow(fftBuffer[j].Y, 2));
+                      
                         magnitude[j] = 20 * Math.Log10(magnitude[j]);
-                    if (magnitude[j] < -70)
-                    {
-                        magnitude[j] =-70; // Represents -Infinity dB, or 0 in linear scale
-                    }
+                      
+                        /*  if (magnitude[j] > 80)
+                          {
+                              magnitude[j] = 80; // Represents -Infinity dB, or 0 in linear scale
+                          }*/
+
                     }
 
                     // FFT data is now in fftBuffer. Process it as needed.
 
                     //  visualizer.UpdateGraph(magnitude);
 
-                    //  Console.WriteLine(magnitude[0]);
+                  
 
-                   
+
                     visualizer.UpdateGraph(magnitude);
                     bufferPos = 0; // Reset buffer position
                 }
             }
-          
-           
-               
-          
+
+
+
+
 
             return samplesRead;
         }

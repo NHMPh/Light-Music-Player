@@ -35,10 +35,10 @@ namespace NHMPh_music_player
         public ArdunoSetting( SpectrumVisualizer spectrumVisualizer)
         {
             InitializeComponent();
-           /* string[] ports = SerialPort.GetPortNames();
+            string[] ports = SerialPort.GetPortNames();
             SerialPort port = new SerialPort(ports[0]);
-            MessageBox.Show(port.PortName.ToString());*/
-            serialPort = new SerialPort("COM6", 115200);
+          //  MessageBox.Show(port.PortName.ToString());
+            serialPort = new SerialPort(port.PortName, 115200);
             try
             {
                 serialPort.Open();
@@ -50,16 +50,32 @@ namespace NHMPh_music_player
             ledSpectrum = new LedSpectrum(1, 20, 30, 19, 0);
             this.MouseDown += Window_MouseDown;
             Spectrum_ctn.Children.Add(ledSpectrum.LedStripContainer);
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 19; i++)
             {
                 ledSpectrum.LedStrips[0].Leds[i].LedDisplay.Click += LedDisplay_Click;
             }
-
+            ledSpectrum.LedStrips[0].Leds[19].LedDisplay.Click += LedDisplay_ClickFull; ;
             this.spectrumVisualizer = spectrumVisualizer;
             timer6.Interval = TimeSpan.FromMilliseconds(20);
             timer6.Tick += UpadateLed;
             timer6.Start();
         }
+
+        private void LedDisplay_ClickFull(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
+
+            if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                for (int i =0 ; i < 20; i++)
+                {
+                    ledSpectrum.LedStrips[0].Leds[i].LedDisplay.Background = new SolidColorBrush(Color.FromArgb(colorDialog.Color.A, colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B));
+                }
+    
+
+            }
+        }
+
         private void UpadateLed(object sender, EventArgs e)
         {
 

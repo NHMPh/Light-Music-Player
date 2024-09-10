@@ -22,7 +22,7 @@ namespace NHMPh_music_player
         float[] multipliers = new float[numBars];
 
         MainWindow mainWindow;
-     //   MediaPlayer mediaPlayer;
+        //   MediaPlayer mediaPlayer;
         List<ProgressBar> spectrumBars = new List<ProgressBar>();
         public double[] fbands = new double[2048];
         float[] decreaserate = new float[512];
@@ -45,45 +45,118 @@ namespace NHMPh_music_player
                 heightestBand[i] = 1;
             }
         }
+
+        private double AverageCalculator(int elements, int startIndex)
+        {
+
+            double average = 0;
+            for (int i = 0; i < elements; i++)
+            {
+                double value = 80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[startIndex + i];
+                if(value<0)value = 0;
+                average += value;
+            }
+            return average / (elements);
+        }
         public void UpadateSpectrumBar15()
         {
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 15; i++)
             {
                 double average = 0;
-                for (int j = 0; j <= Math.Pow(2, i); j++)
+                double spectrumValue = 0;
+                switch (i)
                 {
-                    average += 70 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
+                    case 0:
+                        average = (80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[0]);
+                        break;
+                    case 1:
+                        average = (80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[1]);
+                        break;
+                    case 2:
+                        average = (80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[2]);
+                        break;
+                    case 3:
+                        average = AverageCalculator(3, 3);
+                        break;
+                    case 4:
+                        average = AverageCalculator(3, 6);
+                        break;
+                    case 5:
+                        average = AverageCalculator(5, 9);
+                        break;
+                    case 6:
+                        average = AverageCalculator(13, 14);
+                        break;
+                    case 7:
+                        average = AverageCalculator(25, 27);
+                        break;
+                    case 8:
+                        average = AverageCalculator(25, 52);
+                        break;
+                    case 9:
+                        average = AverageCalculator(25, 77);
+                        break;
+                    case 10:
+                        average = AverageCalculator(25, 102);
+                        break;
+                    case 11:
+                        average = AverageCalculator(64, 127);
+                        break;
+                    case 12:
+                        average = AverageCalculator(64,191);
+                        break;
+                    case 13:
+                        average = AverageCalculator(128, 255);
+                        break;
+                    case 14:
+                        average = mainWindow.MediaPlayer.GetMasterPeak();
+                        break;
+
                 }
-                average /= Math.Pow(2, i);
-                if (heightestBand[2 * i] < average)
+                if (heightestBand[i] < average)
                 {
-                    heightestBand[2 * i] = average;
+                    heightestBand[i] = average;
                 }
-                var spectrumValue = (average / heightestBand[2 * i]) * 19;
+                spectrumValue = (average / 60) * 19;
                 spectrumValue = Math.Ceiling(spectrumValue);
                 if (spectrumValue < 0) spectrumValue = 0;
                 if (spectrumValue > 19) spectrumValue = 19;
-                buffer[2 * i] = (int)spectrumValue;
-                average = 0;
-                for (int j = 0; j < Math.Pow(2, i); j++)
-                {
-                    average += 70+fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
-                }
-                if (heightestBand[2 * i + 1] < average)
-                {
-                    heightestBand[2 * i + 1] = average;
-                }
-                spectrumValue = (average / heightestBand[2 * i + 1]) * 19;
-                spectrumValue = Math.Ceiling(spectrumValue);
-                if (spectrumValue < 0) spectrumValue = 0;
-                if (spectrumValue > 19) spectrumValue = 19;
-                buffer[2 * i + 1] = (int)spectrumValue;
+                buffer[i] = (int)spectrumValue;
+                /* double average = 0;
+                 for (int j = 0; j <= Math.Pow(2, i); j++)
+                 {
+                     average += 70 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
+                 }
+                 average /= Math.Pow(2, i);
+                 if (heightestBand[2 * i] < average)
+                 {
+                     heightestBand[2 * i] = average;
+                 }
+                 var spectrumValue = (average / heightestBand[2 * i]) * 19;
+                 spectrumValue = Math.Ceiling(spectrumValue);
+                 if (spectrumValue < 0) spectrumValue = 0;
+                 if (spectrumValue > 19) spectrumValue = 19;
+                 buffer[2 * i] = (int)spectrumValue;
+                 average = 0;
+                 for (int j = 0; j < Math.Pow(2, i); j++)
+                 {
+                     average += 70+fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
+                 }
+                 if (heightestBand[2 * i + 1] < average)
+                 {
+                     heightestBand[2 * i + 1] = average;
+                 }
+                 spectrumValue = (average / heightestBand[2 * i + 1]) * 19;
+                 spectrumValue = Math.Ceiling(spectrumValue);
+                 if (spectrumValue < 0) spectrumValue = 0;
+                 if (spectrumValue > 19) spectrumValue = 19;
+                 buffer[2 * i + 1] = (int)spectrumValue;*/
             }
         }
         public void UpdateGraph(double[] magnitude)
         {
-            fbands = magnitude;         
+            fbands = magnitude;
         }
         private List<ProgressBar> GetExistingProgressBars()
         {
@@ -116,16 +189,17 @@ namespace NHMPh_music_player
         public void DrawGraph()
         {
 
-            int positiveThreshhold = 70;
-            for (int i = 0, j = 0; i <128; i++)
+            int positiveThreshhold = 80;
+            for (int i = 0, j = 0; i < 128; i++)
             {
                 float multiplier = multipliers[i];
 
-                if ((fbands[i] + positiveThreshhold)/ positiveThreshhold > spectrumBars[i].Value)
+                if ((fbands[i]+ positiveThreshhold) / positiveThreshhold > spectrumBars[i].Value)
                 {
                     int nextIndex = i + j;
-                   // spectrumBars[i].Value = (((fbands[i] + positiveThreshhold))/60)*1.5f; // (fbands[i]) * multiplier; //((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier;
-                    spectrumBars[i].Value = (((fbands[nextIndex] + positiveThreshhold + fbands[nextIndex + 1] + positiveThreshhold) / 2)/ positiveThreshhold) *1.5f * multiplier ;
+                    // spectrumBars[i].Value = (((fbands[i] + positiveThreshhold))/60)*1.5f; // (fbands[i]) * multiplier; //((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier;
+                    spectrumBars[i].Value = (((fbands[nextIndex]  + fbands[nextIndex + 1] +2*positiveThreshhold) / 2) / positiveThreshhold) * 1.5f * multiplier;
+                    //MessageBox.Show(fbands[i].ToString());
                     j++;
                     decreaserate[i] = 0.005f;
                 }
@@ -144,7 +218,7 @@ namespace NHMPh_music_player
             mainWindow.spectrum_ctn.Children.Clear();
             for (int i = 0; i < 128; i++)
             {
-               
+
                 ProgressBar progressBar = new ProgressBar()
                 {
                     BorderThickness = new Thickness(0),
@@ -167,71 +241,71 @@ namespace NHMPh_music_player
 
 
         }
-      /*  private double[] FFT(double[] data)
-        {
-            int fftLength = data.Length;
-            System.Numerics.Complex[] fftComplex = new System.Numerics.Complex[fftLength];
-            for (int i = 0; i < fftLength; i++)
-            {
-                fftComplex[i] = new System.Numerics.Complex(data[i], 0.0);
-            }
-            Accord.Math.FourierTransform.FFT(fftComplex, Accord.Math.FourierTransform.Direction.Forward);
-            //    FastFourierTransform.FFT(true, (int)Math.Log(fftLength, 2.0), fftComplex);
+        /*  private double[] FFT(double[] data)
+          {
+              int fftLength = data.Length;
+              System.Numerics.Complex[] fftComplex = new System.Numerics.Complex[fftLength];
+              for (int i = 0; i < fftLength; i++)
+              {
+                  fftComplex[i] = new System.Numerics.Complex(data[i], 0.0);
+              }
+              Accord.Math.FourierTransform.FFT(fftComplex, Accord.Math.FourierTransform.Direction.Forward);
+              //    FastFourierTransform.FFT(true, (int)Math.Log(fftLength, 2.0), fftComplex);
 
-            // Calculate the magnitude spectrum and only return the first half
-            double[] magnitude = new double[fftLength];
-            for (int i = 0; i < fftLength; i++)
-            {
-                magnitude[i] = fftComplex[i].Magnitude;//Math.Sqrt(Math.Pow(fftComplex[i].X, 2) + Math.Pow(fftComplex[i].Y, 2));
-                if (magnitude[i] != 0)
-                {
-                    magnitude[i] = 20 * Math.Log10((double)magnitude[i]);
-                    //   if (magnitude[i] < -60)
-                    //    magnitude[i] = -60;
+              // Calculate the magnitude spectrum and only return the first half
+              double[] magnitude = new double[fftLength];
+              for (int i = 0; i < fftLength; i++)
+              {
+                  magnitude[i] = fftComplex[i].Magnitude;//Math.Sqrt(Math.Pow(fftComplex[i].X, 2) + Math.Pow(fftComplex[i].Y, 2));
+                  if (magnitude[i] != 0)
+                  {
+                      magnitude[i] = 20 * Math.Log10((double)magnitude[i]);
+                      //   if (magnitude[i] < -60)
+                      //    magnitude[i] = -60;
 
-                }
-                else
-                {
-                    magnitude[i] = -60;
-                }
-                //Console.Write();
-
-
+                  }
+                  else
+                  {
+                      magnitude[i] = -60;
+                  }
+                  //Console.Write();
 
 
 
-            }
 
-            return magnitude;
 
-        }*/
-      /*  private double[] GetFFTdata()
-        {
+              }
 
-            int desireSamples =1024;
-            double[] doublesData = new double[desireSamples];
-            byte[] buffer = new byte[desireSamples * 4];
-            int bytesRead;
-            long originalPosition = mediaPlayer.Wave.Position;
-            bytesRead = mediaPlayer.Wave.Read(buffer, 0, buffer.Length);
-          
-            mediaPlayer.Wave.Position = originalPosition;
-            for (int i = 0; i < bytesRead / 4; i++)
-            {
-                doublesData[i] = BitConverter.ToSingle(buffer, i * 4);
+              return magnitude;
 
-            }
+          }*/
+        /*  private double[] GetFFTdata()
+          {
 
-            // If bytesRead is less than desireSamples * 4, fill the rest of doublesData with zeros
-            if (bytesRead < buffer.Length)
-            {
-                for (int i = bytesRead / 4; i < desireSamples; i++)
-                {
-                    doublesData[i] = 0;
-                }
-            }
+              int desireSamples =1024;
+              double[] doublesData = new double[desireSamples];
+              byte[] buffer = new byte[desireSamples * 4];
+              int bytesRead;
+              long originalPosition = mediaPlayer.Wave.Position;
+              bytesRead = mediaPlayer.Wave.Read(buffer, 0, buffer.Length);
 
-            return FFT(doublesData);
-        }*/
+              mediaPlayer.Wave.Position = originalPosition;
+              for (int i = 0; i < bytesRead / 4; i++)
+              {
+                  doublesData[i] = BitConverter.ToSingle(buffer, i * 4);
+
+              }
+
+              // If bytesRead is less than desireSamples * 4, fill the rest of doublesData with zeros
+              if (bytesRead < buffer.Length)
+              {
+                  for (int i = bytesRead / 4; i < desireSamples; i++)
+                  {
+                      doublesData[i] = 0;
+                  }
+              }
+
+              return FFT(doublesData);
+          }*/
     }
 }

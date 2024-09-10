@@ -1,4 +1,6 @@
-﻿using NAudio.Wave;
+﻿using Accord.Math.Distances;
+using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -18,6 +20,8 @@ namespace NHMPh_music_player
         public event EventHandler OnSongChange;
         public event EventHandler OnPositionChange;
         private SpectrumVisualizer visualizer;
+        MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+      
         public VideoInfo CurrentSong { get { return currentSong; } set { currentSong = value; } }
         public WaveChannel32 Wave { get { return wave; } set { wave = value; } }
         public PlaybackState PlaybackState { get { return output.PlaybackState; } }
@@ -26,6 +30,7 @@ namespace NHMPh_music_player
         public float Volume { set { output.Volume = (float)value; } }
         public MediaPlayer(MainWindow mainWindow, SpectrumVisualizer visualizer)
         {
+            
             this.mainWindow = mainWindow;
             this.visualizer = visualizer;
         }
@@ -52,6 +57,7 @@ namespace NHMPh_music_player
 
         public MediaPlayer(VideoInfo videoInfo)
         {
+         
             currentSong = videoInfo;
         }
 
@@ -107,6 +113,12 @@ namespace NHMPh_music_player
 
             mainWindow.songProgress.Value = wave.CurrentTime.TotalMilliseconds;
             OnPositionChange?.Invoke(this, null);
+        }
+
+        public int GetMasterPeak()
+        {
+           var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+            return (int)(60 * device.AudioMeterInformation.MasterPeakValue);
         }
     }
 }

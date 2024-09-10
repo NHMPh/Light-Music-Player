@@ -179,10 +179,9 @@ namespace NHMPh_music_player
                
                 foreach (var lyric in songLyrics)
                 {
-                
                     if (lyric.Item1 < seconds)
                     {
-                       line = lyric.Item2.ToString().Replace("\n", " ");
+                       line = lyric.Item2.ToString().Replace("\n", " ").Replace("\r"," ");
                         if (lyric.Item2.ToString() == "")
                            line = "[Music]";
                     }
@@ -190,10 +189,11 @@ namespace NHMPh_music_player
             }
             else 
             {
-                line= _songLyrics.GetByTime(TimeSpan.FromSeconds(seconds)).Text.Replace("\n", " ");
+                line= _songLyrics.GetByTime(TimeSpan.FromSeconds(seconds)).Text.Replace("\n", " ").Replace("\r"," ");
             }
 
             return line;
         }
+       
     }
 }
