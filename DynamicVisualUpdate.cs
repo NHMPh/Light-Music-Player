@@ -180,7 +180,9 @@ namespace NHMPh_music_player
                         if (mediaPlayer.Wave != null)
                         {
 
-                            window.songProgress.Value = mediaPlayer.Wave.CurrentTime.TotalMilliseconds;
+                          
+                          
+                           window.songProgress.Value = mediaPlayer.Wave.CurrentTime.TotalMilliseconds;
                             if (!MusicSetting.isChosingTimeStap)
                             {
                                 window.thumb.Value = window.songProgress.Value;

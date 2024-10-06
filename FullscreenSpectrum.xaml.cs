@@ -136,22 +136,31 @@ namespace NHMPh_music_player
             {
                 Dispatcher.Invoke(() =>
                 {
-                    double seconds = mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
-                    var line = mainWindow.MediaPlayer.CurrentSong.GetLyricBytime(seconds);
-                    if (line.Length > 10)
+                    if (isLyrics)
                     {
-                        this.lyric.FontSize = 60;
-                    }
-                    else if (line.Length > 12)
-                    {
-                        this.lyric.FontSize = 50;
+                        double seconds = mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
+                        var line = mainWindow.MediaPlayer.CurrentSong.GetLyricBytime(seconds);
+                        if (line.Length > 10)
+                        {
+                            this.lyric.FontSize = 60;
+                        }
+                        else if (line.Length > 12)
+                        {
+                            this.lyric.FontSize = 50;
+                        }
+                        else
+                        {
+                            this.lyric.FontSize = 72;
+                        }
+                        this.lyric.Text = line;
+                        this.postLyric.Text = "";
                     }
                     else
                     {
-                        this.lyric.FontSize = 72;
+                        this.lyric.Text = "";
+                        this.postLyric.Text = "";
                     }
-                    this.lyric.Text = line;
-                    this.postLyric.Text = "";
+                    
 
                 });
             });

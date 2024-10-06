@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Windows.Documents;
-using System.Windows.Media;
 using YoutubeExplode;
 using YoutubeExplode.Videos.ClosedCaptions;
 using YoutubeSearchApi.Net.Models.Youtube;
@@ -153,7 +151,7 @@ namespace NHMPh_music_player
                     GetLyricsLib(mainWindow);
                     return;
                 }
-                    
+                
                 _songLyrics = await youtube.Videos.ClosedCaptions.GetAsync(trackInfo);
                 OnLyricsFound?.Invoke(this, true);
                 mainWindow.lyrics_btn.Width = 20;

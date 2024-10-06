@@ -47,9 +47,10 @@ namespace NHMPh_music_player
             mainWindow.Track.MouseLeftButtonDown += Thumb_MouseLeftButtonDown;
             mainWindow.thumb.GotMouseCapture += Thumb_GotMouseCapture;
             mainWindow.thumb.LostMouseCapture += Thumb_LostMouseCapture;
-
+            mainWindow.volume.Value = mediaPlayer.Volume;
+            mainWindow.volumVisual.Value = mainWindow.volume.Value;
             mainWindow.volume.ValueChanged += Volume_ValueChanged;
-
+            
             mainWindow.searchBar.KeyDown += SearchBarEnterKeyDown;
 
 
@@ -58,6 +59,7 @@ namespace NHMPh_music_player
 
             mainWindow.Topmost = true;
             mainWindow.Icon = new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\Images\\icon.ico"));
+
         }
 
         private void Radio_btn_Click(object sender, RoutedEventArgs e)
@@ -263,6 +265,8 @@ namespace NHMPh_music_player
         public void ChangeVolume(Slider volume, ProgressBar volumeVisual)
         {
             mediaPlayer.Volume = (float)volume.Value;
+            mainWindow.volume.Value = mediaPlayer.Volume;
+            mainWindow.volumVisual.Value = mediaPlayer.Volume;
             volumeVisual.Value = volume.Value;
         }
         private void Thumb_GotMouseCapture(object sender, MouseEventArgs e)
@@ -287,7 +291,12 @@ namespace NHMPh_music_player
         }
         private async void SearchBarEnterKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key != Key.Enter) return;
+            if (e.Key != Key.Enter)
+          
+                
+                
+                
+                return;
 
             string key = (sender as TextBox).Text;
             (sender as TextBox).Text = "";

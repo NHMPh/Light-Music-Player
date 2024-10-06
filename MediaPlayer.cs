@@ -2,6 +2,12 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
+using System.IO;
+using System.IO.Packaging;
+using System.Linq;
+using System.Media;
+using System.Net.Http;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using YoutubeExplode.Videos.Streams;
@@ -12,7 +18,7 @@ namespace NHMPh_music_player
     {
 
         private WaveOutEvent output = new WaveOutEvent();
-        private MediaFoundationReader _mf;
+        private _MediaFoundationReader _mf;
         private WaveChannel32 wave;
         FFTSampleProvider fftProvider;
         private MainWindow mainWindow;
@@ -27,7 +33,7 @@ namespace NHMPh_music_player
         public PlaybackState PlaybackState { get { return output.PlaybackState; } }
 
         public string PlayBackUrl;
-        public float Volume { set { output.Volume = (float)value; } }
+        public float Volume { get { return output.Volume; } set { output.Volume = (float)value; } }
         public MediaPlayer(MainWindow mainWindow, SpectrumVisualizer visualizer)
         {
             
@@ -35,22 +41,24 @@ namespace NHMPh_music_player
             this.visualizer = visualizer;
         }
 
-      
 
         private async Task GetSongStream()
         {
+           
+            Console.WriteLine(currentSong.Url);
             var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
-            var streamUrl = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality().Url;
-            PlayBackUrl = streamUrl;
-            Console.WriteLine(streamUrl);
-            //set _mf for playing audio
-            _mf = new MediaFoundationReader(streamUrl);
-            wave = new WaveChannel32(_mf);
+  
+            var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();//streamManifest.GetMuxedStreams().GetWithHighestVideoQuality().Url;
+            System.IO.Stream stream = await mainWindow.youtube.Videos.Streams.GetAsync(streamUrl);
+            Console.WriteLine(stream.Length);    
+            _mf = new _MediaFoundationReader(streamUrl.Url);                                                          //  PlayBackUrl = streamUrl;
+            wave = new NAudio.Wave.WaveChannel32(_mf);
             fftProvider = new FFTSampleProvider(wave.ToSampleProvider(), visualizer);
+           
         }
         private void GetRadioStream()
         {
-            _mf = new MediaFoundationReader(currentSong.Url);
+            _mf = new _MediaFoundationReader(currentSong.Url);
             wave = new WaveChannel32(_mf);
             fftProvider = new FFTSampleProvider(wave.ToSampleProvider(), visualizer);
         }
@@ -75,17 +83,26 @@ namespace NHMPh_music_player
             output.Init(fftProvider);
             output.Play();
             mainWindow.status.Text = "Playing";
+        
         }
         public async void PlayMusic()
         {
             MusicSetting.isRadio = false;
             mainWindow.status.Text = "Loading...";
-            await GetSongStream();
+            await Task.Run(() => GetSongStream());
+          
             OnSongChange?.Invoke(this, null);
+         
+            Console.WriteLine("Playing");
+
             output?.Dispose();
+            //output = new WaveOut();
             output.Init(fftProvider);
+
             output.Play();
             mainWindow.status.Text = "Playing";
+    
+
         }
         public void PauseMusic()
         {
@@ -107,6 +124,8 @@ namespace NHMPh_music_player
         }
         public void Seek(int seconds)
         {
+            Console.WriteLine("Stop");
+            
             wave.Position = wave.WaveFormat.AverageBytesPerSecond * seconds;
             if (output.PlaybackState != PlaybackState.Playing)
                 output.Play();

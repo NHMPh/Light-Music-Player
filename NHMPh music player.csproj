@@ -314,8 +314,9 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="YoutubeExplode, Version=6.3.16.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\YoutubeExplode.6.3.16\lib\net461\YoutubeExplode.dll</HintPath>
+    <Reference Include="YoutubeExplode, Version=6.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\YoutubeExplode.6.4.2\lib\net461\YoutubeExplode.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="YoutubeSearchApi.Net, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\YoutubeSearchApi.Net.1.1.1\lib\netstandard2.0\YoutubeSearchApi.Net.dll</HintPath>
@@ -348,6 +349,7 @@
     <Compile Include="VideoInfo.cs" />
     <Compile Include="DynamicVisualUpdate.cs" />
     <Compile Include="_CustomPlaylist.cs" />
+    <Compile Include="_MeadiaFounderReader.cs" />
     <Page Include="ArdunoSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

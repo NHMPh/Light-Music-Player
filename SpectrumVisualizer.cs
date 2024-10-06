@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using NAudio.Dsp;
 using Complex = NAudio.Dsp.Complex;
 using System.Windows.Threading;
+using System.ComponentModel;
 
 namespace NHMPh_music_player
 {
@@ -157,6 +158,8 @@ namespace NHMPh_music_player
         public void UpdateGraph(double[] magnitude)
         {
             fbands = magnitude;
+           /* if (!MusicSetting.isFullScreen)
+                Application.Current.Dispatcher.Invoke(() => DrawGraph());*/
         }
         private List<ProgressBar> GetExistingProgressBars()
         {
@@ -188,11 +191,12 @@ namespace NHMPh_music_player
         }
         public void DrawGraph()
         {
-
+            //0.005f
+            const float decreaseconst = 0.005f;
             int positiveThreshhold = 80;
             for (int i = 0, j = 0; i < 128; i++)
             {
-                float multiplier = multipliers[i];
+                float multiplier = 1.0f;
 
                 if ((fbands[i]+ positiveThreshhold) / positiveThreshhold > spectrumBars[i].Value)
                 {
@@ -201,7 +205,7 @@ namespace NHMPh_music_player
                     spectrumBars[i].Value = (((fbands[nextIndex]  + fbands[nextIndex + 1] +2*positiveThreshhold) / 2) / positiveThreshhold) * 1.5f * multiplier;
                     //MessageBox.Show(fbands[i].ToString());
                     j++;
-                    decreaserate[i] = 0.005f;
+                    decreaserate[i] = decreaseconst;
                 }
                 else
                 {
@@ -212,6 +216,19 @@ namespace NHMPh_music_player
                     }
                 }
             }
+        }
+        public void DecreaseGraph()
+        {
+           /* int positiveThreshhold = 80;
+            for (int i = 0, j = 0; i < 128; i++)
+            {
+                if (spectrumBars[i].Value > 0 && (fbands[i] + positiveThreshhold) / positiveThreshhold < spectrumBars[i].Value)
+                {
+                    spectrumBars[i].Value -= 1 * decreaserate[i];
+                    decreaserate[i] *= decreaseRateFactor;
+                }
+               
+            }*/
         }
         private void CreateSpectrumBar()
         {
