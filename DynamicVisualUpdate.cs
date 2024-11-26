@@ -124,7 +124,7 @@ namespace NHMPh_music_player
 
                     if (mediaPlayer.PlaybackState == PlaybackState.Playing && MusicSetting.isSpectrum)
                     {
-                        visualizer.UpadateSpectrumBar15();
+                       // visualizer.UpadateSpectrumBar15();
                         if (!MusicSetting.isFullScreen)
                             visualizer.DrawGraph();
                     }

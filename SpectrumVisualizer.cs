@@ -51,16 +51,33 @@ namespace NHMPh_music_player
         {
 
             double average = 0;
+            int zeroCount = 0;
             for (int i = 0; i < elements; i++)
             {
                 double value = 80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[startIndex + i];
-                if(value<0)value = 0;
-                average += value;
+                if (value < 0)
+                {
+                    value = 0;
+                    zeroCount++;
+                }
+                   
+                 average += value;
             }
-            return average / (elements);
+            int divder = elements;
+            if(divder<=0) return 0;
+            return average / (elements-zeroCount);
         }
-        public void UpadateSpectrumBar15()
+        public void UpadateSpectrumBar15(double[] magnitude)
         {
+            //for(int i =0; i < 14; i++)
+            //{
+            //    int spectrumValue = (int)((magnitude[i] + 150) / 150 * 19);        
+            //     if (spectrumValue < 0) spectrumValue = 0;
+            //     if (spectrumValue > 19) spectrumValue = 19;
+            //    buffer[i] = spectrumValue;
+
+            //}
+
 
             for (int i = 0; i < 15; i++)
             {
@@ -69,13 +86,13 @@ namespace NHMPh_music_player
                 switch (i)
                 {
                     case 0:
-                        average = (80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[0]);
+                        average = (50 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[0]);
                         break;
                     case 1:
-                        average = (80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[1]);
+                        average = (50 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[1]);
                         break;
                     case 2:
-                        average = (80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[2]);
+                        average = (50 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[2]);
                         break;
                     case 3:
                         average = AverageCalculator(3, 3);
@@ -105,7 +122,7 @@ namespace NHMPh_music_player
                         average = AverageCalculator(64, 127);
                         break;
                     case 12:
-                        average = AverageCalculator(64,191);
+                        average = AverageCalculator(64, 191);
                         break;
                     case 13:
                         average = AverageCalculator(128, 255);
@@ -153,8 +170,8 @@ namespace NHMPh_music_player
                  if (spectrumValue < 0) spectrumValue = 0;
                  if (spectrumValue > 19) spectrumValue = 19;
                  buffer[2 * i + 1] = (int)spectrumValue;*/
+                 }
             }
-        }
         public void UpdateGraph(double[] magnitude)
         {
             fbands = magnitude;

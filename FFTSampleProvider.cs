@@ -62,14 +62,28 @@ namespace NHMPh_music_player
 
                     // FFT data is now in fftBuffer. Process it as needed.
 
-                    //  visualizer.UpdateGraph(magnitude);
+                    // Aggregate into 14 bands
+                    double[] bandMagnitudes = new double[14];
+                    int bandWidth = 256 / 14;
+                    for (int band = 0; band < 14; band++)
+                    {
+                        double sum = 0;
+                        for (int j = band * bandWidth; j < (band + 1) * bandWidth; j++)
+                        {
+                            sum += magnitude[j];
+                        }
+                        bandMagnitudes[band] = sum / bandWidth;
+                    }
 
-                  
+
 
 
                     visualizer.UpdateGraph(magnitude);
+                    visualizer.UpadateSpectrumBar15(magnitude);
+
                     bufferPos = 0; // Reset buffer position
                 }
+
             }
 
 
