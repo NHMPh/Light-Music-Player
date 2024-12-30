@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using System.Windows.Media;
@@ -47,11 +46,11 @@ namespace NHMPh_music_player
             }
         }
 
-        private double AverageCalculator(int elements, int startIndex)
+        private double AverageCalculator(int startIndex, int endIndex)
         {
-
             double average = 0;
             int zeroCount = 0;
+            int elements = endIndex - startIndex;
             for (int i = 0; i < elements; i++)
             {
                 double value = 80 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[startIndex + i];
@@ -60,25 +59,15 @@ namespace NHMPh_music_player
                     value = 0;
                     zeroCount++;
                 }
-                   
-                 average += value;
+                average += value;
             }
-            int divder = elements;
-            if(divder<=0) return 0;
-            return average / (elements-zeroCount);
+            if (elements <= 0 || average <= 0) 
+                return 0;
+            return average / (elements - zeroCount);
         }
+
         public void UpadateSpectrumBar15(double[] magnitude)
         {
-            //for(int i =0; i < 14; i++)
-            //{
-            //    int spectrumValue = (int)((magnitude[i] + 150) / 150 * 19);        
-            //     if (spectrumValue < 0) spectrumValue = 0;
-            //     if (spectrumValue > 19) spectrumValue = 19;
-            //    buffer[i] = spectrumValue;
-
-            //}
-
-
             for (int i = 0; i < 15; i++)
             {
                 double average = 0;
@@ -86,92 +75,66 @@ namespace NHMPh_music_player
                 switch (i)
                 {
                     case 0:
-                        average = (50 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[0]);
+                        average = AverageCalculator(0, 4);
                         break;
                     case 1:
-                        average = (50 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[1]);
+                        average = AverageCalculator(4, 5);
                         break;
                     case 2:
-                        average = (50 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[2]);
+                        average = AverageCalculator(5, 8);
                         break;
                     case 3:
-                        average = AverageCalculator(3, 3);
+                        average = AverageCalculator(8, 14);
                         break;
                     case 4:
-                        average = AverageCalculator(3, 6);
+                        average = AverageCalculator(14, 24);
                         break;
                     case 5:
-                        average = AverageCalculator(5, 9);
+                        average = AverageCalculator(24, 45);
                         break;
                     case 6:
-                        average = AverageCalculator(13, 14);
+                        average = AverageCalculator(45, 88);
                         break;
                     case 7:
-                        average = AverageCalculator(25, 27);
+                        average = AverageCalculator(88, 173);
                         break;
                     case 8:
-                        average = AverageCalculator(25, 52);
+                        average = AverageCalculator(173, 180);
                         break;
                     case 9:
-                        average = AverageCalculator(25, 77);
+                        average = AverageCalculator(180, 197);
                         break;
                     case 10:
-                        average = AverageCalculator(25, 102);
+                        average = AverageCalculator(197, 216);
                         break;
                     case 11:
-                        average = AverageCalculator(64, 127);
+                        average = AverageCalculator(216, 271);
                         break;
                     case 12:
-                        average = AverageCalculator(64, 191);
+                        average = AverageCalculator(271, 327);
                         break;
                     case 13:
-                        average = AverageCalculator(128, 255);
+                        average = AverageCalculator(327, 380);
                         break;
                     case 14:
-                        average = mainWindow.MediaPlayer.GetMasterPeak();
+                        average = AverageCalculator(380, 435);
                         break;
-
                 }
                 if (heightestBand[i] < average)
                 {
                     heightestBand[i] = average;
                 }
-                spectrumValue = (average / 60) * 19;
+                if(i==0)
+                spectrumValue = (average / 65) * 19;
+                else
+                    spectrumValue = (average / 50) * 19;
                 spectrumValue = Math.Ceiling(spectrumValue);
                 if (spectrumValue < 0) spectrumValue = 0;
                 if (spectrumValue > 19) spectrumValue = 19;
                 buffer[i] = (int)spectrumValue;
-                /* double average = 0;
-                 for (int j = 0; j <= Math.Pow(2, i); j++)
-                 {
-                     average += 70 + mainWindow.DynamicVisualUpdate.Visualizer.fbands[(int)(2 * (Math.Pow(2, i) - 1 + j))];
-                 }
-                 average /= Math.Pow(2, i);
-                 if (heightestBand[2 * i] < average)
-                 {
-                     heightestBand[2 * i] = average;
-                 }
-                 var spectrumValue = (average / heightestBand[2 * i]) * 19;
-                 spectrumValue = Math.Ceiling(spectrumValue);
-                 if (spectrumValue < 0) spectrumValue = 0;
-                 if (spectrumValue > 19) spectrumValue = 19;
-                 buffer[2 * i] = (int)spectrumValue;
-                 average = 0;
-                 for (int j = 0; j < Math.Pow(2, i); j++)
-                 {
-                     average += 70+fbands[(int)(2 * (Math.Pow(2, i) - 1 + j)) + 1];
-                 }
-                 if (heightestBand[2 * i + 1] < average)
-                 {
-                     heightestBand[2 * i + 1] = average;
-                 }
-                 spectrumValue = (average / heightestBand[2 * i + 1]) * 19;
-                 spectrumValue = Math.Ceiling(spectrumValue);
-                 if (spectrumValue < 0) spectrumValue = 0;
-                 if (spectrumValue > 19) spectrumValue = 19;
-                 buffer[2 * i + 1] = (int)spectrumValue;*/
-                 }
             }
+        }
+
         public void UpdateGraph(double[] magnitude)
         {
             fbands = magnitude;

@@ -43,7 +43,7 @@ namespace NHMPh_music_player
                     for (int j = 0; j < fftLength; j++)
                     {
                         fftBuffer[j].X = (float)(sampleBuffer[j] * FastFourierTransform.BlackmannHarrisWindow(j, fftLength));
-                        fftBuffer[j].Y = 0; // Imaginary part is zero for real inputs
+                        fftBuffer[j].Y = 0; 
                     }
 
                     FastFourierTransform.FFT(true, (int)Math.Log(fftLength, 2.0), fftBuffer);
@@ -51,45 +51,17 @@ namespace NHMPh_music_player
                     {
                         magnitude[j] = Math.Sqrt(Math.Pow(fftBuffer[j].X, 2) + Math.Pow(fftBuffer[j].Y, 2));
                       
-                        magnitude[j] = 20 * Math.Log10(magnitude[j]);
-                      
-                        /*  if (magnitude[j] > 80)
-                          {
-                              magnitude[j] = 80; // Represents -Infinity dB, or 0 in linear scale
-                          }*/
+                        magnitude[j] = 20 * Math.Log10(magnitude[j]);      
 
                     }
-
-                    // FFT data is now in fftBuffer. Process it as needed.
-
-                    // Aggregate into 14 bands
-                    double[] bandMagnitudes = new double[14];
-                    int bandWidth = 256 / 14;
-                    for (int band = 0; band < 14; band++)
-                    {
-                        double sum = 0;
-                        for (int j = band * bandWidth; j < (band + 1) * bandWidth; j++)
-                        {
-                            sum += magnitude[j];
-                        }
-                        bandMagnitudes[band] = sum / bandWidth;
-                    }
-
-
-
 
                     visualizer.UpdateGraph(magnitude);
                     visualizer.UpadateSpectrumBar15(magnitude);
 
-                    bufferPos = 0; // Reset buffer position
+                    bufferPos = 0;
                 }
 
             }
-
-
-
-
-
             return samplesRead;
         }
     }

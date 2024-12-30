@@ -317,8 +317,8 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="YoutubeExplode, Version=6.4.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\YoutubeExplode.6.4.4\lib\net461\YoutubeExplode.dll</HintPath>
+    <Reference Include="YoutubeExplode, Version=6.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\YoutubeExplode.6.5.0\lib\netstandard2.0\YoutubeExplode.dll</HintPath>
     </Reference>
     <Reference Include="YoutubeSearchApi.Net, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\YoutubeSearchApi.Net.1.1.1\lib\netstandard2.0\YoutubeSearchApi.Net.dll</HintPath>
