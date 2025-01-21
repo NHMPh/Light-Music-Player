@@ -90,12 +90,12 @@ namespace NHMPh_music_player
             string result = name;
             if (!result.Contains("-"))
             {
-                result = Regex.Replace(result, @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|★", "");
+                result = Regex.Replace(result, @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|★|!", "");
                 return result.Replace(" ", "%20");
             }
             string[] parts = Regex.Split(result, @"(?<=\s-\s)|(?<=\s--\s)|(?<=-\s)");
            // string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO";
-            string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|【|】|""[^""]*""|LYRICS|VIDEO|★";
+            string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|【|】|""[^""]*""|LYRICS|VIDEO|★|!";
             parts[0] = Regex.Replace(parts[0], combinedPattern, "");
             parts[1] = Regex.Replace(parts[1], combinedPattern, "");
             if (parts[0].Contains(','))

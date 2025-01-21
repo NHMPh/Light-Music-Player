@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Windows;
 using YoutubeExplode;
 using YoutubeExplode.Videos.ClosedCaptions;
 using YoutubeSearchApi.Net.Models.Youtube;
@@ -105,12 +106,25 @@ namespace NHMPh_music_player
                     // Send GET request to a URL
                     HttpResponseMessage response = await client.GetAsync($"https://lrclib.net/api/search?q={songName}");
                     Console.WriteLine($"https://lrclib.net/api/search?q={songName}&duration={duration}");
+                  
                     // Check if the response is successful
                     if (response.IsSuccessStatusCode)
                     {
                       
                         string responseBody = await response.Content.ReadAsStringAsync();
-                        songLyrics=StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds( JArray.Parse(responseBody)[0]["syncedLyrics"].ToString().Trim());
+                        var arrayResponse = JArray.Parse(responseBody);
+                        for ( int i = 0; i < arrayResponse.Count; i++)
+                        {
+                            var txt = arrayResponse[i]["syncedLyrics"].ToString().Trim();
+                           
+                            if (txt != "")
+                            {   
+                                songLyrics = StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds(txt);
+                                break;
+                            }
+
+                        }
+                       
                         Console.WriteLine(songLyrics.Count);
                         Console.WriteLine(songLyrics.First());
                         OnLyricsFound?.Invoke(this, true);
