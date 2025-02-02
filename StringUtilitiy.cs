@@ -76,7 +76,7 @@ namespace NHMPh_music_player
 
         private static readonly Dictionary<string, string> songException = new Dictionary<string, string>()
         {
-            { "BoneyM-Rasputin", "Rasputin"},{ "BoneyM.-Rasputin", "Rasputin"},{"DMDOKURO-Stained,BrutalCalamity", "Stained, Brutal Calamity"},{"NineInchNails-HurtLyricsVideo","Nine Inch Nails - Hurt " },{"FoolsGarden-LemonTree","Lemon Tree"},{"Fool'sGarden-LemonTree","Lemon Tree"},{"O-Zone-DragosteaDinTei","O-zone"}
+            { "WITHYOU", "With You Hoaprox"}, { "BoneyM-Rasputin", "Rasputin"},{ "BoneyM.-Rasputin", "Rasputin"},{"DMDOKURO-Stained,BrutalCalamity", "Stained, Brutal Calamity"},{"NineInchNails-HurtLyricsVideo","Nine Inch Nails - Hurt " },{"FoolsGarden-LemonTree","Lemon Tree"},{"Fool'sGarden-LemonTree","Lemon Tree"},{"O-Zone-DragosteaDinTei","O-zone"}
         };
         public static string ProcessInvailName(string name)
         {
@@ -91,6 +91,7 @@ namespace NHMPh_music_player
             if (!result.Contains("-"))
             {
                 result = Regex.Replace(result, @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|★|!", "");
+                try { result = songException[result.Replace(" ", "")]; } catch { };
                 return result.Replace(" ", "%20");
             }
             string[] parts = Regex.Split(result, @"(?<=\s-\s)|(?<=\s--\s)|(?<=-\s)");
@@ -108,6 +109,7 @@ namespace NHMPh_music_player
             }
             parts[1] = ReplaceNumbersWithWords(parts[1]);
             string processName = parts[0] + "" + parts[1];
+            Console.WriteLine(processName.Replace(" ", ""));
             try { processName = songException[processName.Replace(" ", "")]; } catch { }
             return processName.Replace(" ", "%20");
 

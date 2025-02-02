@@ -74,6 +74,7 @@ namespace NHMPh_music_player
                 {
                    
                 }
+
                 var _streamUrl = await mainWindow.ytdl.RunWithOptions(
                      new[] { currentSong.Url },
                      options,

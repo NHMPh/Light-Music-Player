@@ -1,4 +1,5 @@
 ﻿
+using Accord;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,8 @@ using System.Windows;
 using YoutubeExplode;
 using YoutubeExplode.Videos.ClosedCaptions;
 using YoutubeSearchApi.Net.Models.Youtube;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using Video = YoutubeExplode.Videos.Video;
 
 namespace NHMPh_music_player
@@ -39,7 +42,7 @@ namespace NHMPh_music_player
         public string Url { get { return url; } }
         public string Thumbnail { get { return thumbnail; } }
 
-        
+
         public List<(double, string)> SongLyrics { get { return songLyrics; } }
 
         public ClosedCaptionTrack _SongLyrics { get { return _songLyrics; } }
@@ -62,7 +65,7 @@ namespace NHMPh_music_player
             this.title = videoInfo.Title;
             this.description = $"{videoInfo.Author} - {videoInfo.Duration}";
             this.url = videoInfo.Url;
-            this.thumbnail = videoInfo.ThumbnailUrl;           
+            this.thumbnail = videoInfo.ThumbnailUrl;
         }
         public VideoInfo(Video videoInfo)
         {
@@ -84,7 +87,7 @@ namespace NHMPh_music_player
 
 
             var des = await youtube.Videos.GetAsync(this.url);
-            duration =(int)des.Duration.Value.TotalSeconds;
+            duration = (int)des.Duration.Value.TotalSeconds;
             description += "\n" + des.Description;
             if (!MusicSetting.isLyrics)
                 staticVisualUpdate.SetVisualDes(description);
@@ -104,27 +107,37 @@ namespace NHMPh_music_player
                 try
                 {
                     // Send GET request to a URL
-                    HttpResponseMessage response = await client.GetAsync($"https://lrclib.net/api/search?q={songName}");
+                    HttpResponseMessage response = await client.GetAsync($"https://lrclib.net/api/search?q={songName}&duration={duration}");
                     Console.WriteLine($"https://lrclib.net/api/search?q={songName}&duration={duration}");
-                  
+                    Console.WriteLine(1);
                     // Check if the response is successful
                     if (response.IsSuccessStatusCode)
                     {
-                      
+                        Console.WriteLine(2);
                         string responseBody = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine(3);
                         var arrayResponse = JArray.Parse(responseBody);
-                        for ( int i = 0; i < arrayResponse.Count; i++)
+                        Console.WriteLine(4);
+                        int smallestRange = int.MaxValue;
+                        int index = 0;
+                        for (int i = 0; i < arrayResponse.Count; i++)
                         {
-                            var txt = arrayResponse[i]["syncedLyrics"].ToString().Trim();
-                           
-                            if (txt != "")
-                            {   
-                                songLyrics = StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds(txt);
-                                break;
+                            var text = arrayResponse[i]["syncedLyrics"].ToString().Trim();
+                            if (text == "") continue;
+                            songLyrics = StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds(text);
+                            Console.WriteLine($"Index: {i} LastSongTime: {songLyrics.Last().Item1} Song id {arrayResponse[i]["id"]}");
+                            if (Math.Abs( (int)(songLyrics.Last().Item1) - (duration)) < smallestRange)
+                            {
+                                smallestRange = Math.Abs((int)(songLyrics.Last().Item1) - (duration));
+                                index = i;
                             }
 
+
                         }
-                       
+                        var _text = arrayResponse[index]["syncedLyrics"].ToString().Trim();
+                        Console.WriteLine($"Index: {index} LastSongTime: {songLyrics.Last().Item1} Song id {arrayResponse[index]["id"]}");
+                        songLyrics = StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds(_text);
+
                         Console.WriteLine(songLyrics.Count);
                         Console.WriteLine(songLyrics.First());
                         OnLyricsFound?.Invoke(this, true);
@@ -142,7 +155,7 @@ namespace NHMPh_music_player
                         MusicSetting.lyricsOffset = 0;
                         OnLyricsFound?.Invoke(this, false);
 
-                    }                  
+                    }
 
                 }
                 catch (Exception ex)
@@ -165,7 +178,7 @@ namespace NHMPh_music_player
                     GetLyricsLib(mainWindow);
                     return;
                 }
-                
+
                 _songLyrics = await youtube.Videos.ClosedCaptions.GetAsync(trackInfo);
                 OnLyricsFound?.Invoke(this, true);
                 mainWindow.lyrics_btn.Width = 20;
@@ -179,33 +192,33 @@ namespace NHMPh_music_player
             }
 
 
-            
+
 
         }
         public string GetLyricBytime(double seconds)
         {
 
             string line = "";
-            if (songLyrics.Count>0)
+            if (songLyrics.Count > 0)
             {
-               
+
                 foreach (var lyric in songLyrics)
                 {
                     if (lyric.Item1 < seconds)
                     {
-                       line = lyric.Item2.ToString().Replace("\n", " ").Replace("\r"," ");
+                        line = lyric.Item2.ToString().Replace("\n", " ").Replace("\r", " ");
                         if (lyric.Item2.ToString() == "")
-                           line = "[Music]";
+                            line = "[Music]";
                     }
                 }
             }
-            else 
+            else
             {
-                line= _songLyrics.GetByTime(TimeSpan.FromSeconds(seconds)).Text.Replace("\n", " ").Replace("\r"," ");
+                line = _songLyrics.GetByTime(TimeSpan.FromSeconds(seconds)).Text.Replace("\n", " ").Replace("\r", " ");
             }
 
             return line;
         }
-       
+
     }
 }
