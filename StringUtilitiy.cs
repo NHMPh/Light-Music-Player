@@ -11,6 +11,11 @@ namespace NHMPh_music_player
 {
     internal static class StringUtilitiy
     {
+        public static string MakeValidLink(string input)
+        {
+            input = Regex.Replace(input, @"&list=[^&]*", "");
+            return input;
+        }
         //Number to word converter <10
         public static string ReplaceNumbersWithWords(string input)
         {

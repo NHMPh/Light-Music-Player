@@ -63,33 +63,40 @@ namespace NHMPh_music_player
             }
             catch
             {
+                mainWindow.status.Text = "Loading..";
                 if (!File.Exists(".\\yt-dlp.exe")) //if ytdl is not downloaded
                 {
                     string message = "Downloading yt-dlp.exe please wait: https://github.com/yt-dlp/yt-dlp";
                     string caption = "Download yt-dlp";
                     MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    mainWindow.status.Text = "Downloading...";
                     await YoutubeDLSharp.Utils.DownloadYtDlp();
                 }                  
                 else
                 {
                    
                 }
-
+                Console.WriteLine("Make up "+StringUtilitiy.MakeValidLink(currentSong.Url));
                 var _streamUrl = await mainWindow.ytdl.RunWithOptions(
-                     new[] { currentSong.Url },
+                     new[] {StringUtilitiy.MakeValidLink(currentSong.Url) },
                      options,
                      CancellationToken.None
                 );
+                Console.WriteLine("2");
                 url = _streamUrl.Data[0];
             }
 
 
 
-
-            _mf = new _MediaFoundationReader(url);
+            Console.WriteLine(url);
+            _mf = new  _MediaFoundationReader(url);
+            Console.WriteLine("4");
             //  PlayBackUrl = streamUrl;
             wave = new NAudio.Wave.WaveChannel32(_mf);
+            Console.WriteLine("5");
             fftProvider = new FFTSampleProvider(wave.ToSampleProvider(), visualizer);
+            Console.WriteLine("6");
 
         }
         private void GetRadioStream()
