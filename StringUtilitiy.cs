@@ -81,7 +81,7 @@ namespace NHMPh_music_player
 
         private static readonly Dictionary<string, string> songException = new Dictionary<string, string>()
         {
-            { "WITHYOU", "With You Hoaprox"}, { "BoneyM-Rasputin", "Rasputin"},{ "BoneyM.-Rasputin", "Rasputin"},{"DMDOKURO-Stained,BrutalCalamity", "Stained, Brutal Calamity"},{"NineInchNails-HurtLyricsVideo","Nine Inch Nails - Hurt " },{"FoolsGarden-LemonTree","Lemon Tree"},{"Fool'sGarden-LemonTree","Lemon Tree"},{"O-Zone-DragosteaDinTei","O-zone"}
+            { "MiatriSsStartitover-Decemberstoryrewind" ,"MiatriSs%20Начать%20Сначала"} , { "WITHYOU", "With You Hoaprox"}, { "BoneyM-Rasputin", "Rasputin"},{ "BoneyM.-Rasputin", "Rasputin"},{"DMDOKURO-Stained,BrutalCalamity", "Stained, Brutal Calamity"},{"NineInchNails-HurtLyricsVideo","Nine Inch Nails - Hurt " },{"FoolsGarden-LemonTree","Lemon Tree"},{"Fool'sGarden-LemonTree","Lemon Tree"},{"O-Zone-DragosteaDinTei","O-zone"}
         };
         public static string ProcessInvailName(string name)
         {

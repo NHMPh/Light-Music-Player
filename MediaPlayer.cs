@@ -63,7 +63,7 @@ namespace NHMPh_music_player
             }
             catch
             {
-                mainWindow.status.Text = "Loading..";
+                mainWindow.status.Text = "Loading";
                 if (!File.Exists(".\\yt-dlp.exe")) //if ytdl is not downloaded
                 {
                     string message = "Downloading yt-dlp.exe please wait: https://github.com/yt-dlp/yt-dlp";
