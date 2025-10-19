@@ -134,7 +134,7 @@ namespace NHMPh_music_player
 
 
                         }
-                        var _text = arrayResponse[index]["syncedLyrics"].ToString().Trim();
+                        var _text = arrayResponse[0]["syncedLyrics"].ToString().Trim();
                         Console.WriteLine($"Index: {index} LastSongTime: {songLyrics.Last().Item1} Song id {arrayResponse[index]["id"]}");
                         songLyrics = StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds(_text);
 

@@ -56,10 +56,10 @@ namespace NHMPh_music_player
             MusicSetting.isBrowser = true;
             mainWindow.status.Text = "Fetching...";
            
-            string videoUrl = $"{currentSong.Url}&list=RD{StringUtilitiy.ExtractId(currentSong.Url)}&themeRefresh=1";
+            string videoUrl = $"{currentSong.Url}&list=RD{StringUtilitiy.ExtractId(currentSong.Url)}";
            
             // Get all playlist videos
-            var videos = await mainWindow.youtube.Playlists.GetVideosAsync(videoUrl).CollectAsync(25);
+            var videos = await mainWindow.youtube.Playlists.GetVideosAsync(videoUrl).CollectAsync(50);
             foreach (var video in videos)
             {
               

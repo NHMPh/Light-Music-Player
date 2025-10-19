@@ -323,6 +323,9 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="YoutubeDLSharp, Version=1.1.2.25113, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\YoutubeDLSharp.1.1.2\lib\net45\YoutubeDLSharp.dll</HintPath>
+    </Reference>
     <Reference Include="YoutubeExplode, Version=6.5.5.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\YoutubeExplode.6.5.5\lib\netstandard2.0\YoutubeExplode.dll</HintPath>
     </Reference>

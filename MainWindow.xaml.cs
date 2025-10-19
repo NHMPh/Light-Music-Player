@@ -36,8 +36,10 @@ namespace NHMPh_music_player
         {
   ;
             InitializeComponent();
-         
-            youtube = new YoutubeClient();
+            string cookiePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.txt");
+            Cookie[] cookies = ParseCookiesTxt(cookiePath);
+            youtube = new YoutubeClient(CreateYoutubeClientWithCookies(cookies),cookies);
+            youtubeCookies = cookies;
             visualizer = new SpectrumVisualizer(this);
             mediaPlayer = new MediaPlayer(this, visualizer);
             songManger = new SongsManager();
@@ -50,6 +52,27 @@ namespace NHMPh_music_player
         public void LoginToYoutube(YoutubeClient youtubeClient)
         {
             youtube = youtubeClient;
+            string cookiePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.txt");
+            SaveCookiesToTxt(youtubeCookies, cookiePath);
+        }
+        void SaveCookiesToTxt(Cookie[] cookies, string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath, false))
+            {
+                writer.WriteLine("# Netscape HTTP Cookie File");
+                foreach (var c in cookies)
+                {
+                    string domain = c.Domain.StartsWith(".") ? c.Domain : "." + c.Domain;
+                    string flag = c.Domain.StartsWith(".") ? "TRUE" : "FALSE";
+                    string path = string.IsNullOrEmpty(c.Path) ? "/" : c.Path;
+                    string secure = c.Secure ? "TRUE" : "FALSE";
+                    long expiry = c.Expires != DateTime.MinValue
+                        ? new DateTimeOffset(c.Expires).ToUnixTimeSeconds()
+                        : 9999999999; // No expiry fallback
+
+                    writer.WriteLine($"{domain}\t{flag}\t{path}\t{secure}\t{expiry}\t{c.Name}\t{c.Value}");
+                }
+            }
         }
         public void RefreshYoutubeClientHttpClient()
         {
@@ -81,7 +104,7 @@ namespace NHMPh_music_player
 
             var httpClient = new HttpClient(handler, disposeHandler: true);
 
-           // Add browser-like headers
+            // Add browser-like headers
             httpClient.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36");
 
@@ -101,6 +124,50 @@ namespace NHMPh_music_player
             httpClient.DefaultRequestHeaders.Add("upgrade-insecure-requests", "1");
 
             return httpClient;
+        }
+        public Cookie[] ParseCookiesTxt(string filePath)
+        {
+            var cookies = new List<Cookie>();
+
+            if (!File.Exists(filePath))
+                return cookies.ToArray();
+
+            var lines = File.ReadAllLines(filePath);
+
+            foreach (var line in lines)
+            {
+                // Skip comments or empty lines
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+                    continue;
+
+                // Netscape format has 7 fields, tab-separated
+                // domain, flag, path, secure, expiry, name, value
+                var parts = line.Split('\t');
+                if (parts.Length < 7)
+                    continue;
+
+                try
+                {
+                    string domain = parts[0];
+                    string path = parts[2];
+                    bool secure = parts[3].Equals("TRUE", StringComparison.OrdinalIgnoreCase);
+                    string name = parts[5];
+                    string value = parts[6];
+
+                    var cookie = new Cookie(name, value, path, domain)
+                    {
+                        Secure = secure
+                    };
+
+                    cookies.Add(cookie);
+                }
+                catch
+                {
+                    // Ignore malformed lines
+                }
+            }
+
+            return cookies.ToArray();
         }
     }
 

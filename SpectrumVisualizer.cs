@@ -19,6 +19,9 @@ namespace NHMPh_music_player
         const float multiplierLow = 1;//2000;
         const float multiplierHigh = 1;//5000;
         const float decreaseRateFactor = 1.30f;
+        //0.005f
+        const float decreaseconst = 0.010f;
+        int positiveThreshhold = 80;
         float[] multipliers = new float[numBars];
 
         MainWindow mainWindow;
@@ -171,18 +174,16 @@ namespace NHMPh_music_player
         }
         public void DrawGraph()
         {
-            //0.005f
-            const float decreaseconst = 0.010f;
-            int positiveThreshhold = 80;
+            
             for (int i = 0, j = 0; i < 128; i++)
             {
-                float multiplier = 1.0f;
+              
 
                 if ((fbands[i]+ positiveThreshhold) / positiveThreshhold > spectrumBars[i].Value)
                 {
                     int nextIndex = i + j;
                     // spectrumBars[i].Value = (((fbands[i] + positiveThreshhold))/60)*1.5f; // (fbands[i]) * multiplier; //((fbands[nextIndex] + fbands[nextIndex + 1]) / 2) * multiplier;
-                    spectrumBars[i].Value = (((fbands[nextIndex]  + fbands[nextIndex + 1] +2*positiveThreshhold) / 2) / positiveThreshhold) * 1.5f * multiplier;
+                    spectrumBars[i].Value = (((fbands[nextIndex] + fbands[nextIndex + 1] + 2 * positiveThreshhold) / 2) / positiveThreshhold) * 1.5f;
                     //MessageBox.Show(fbands[i].ToString());
                     j++;
                     decreaserate[i] = decreaseconst;

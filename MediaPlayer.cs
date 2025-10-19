@@ -1,4 +1,5 @@
 ﻿using Accord.Math.Distances;
+using AngleSharp.Media;
 using Microsoft.Extensions.Options;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -13,6 +14,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using YoutubeDLSharp;
+using YoutubeDLSharp.Options;
+using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
 
 namespace NHMPh_music_player
@@ -30,7 +34,7 @@ namespace NHMPh_music_player
         public event EventHandler OnPositionChange;
         private SpectrumVisualizer visualizer;
         MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
-
+        YoutubeDL ytdl;
         public VideoInfo CurrentSong { get { return currentSong; } set { currentSong = value; } }
         public WaveChannel32 Wave { get { return wave; } set { wave = value; } }
         public PlaybackState PlaybackState { get { return output.PlaybackState; } }
@@ -39,50 +43,82 @@ namespace NHMPh_music_player
         public float Volume { get { return output.Volume; } set { output.Volume = (float)value; } }
         public MediaPlayer(MainWindow mainWindow, SpectrumVisualizer visualizer)
         {
-
+             ytdl = new YoutubeDL();
             this.mainWindow = mainWindow;
             this.visualizer = visualizer;
         }
+        public async Task<string> GetRr5UrlAsync(string videoUrl)
+        {
+            string cookiePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.txt");
+            var options = new OptionSet() { Format = "bestaudio", GetUrl = true, Cookies = cookiePath };
+            string streamUrl="";
+            await mainWindow.Dispatcher.InvokeAsync(() =>
+            {
+                mainWindow.status.Text = "Reconnecting...";
+            });
+            try
+            {
+                 streamUrl = ytdl.RunWithOptions(
+               new[] { videoUrl },
+               options,
+               CancellationToken.None
+                 ).Result.Data[0];
+            }catch(Exception ex)
+            {
+                await mainWindow.Dispatcher.InvokeAsync(() =>
+                {
+                    mainWindow.status.Text = "Recursive";
+                });
+                await Task.Delay(1000);
+              
+               return await GetRr5UrlAsync(videoUrl);
+            }
 
+            await mainWindow.Dispatcher.InvokeAsync(() =>
+            {
+                mainWindow.status.Text = "Done...";
+            });
+            Console.WriteLine(streamUrl);
+            return streamUrl;
+        }
         private async Task GetSongStream()
         {
 
-            string url="";
+            string url = "";
 
             Console.WriteLine(currentSong.Url);
             try
             {
                 mainWindow.RefreshYoutubeClientHttpClient();
                 var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
-                var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();//streamManifest.GetMuxedStreams().GetWithHighestVideoQuality().Url;
-                System.IO.Stream stream = await mainWindow.youtube.Videos.Streams.GetAsync(streamUrl);
-                Console.WriteLine(stream.Length);
+                var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
                 url = streamUrl.Url;
             }
-            catch(Exception EX)
+            catch (Exception EX)
             {
+
                
-                mainWindow.RefreshYoutubeClientHttpClient();
+                await mainWindow.Dispatcher.InvokeAsync(() =>
+                {
+                    mainWindow.status.Text = "YTDL...";
+                });
                 try
                 {
-                    MessageBox.Show("Refreshed Youtube Client HttpClient. Retrying...");
-                    var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
-                    var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();//streamManifest.GetMuxedStreams().GetWithHighestVideoQuality().Url;
-                    System.IO.Stream stream = await mainWindow.youtube.Videos.Streams.GetAsync(streamUrl);
-                    Console.WriteLine(stream.Length);
-                    url = streamUrl.Url;
+                    url = await GetRr5UrlAsync(currentSong.Url);
                 }
-                catch (Exception EX2)
+                catch (Exception ex3)
                 {
-                    MessageBox.Show(EX2.ToString());
+                    await mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        mainWindow.status.Text = "403";
+                    });
                 }
-                   
-               
+
             }
 
 
 
-            _mf = new  _MediaFoundationReader(url);
+            _mf = new _MediaFoundationReader(url);
             Console.WriteLine("4");
             //  PlayBackUrl = streamUrl;
             wave = new NAudio.Wave.WaveChannel32(_mf);
