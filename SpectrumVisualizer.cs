@@ -18,7 +18,7 @@ namespace NHMPh_music_player
         const int thresholdIndex = 50;
         const float multiplierLow = 1;//2000;
         const float multiplierHigh = 1;//5000;
-        const float decreaseRateFactor = 1.2f;
+        const float decreaseRateFactor = 1.30f;
         float[] multipliers = new float[numBars];
 
         MainWindow mainWindow;
@@ -172,7 +172,7 @@ namespace NHMPh_music_player
         public void DrawGraph()
         {
             //0.005f
-            const float decreaseconst = 0.005f;
+            const float decreaseconst = 0.010f;
             int positiveThreshhold = 80;
             for (int i = 0, j = 0; i < 128; i++)
             {

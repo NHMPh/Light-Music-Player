@@ -19,7 +19,7 @@ namespace NHMPh_music_player
         MainWindow mainWindow;
         MediaPlayer mediaPlayer;
         SongsManager songsManager;
-        FullscreenSpectrum fullscreenSpectrum =null;
+        FullscreenSpectrum fullscreenSpectrum = null;
         ArdunoSetting ardunoSetting = null;
         public UIControl(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager)
         {
@@ -27,7 +27,7 @@ namespace NHMPh_music_player
             this.mediaPlayer = mediaPlayer;
             this.songsManager = songsManager;
 
-             
+
 
             mainWindow.autoplay_btn.Click += AutoplayBtn;
             mainWindow.close_btn.Click += CloseBtn;
@@ -43,6 +43,7 @@ namespace NHMPh_music_player
             mainWindow.skipBtn.Click += SkipBtn;
             mainWindow.spectrum_btn.MouseRightButtonDown += FullSpectrumBtn;
             mainWindow.radio_btn.Click += Radio_btn_Click;
+            mainWindow.login_btn.Click += LoginWindowBtn;
 
             mainWindow.Track.MouseLeftButtonDown += Thumb_MouseLeftButtonDown;
             mainWindow.thumb.GotMouseCapture += Thumb_GotMouseCapture;
@@ -50,7 +51,7 @@ namespace NHMPh_music_player
             mainWindow.volume.Value = mediaPlayer.Volume;
             mainWindow.volumVisual.Value = mainWindow.volume.Value;
             mainWindow.volume.ValueChanged += Volume_ValueChanged;
-            
+
             mainWindow.searchBar.KeyDown += SearchBarEnterKeyDown;
 
 
@@ -62,11 +63,30 @@ namespace NHMPh_music_player
 
         }
 
+        private void LoginWindowBtn(object sender, RoutedEventArgs e)
+        {
+          
+            LoginWindow loginWindow = new LoginWindow();
+            bool? result = loginWindow.ShowDialog();
+            if (result == true)
+            {
+                MessageBox.Show("✅ Login successful!");
+                mainWindow.youtubeCookies = loginWindow.YoutubeCookies;
+                mainWindow.LoginToYoutube(loginWindow.YoutubeClientInstance);
+            }
+            else
+            {
+                MessageBox.Show("❌ Login failed or cancelled.");
+            }
+
+
+        }
+
         private void Radio_btn_Click(object sender, RoutedEventArgs e)
         {
 
-           
-            if (mainWindow.radio_view.Height==0)
+
+            if (mainWindow.radio_view.Height == 0)
             {
                 mainWindow.description.Height = 0;
                 mainWindow.spectrum_ctn.Height = 0;
@@ -78,18 +98,19 @@ namespace NHMPh_music_player
                 {
                     mainWindow.description.Height = 76;
                     mainWindow.spectrum_ctn.Height = 0;
-       
+
 
                 }
                 if (MusicSetting.isSpectrum)
                 {
                     mainWindow.description.Height = 16;
                     mainWindow.spectrum_ctn.Height = 60;
-         
-                };
+
+                }
+                ;
                 mainWindow.radio_view.Height = 0;
             }
-           
+
         }
 
         private void ArdunoBtn(object sender, RoutedEventArgs e)
@@ -97,7 +118,7 @@ namespace NHMPh_music_player
 
             if (ardunoSetting == null)
             {
-              ardunoSetting = new ArdunoSetting(mainWindow.DynamicVisualUpdate.Visualizer);
+                ardunoSetting = new ArdunoSetting(mainWindow.DynamicVisualUpdate.Visualizer);
             }
             ardunoSetting.Show();
 
@@ -202,7 +223,7 @@ namespace NHMPh_music_player
             {
                 window.Close();
             }
-        }       
+        }
         public void SpectrumBtn(object sender, RoutedEventArgs e)
         {
             MusicSetting.isSpectrum = !MusicSetting.isSpectrum;
@@ -211,7 +232,7 @@ namespace NHMPh_music_player
             {
                 mainWindow.description.Height = 76;
                 mainWindow.spectrum_ctn.Height = 0;
-             //   mainWindow.DynamicVisualUpdate.Visualizer.fbands.Clear();
+                //   mainWindow.DynamicVisualUpdate.Visualizer.fbands.Clear();
 
             }
             if (MusicSetting.isSpectrum)
@@ -221,7 +242,8 @@ namespace NHMPh_music_player
                 mainWindow.radio_view.Height = 0;
                 //  UpdateGraph();
                 //  DrawGraph();
-            };
+            }
+            ;
         }
         private void MinimizeBtn(object sender, RoutedEventArgs e)
         {
@@ -232,11 +254,11 @@ namespace NHMPh_music_player
             Console.WriteLine("Press");
             if (!MusicSetting.isFullScreen)
             {
-                if(fullscreenSpectrum == null)
+                if (fullscreenSpectrum == null)
                 {
                     fullscreenSpectrum = new FullscreenSpectrum(mainWindow);
                 }
-                
+
                 MusicSetting.isFullScreen = true;
                 fullscreenSpectrum.Show();
                 fullscreenSpectrum.Reopen();
@@ -247,9 +269,9 @@ namespace NHMPh_music_player
         public void CloseFullScreen()
         {
             MusicSetting.isFullScreen = false;
-           
+
             fullscreenSpectrum.Hide();
-            fullscreenSpectrum.Show();    
+            fullscreenSpectrum.Show();
             fullscreenSpectrum.Hide();
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -292,15 +314,15 @@ namespace NHMPh_music_player
         private async void SearchBarEnterKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Enter)
-          
-                
-                
-                
+
+
+
+
                 return;
 
             string key = (sender as TextBox).Text;
             (sender as TextBox).Text = "";
-            await Searcher.Search(key, songsManager);
+            await Searcher.Search(key, songsManager, mainWindow);
 
             if (mediaPlayer.PlaybackState == PlaybackState.Stopped)
             {

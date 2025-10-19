@@ -13,8 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using YoutubeDLSharp;
-using YoutubeDLSharp.Options;
 using YoutubeExplode.Videos.Streams;
 
 namespace NHMPh_music_player
@@ -46,50 +44,44 @@ namespace NHMPh_music_player
             this.visualizer = visualizer;
         }
 
-        OptionSet options = new OptionSet() { Format = "m4a", GetUrl = true };
         private async Task GetSongStream()
         {
 
-            string url;
+            string url="";
 
             Console.WriteLine(currentSong.Url);
             try
             {
+                mainWindow.RefreshYoutubeClientHttpClient();
                 var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
                 var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();//streamManifest.GetMuxedStreams().GetWithHighestVideoQuality().Url;
                 System.IO.Stream stream = await mainWindow.youtube.Videos.Streams.GetAsync(streamUrl);
                 Console.WriteLine(stream.Length);
                 url = streamUrl.Url;
             }
-            catch
+            catch(Exception EX)
             {
-                mainWindow.status.Text = "Loading";
-                if (!File.Exists(".\\yt-dlp.exe")) //if ytdl is not downloaded
+               
+                mainWindow.RefreshYoutubeClientHttpClient();
+                try
                 {
-                    string message = "Downloading yt-dlp.exe please wait: https://github.com/yt-dlp/yt-dlp";
-                    string caption = "Download yt-dlp";
-                    MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    mainWindow.status.Text = "Downloading...";
-                    await YoutubeDLSharp.Utils.DownloadYtDlp();
-                }                  
-                else
-                {
-                   
+                    MessageBox.Show("Refreshed Youtube Client HttpClient. Retrying...");
+                    var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
+                    var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();//streamManifest.GetMuxedStreams().GetWithHighestVideoQuality().Url;
+                    System.IO.Stream stream = await mainWindow.youtube.Videos.Streams.GetAsync(streamUrl);
+                    Console.WriteLine(stream.Length);
+                    url = streamUrl.Url;
                 }
-                Console.WriteLine("Make up "+StringUtilitiy.MakeValidLink(currentSong.Url));
-                var _streamUrl = await mainWindow.ytdl.RunWithOptions(
-                     new[] {StringUtilitiy.MakeValidLink(currentSong.Url) },
-                     options,
-                     CancellationToken.None
-                );
-                Console.WriteLine("2");
-                url = _streamUrl.Data[0];
+                catch (Exception EX2)
+                {
+                    MessageBox.Show(EX2.ToString());
+                }
+                   
+               
             }
 
 
 
-            Console.WriteLine(url);
             _mf = new  _MediaFoundationReader(url);
             Console.WriteLine("4");
             //  PlayBackUrl = streamUrl;

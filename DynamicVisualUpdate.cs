@@ -52,7 +52,7 @@ namespace NHMPh_music_player
 
             lyricTimer.Start();
             spectrumTimer = new DispatcherTimer();
-            spectrumTimer.Interval = TimeSpan.FromMilliseconds(1); // Set the interval as needed
+            spectrumTimer.Interval = TimeSpan.FromMilliseconds(16); // Set the interval as needed
             spectrumTimer.Tick += async (sender, e) =>
             {
                 await SpectrumUpdate();
