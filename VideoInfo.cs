@@ -123,18 +123,22 @@ namespace NHMPh_music_player
                         for (int i = 0; i < arrayResponse.Count; i++)
                         {
                             var text = arrayResponse[i]["syncedLyrics"].ToString().Trim();
-                            if (text == "") continue;
+                            if (text == "")
+                            {
+                                index++;
+                                continue;
+                            }
                             songLyrics = StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds(text);
                             Console.WriteLine($"Index: {i} LastSongTime: {songLyrics.Last().Item1} Song id {arrayResponse[i]["id"]}");
                             if (Math.Abs( (int)(songLyrics.Last().Item1) - (duration)) < smallestRange)
                             {
                                 smallestRange = Math.Abs((int)(songLyrics.Last().Item1) - (duration));
-                                index = i;
+                                //index = i;
                             }
 
 
                         }
-                        var _text = arrayResponse[0]["syncedLyrics"].ToString().Trim();
+                        var _text = arrayResponse[index]["syncedLyrics"].ToString().Trim();
                         Console.WriteLine($"Index: {index} LastSongTime: {songLyrics.Last().Item1} Song id {arrayResponse[index]["id"]}");
                         songLyrics = StringUtilitiy.ExtractAndParseTimestampsAndLyricsToMilliseconds(_text);
 

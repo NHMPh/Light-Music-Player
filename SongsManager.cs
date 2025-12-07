@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using YoutubeExplode;
 using YoutubeExplode.Common;
 
 namespace NHMPh_music_player
@@ -55,9 +55,10 @@ namespace NHMPh_music_player
           
             MusicSetting.isBrowser = true;
             mainWindow.status.Text = "Fetching...";
-           
-            string videoUrl = $"{currentSong.Url}&list=RD{StringUtilitiy.ExtractId(currentSong.Url)}";
-           
+            mainWindow.RefreshYoutubeClientHttpClient();
+            string videoUrl = $"https://www.youtube.com/watch?v={StringUtilitiy.ExtractId(currentSong.Url)}&list=RD{StringUtilitiy.ExtractId(currentSong.Url)}&start_radio=1";
+            Console.WriteLine(videoUrl);
+            mainWindow.RefreshYoutubeClientHttpClient();
             // Get all playlist videos
             var videos = await mainWindow.youtube.Playlists.GetVideosAsync(videoUrl).CollectAsync(50);
             foreach (var video in videos)

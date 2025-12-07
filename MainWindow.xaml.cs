@@ -36,6 +36,7 @@ namespace NHMPh_music_player
         {
   ;
             InitializeComponent();
+
             string cookiePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.txt");
             Cookie[] cookies = ParseCookiesTxt(cookiePath);
             youtube = new YoutubeClient(CreateYoutubeClientWithCookies(cookies),cookies);
@@ -76,8 +77,9 @@ namespace NHMPh_music_player
         }
         public void RefreshYoutubeClientHttpClient()
         {
-         
+            youtube.Dispose();
             youtube = new YoutubeClient(CreateYoutubeClientWithCookies(youtubeCookies),youtubeCookies);
+           
         }
         private HttpClient CreateYoutubeClientWithCookies(Cookie[] cookies)
         {

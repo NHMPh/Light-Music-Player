@@ -181,9 +181,26 @@ namespace NHMPh_music_player
         {
             MusicSetting.isLyrics = !MusicSetting.isLyrics;
             if (MusicSetting.isLyrics)
-                mainWindow.description.Text = "For more accurate lyrics sync, search \"[song name] + lyrics.\"";
+            {
+                mainWindow.lyricsTextBox.Text = "Intermission";
+                mainWindow.lyricsTextBox.Height = double.NaN;
+                mainWindow.description.Height = 0;
+            }
+
             else
+            {
                 mainWindow.description.Text = mediaPlayer.CurrentSong.Description;
+                mainWindow.lyricsTextBox.Text = "";
+                mainWindow.lyricsTextBox.Height = 0;
+                if(!MusicSetting.isSpectrum)
+                mainWindow.description.Height = 76;
+                else
+                {
+                    mainWindow.description.Height = 16;
+                }
+
+            }
+               
         }
         private void AutoplayBtn(object sender, RoutedEventArgs e)
         {
@@ -230,14 +247,20 @@ namespace NHMPh_music_player
 
             if (!MusicSetting.isSpectrum)
             {
-                mainWindow.description.Height = 76;
+                if (!MusicSetting.isLyrics)
+                    mainWindow.description.Height = 76;
+                else
+                    mainWindow.description.Height = 0;
                 mainWindow.spectrum_ctn.Height = 0;
                 //   mainWindow.DynamicVisualUpdate.Visualizer.fbands.Clear();
 
             }
             if (MusicSetting.isSpectrum)
             {
-                mainWindow.description.Height = 16;
+                if(!MusicSetting.isLyrics)
+                    mainWindow.description.Height = 16;
+                else
+                    mainWindow.description.Height = 0;
                 mainWindow.spectrum_ctn.Height = 60;
                 mainWindow.radio_view.Height = 0;
                 //  UpdateGraph();

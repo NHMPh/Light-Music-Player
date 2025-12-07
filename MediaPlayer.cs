@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
@@ -49,29 +50,66 @@ namespace NHMPh_music_player
         }
         public async Task<string> GetRr5UrlAsync(string videoUrl)
         {
-            string cookiePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.txt");
-            var options = new OptionSet() { Format = "bestaudio", GetUrl = true, Cookies = cookiePath };
-            string streamUrl="";
+            
+            var options = new OptionSet() { Format = "bestaudio", GetUrl = true,  ForceIPv4 = true };
+           // options.AddCustomOption("--cookies", "cookie.txt");
+
+            // cancel if yt-dlp hangs > 30s
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+            string streamUrl ="";
             await mainWindow.Dispatcher.InvokeAsync(() =>
             {
                 mainWindow.status.Text = "Reconnecting...";
             });
             try
             {
-                 streamUrl = ytdl.RunWithOptions(
-               new[] { videoUrl },
+                options.Verbose = true;
+            
+                var result = await ytdl.RunWithOptions(
+               new[] { $"https://www.youtube.com/watch?v={StringUtilitiy.ExtractId(videoUrl)}"},
                options,
-               CancellationToken.None
-                 ).Result.Data[0];
-            }catch(Exception ex)
+               cts.Token
+                 );
+
+                // 🔹 Log what yt-dlp said
+                Console.WriteLine("--- STDOUT ---");
+                Console.WriteLine(result.Data); // normal log
+                Console.WriteLine("--- STDERR ---");
+                foreach(var error in result.ErrorOutput)
+                {
+                    foreach(var er in error)
+                    {
+                        Console.Write(er.ToString());
+                        
+                    }
+                    Console.WriteLine();
+                }
+
+                // 🔹 Check if it actually succeeded
+                if (result.Success && result.Data != null && result.Data.Length > 0)
+                {
+                     streamUrl = result.Data[0];
+                    Console.WriteLine("✅ Got stream URL: " + streamUrl);
+                    return streamUrl;
+                }
+                else
+                {
+                    Console.WriteLine("⚠️ yt-dlp failed:\n" + result.ErrorOutput);
+                    return null;
+                }
+               
+            }
+            catch(Exception ex)
             {
                 await mainWindow.Dispatcher.InvokeAsync(() =>
                 {
-                    mainWindow.status.Text = "Recursive";
+                    mainWindow.status.Text = "Failed";
                 });
+                MessageBox.Show("Failed to get stream url via YTDL.\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 await Task.Delay(1000);
               
-               return await GetRr5UrlAsync(videoUrl);
+               //return await GetRr5UrlAsync(videoUrl);
             }
 
             await mainWindow.Dispatcher.InvokeAsync(() =>
@@ -89,10 +127,12 @@ namespace NHMPh_music_player
             Console.WriteLine(currentSong.Url);
             try
             {
-                mainWindow.RefreshYoutubeClientHttpClient();
+                mainWindow.youtube = new YoutubeClient();
                 var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
                 var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
                 url = streamUrl.Url;
+                mainWindow.RefreshYoutubeClientHttpClient();
+
             }
             catch (Exception EX)
             {
@@ -117,7 +157,7 @@ namespace NHMPh_music_player
             }
 
 
-
+            Console.WriteLine(url);
             _mf = new _MediaFoundationReader(url);
             Console.WriteLine("4");
             //  PlayBackUrl = streamUrl;

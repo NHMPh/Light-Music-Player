@@ -24,7 +24,26 @@
                         <StackPanel Orientation="Vertical" Margin="0" Width="380" Height="133">
                             <TextBlock Padding="4,4,0,0" x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Text="Light music player v.1.2.2" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"   />
                             <Grid>
-                                <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Vertical" Height="76">
+                                    <TextBox x:Name="lyricsTextBox"
+                                       Text=""
+                                        Padding="2.7,0,0,0"
+                                        Foreground="White"
+                                        FontSize="12"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        TextWrapping="Wrap"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        IsReadOnly="True"
+                                        IsReadOnlyCaretVisible="False"
+                                        MinWidth="0"
+                                        MinHeight="0"
+                                        HorizontalContentAlignment="Left"
+                                        VerticalContentAlignment="Top"
+                                        TextBoxBase.AutoWordSelection="False"
+                                        Height="0"
+                                        />
                                     <TextBlock Padding="4.5,0,0,0" x:Name="description"  Foreground="White" Height="076" Width="379" FontSize="12"  HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap"><Run Text="Created by NHMPh" /></TextBlock>
 
                                     <StackPanel x:Name="spectrum_ctn" Orientation="Horizontal" Width="380" Height="0">
@@ -32,153 +51,153 @@
                                     </StackPanel>
                                     <ScrollViewer x:Name="radio_view" Height="0">
                                         <Grid>
-                                           
-                                        <StackPanel x:Name="radio_ctn" Orientation="Vertical" Margin="0,0,0,0"  >
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70"   TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
 
-                                                </Grid>
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
+                                            <StackPanel x:Name="radio_ctn" Orientation="Vertical" Margin="0,0,0,0"  >
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70"   TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
 
-                                                </Grid>
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
+                                                    </Grid>
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
 
-                                                </Grid>
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
+                                                    </Grid>
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
 
-                                                </Grid>
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
+                                                    </Grid>
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
 
-                                                </Grid>
+                                                    </Grid>
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
+
+                                                    </Grid>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
+
+                                                    </Grid>
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
+
+                                                    </Grid>
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
+
+                                                    </Grid>
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
+
+                                                    </Grid>
+                                                    <Grid Margin="2,0,0,0">
+                                                        <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
+                                                            <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Button.Resources>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="CornerRadius" Value="2"/>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                        </Button>
+                                                        <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
+                                                            <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                        </Border>
+
+                                                    </Grid>
+                                                </StackPanel>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
-
-                                                </Grid>
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
-
-                                                </Grid>
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
-
-                                                </Grid>
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
-
-                                                </Grid>
-                                                <Grid Margin="2,0,0,0">
-                                                    <Button Width="70" BorderBrush="Cyan" Background="Transparent" >
-                                                        <Image  Width="70"  Source="/EDM.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        <Button.Resources>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="CornerRadius" Value="2"/>
-                                                            </Style>
-                                                        </Button.Resources>
-                                                    </Button>
-                                                    <Border Width="70" Height="70" CornerRadius="2" Background="#66000000">
-                                                        <TextBlock Text="EDM" Foreground="White" FontSize="20"  FontWeight="Bold" FontFamily="Arial Black" Width="70" Height="70" VerticalAlignment="Bottom" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                                    </Border>
-
-                                                </Grid>
-                                            </StackPanel>
-                                        </StackPanel>
                                         </Grid>
                                     </ScrollViewer>
 
@@ -273,7 +292,7 @@
                                             </Style>
                                         </TextBox.Resources>
                                     </TextBox>
-                                   
+
                                 </Grid>
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

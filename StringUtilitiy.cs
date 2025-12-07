@@ -100,8 +100,8 @@ namespace NHMPh_music_player
                 return result.Replace(" ", "%20");
             }
             string[] parts = Regex.Split(result, @"(?<=\s-\s)|(?<=\s--\s)|(?<=-\s)");
-           // string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO";
-            string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|【|】|""[^""]*""|LYRICS|VIDEO|★|!";
+            //string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO";
+            string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|-\..*|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|The Original Song|Original Song by|★|!";
             parts[0] = Regex.Replace(parts[0], combinedPattern, "");
             parts[1] = Regex.Replace(parts[1], combinedPattern, "");
             if (parts[0].Contains(','))

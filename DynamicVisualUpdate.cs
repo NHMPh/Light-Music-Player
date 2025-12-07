@@ -85,7 +85,7 @@ namespace NHMPh_music_player
 
             UpdateTrackBarVisual();
             if (MusicSetting.isRadio) return;
-            mediaPlayer.CurrentSong.GetLyrics(window, window.youtube);
+            mediaPlayer.CurrentSong.GetLyrics(window, new YoutubeExplode.YoutubeClient());
             mediaPlayer.CurrentSong.GetFullDescription(staticVisualUpdate, window.youtube);
         }
         private void UpdateTrackBarVisual()
@@ -108,7 +108,7 @@ namespace NHMPh_music_player
                         string line = mediaPlayer.CurrentSong.GetLyricBytime(seconds);
                         if (line != "")
                         {
-                            window.description.Text = line;
+                            window.lyricsTextBox.Text = line;
                         }
 
                     }

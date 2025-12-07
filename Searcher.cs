@@ -16,11 +16,11 @@ namespace NHMPh_music_player
 {
     public static class Searcher
     {
-     
-        public async static Task Search(string key , SongsManager songsManager, MainWindow mainWindow)
+
+        public async static Task Search(string key, SongsManager songsManager, MainWindow mainWindow)
         {
-           
-           
+
+
             int mode = StringUtilitiy.EvaluateKeyWord(key);
             //Search by link
             if (mode == 1)
@@ -28,13 +28,13 @@ namespace NHMPh_music_player
                 try
                 {
                     var videolinkInfo = await mainWindow.youtube.Videos.GetAsync(key);
-                    songsManager.AddSong (new VideoInfo(videolinkInfo));                  
-                    
+                    songsManager.AddSong(new VideoInfo(videolinkInfo));
+
                 }
                 catch
                 {
-                    MessageBox.Show("Error! This youtube link is wrong or not found");                 
-                    
+                    MessageBox.Show("Error! This youtube link is wrong or not found");
+
                 }
 
             }
@@ -43,26 +43,26 @@ namespace NHMPh_music_player
             {
                 try
                 {
-                    var videos = await mainWindow.youtube.Playlists.GetVideosAsync(key);
+                    var videos = await mainWindow.youtube.Playlists.GetVideosAsync(key).CollectAsync(25);
                     for (int i = 1; i < videos.Count; i++)
                     {
-                        
+
                         songsManager.AddSong(new VideoInfo(videos[i].Title, "Song by " + videos[i].Author, videos[i].Url, videos[i].Thumbnails.FirstOrDefault().Url));
-                    }                  
-                   
+                    }
+
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
 
-                    MessageBox.Show("Error! Auto-generated playlist link is not supported or playlist is private"+ex.ToString());
-                   
+                    MessageBox.Show("Error! Auto-generated playlist link is not supported or playlist is private" + ex.ToString());
+
 
 
                 }
 
 
             }
-            else
+            if (mode == 3)
             {
                 //Search by key         
                 HttpClient httpClient = new HttpClient();
@@ -70,7 +70,7 @@ namespace NHMPh_music_player
                 var responseObject = await client.SearchAsync(key);
                 songsManager.AddSong(new VideoInfo(responseObject.Results.First()));
             }
-               
+
 
         }
     }
