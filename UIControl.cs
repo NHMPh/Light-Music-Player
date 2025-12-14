@@ -20,6 +20,7 @@ namespace NHMPh_music_player
         MediaPlayer mediaPlayer;
         SongsManager songsManager;
         FullscreenSpectrum fullscreenSpectrum = null;
+        Inpicture inpicture = null;
         ArdunoSetting ardunoSetting = null;
         public UIControl(MainWindow mainWindow, MediaPlayer mediaPlayer, SongsManager songsManager)
         {
@@ -35,8 +36,10 @@ namespace NHMPh_music_player
             mainWindow.arduno_btn.Click += ArdunoBtn;
 
             mainWindow.lyricsSync_btn.Click += SyncLyricsBtn;
+            mainWindow.lyricsSync_btn.MouseDown += LyricsSync_btn_MouseDown;
             mainWindow.lyrics_btn.Click += LyricBtn;
             mainWindow.minimize_btn.Click += MinimizeBtn;
+            mainWindow.minimize_btn.MouseRightButtonDown += InpictureMode;
             mainWindow.spectrum_btn.Click += SpectrumBtn;
             mainWindow.loopBtn.Click += LoopBtn;
             mainWindow.pauseBtn.Click += PauseResumeBtn;
@@ -44,6 +47,8 @@ namespace NHMPh_music_player
             mainWindow.spectrum_btn.MouseRightButtonDown += FullSpectrumBtn;
             mainWindow.radio_btn.Click += Radio_btn_Click;
             mainWindow.login_btn.Click += LoginWindowBtn;
+
+            mainWindow.thumbnailborder.MouseDown += Thumbnailborder_GotMouseCapture; ;
 
             mainWindow.Track.MouseLeftButtonDown += Thumb_MouseLeftButtonDown;
             mainWindow.thumb.GotMouseCapture += Thumb_GotMouseCapture;
@@ -54,7 +59,7 @@ namespace NHMPh_music_player
 
             mainWindow.searchBar.KeyDown += SearchBarEnterKeyDown;
 
-
+            mainWindow.KeyDown += EnterKeyDown;
             mainWindow.Closed += MainWindow_Closed;
             mainWindow.MouseLeftButtonDown += MainWindow_MouseLeftButtonDown;
 
@@ -63,9 +68,86 @@ namespace NHMPh_music_player
 
         }
 
+        private void EnterKeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Left)
+            {
+                mediaPlayer.Seek((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - 5);
+                e.Handled = true;
+            }
+               
+            if (e.Key == Key.Right)
+            {
+                mediaPlayer.Seek((int)mediaPlayer.Wave.CurrentTime.TotalSeconds + 5);
+                e.Handled = true;
+            }
+               
+            if (e.Key == Key.Up)
+            {
+                ChangeVolume(mainWindow.volume, mainWindow.volumVisual, 0.1f);
+                e.Handled = true;
+            }
+                
+            if (e.Key == Key.Down)
+            {
+                ChangeVolume(mainWindow.volume, mainWindow.volumVisual, -0.1f);
+                e.Handled = true;
+            }
+               
+
+           
+        }
+
+        private void LyricsSync_btn_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //check for right click
+            if (e.XButton1 == MouseButtonState.Pressed)
+            {
+                MusicSetting.lyricsOffset -= 0.5;
+             
+            }
+            else
+            {
+                MusicSetting.lyricsOffset += 0.5;
+            }
+            mainWindow.lyricsBox.Text += $"\nOffset: {MusicSetting.lyricsOffset}s";
+        }
+
+        private void Thumbnailborder_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            Console.WriteLine("Press");
+            if (!MusicSetting.isInPictureMode)
+            {
+                if (inpicture == null)
+                {
+                    inpicture = new Inpicture(songsManager.CurrentSong, mainWindow);
+                }
+
+                MusicSetting.isInPictureMode = true;
+
+                System.Windows.Point mousePos = e.GetPosition(null);
+                var screenPos = mainWindow.PointToScreen(mousePos);
+
+                inpicture.Left = screenPos.X - (inpicture.Width / 2);
+                inpicture.Top = screenPos.Y - (inpicture.Height / 2);
+                mainWindow.Hide();
+                inpicture.Show();
+               
+
+
+            }
+        }
+
+        private void InpictureMode(object sender, MouseButtonEventArgs e)
+        {
+
+
+
+        }
+
         private void LoginWindowBtn(object sender, RoutedEventArgs e)
         {
-          
+
             LoginWindow loginWindow = new LoginWindow();
             bool? result = loginWindow.ShowDialog();
             if (result == true)
@@ -173,7 +255,7 @@ namespace NHMPh_music_player
             }
             else
             {
-                mediaPlayer.Seek(0);
+                mediaPlayer.Seek((int)mediaPlayer.Wave.CurrentTime.TotalSeconds - 3);
                 MusicSetting.lyricsOffset = 0;
             }
         }
@@ -182,7 +264,7 @@ namespace NHMPh_music_player
             MusicSetting.isLyrics = !MusicSetting.isLyrics;
             if (MusicSetting.isLyrics)
             {
-                mainWindow.lyricsTextBox.Text = "Intermission";
+                mainWindow.lyricsBox.Text = "Intermission";
                 mainWindow.lyricsTextBox.Height = double.NaN;
                 mainWindow.description.Height = 0;
             }
@@ -190,17 +272,17 @@ namespace NHMPh_music_player
             else
             {
                 mainWindow.description.Text = mediaPlayer.CurrentSong.Description;
-                mainWindow.lyricsTextBox.Text = "";
+                mainWindow.lyricsBox.Text = "";
                 mainWindow.lyricsTextBox.Height = 0;
-                if(!MusicSetting.isSpectrum)
-                mainWindow.description.Height = 76;
+                if (!MusicSetting.isSpectrum)
+                    mainWindow.description.Height = 76;
                 else
                 {
                     mainWindow.description.Height = 16;
                 }
 
             }
-               
+
         }
         private void AutoplayBtn(object sender, RoutedEventArgs e)
         {
@@ -257,12 +339,13 @@ namespace NHMPh_music_player
             }
             if (MusicSetting.isSpectrum)
             {
-                if(!MusicSetting.isLyrics)
+                if (!MusicSetting.isLyrics)
                     mainWindow.description.Height = 16;
                 else
                     mainWindow.description.Height = 0;
                 mainWindow.spectrum_ctn.Height = 60;
                 mainWindow.radio_view.Height = 0;
+              
                 //  UpdateGraph();
                 //  DrawGraph();
             }
@@ -314,6 +397,13 @@ namespace NHMPh_music_player
             mainWindow.volumVisual.Value = mediaPlayer.Volume;
             volumeVisual.Value = volume.Value;
         }
+        public void ChangeVolume(Slider volume, ProgressBar volumeVisual,float amount)
+        {
+            mediaPlayer.Volume +=amount;
+            mainWindow.volume.Value = mediaPlayer.Volume;
+            mainWindow.volumVisual.Value = mediaPlayer.Volume;
+            volumeVisual.Value = volume.Value;
+        }
         private void Thumb_GotMouseCapture(object sender, MouseEventArgs e)
         {
             MusicSetting.isChosingTimeStap = true;
@@ -336,12 +426,9 @@ namespace NHMPh_music_player
         }
         private async void SearchBarEnterKeyDown(object sender, KeyEventArgs e)
         {
+         
             if (e.Key != Key.Enter)
-
-
-
-
-                return;
+                    return;
 
             string key = (sender as TextBox).Text;
             (sender as TextBox).Text = "";
@@ -356,6 +443,7 @@ namespace NHMPh_music_player
 
             }
         }
+       
 
     }
 }

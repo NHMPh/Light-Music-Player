@@ -71,12 +71,12 @@ namespace NHMPh_music_player
             window.lyricsSync_btn.Width = 0;
             window.lyrics_btn.Width = 0;
             MusicSetting.lyricsOffset = 0;
-            UpdateStaticVisual();
+            UpdateStaticVisualAsync();
 
             if (MusicSetting.isRadio) return;
             songsManager.InvokeVideoQueueChange();
         }
-        private void UpdateStaticVisual()
+        private async Task UpdateStaticVisualAsync()
         {
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
@@ -85,8 +85,8 @@ namespace NHMPh_music_player
 
             UpdateTrackBarVisual();
             if (MusicSetting.isRadio) return;
+            await mediaPlayer.CurrentSong.GetFullDescription(staticVisualUpdate, window.youtube);
             mediaPlayer.CurrentSong.GetLyrics(window, new YoutubeExplode.YoutubeClient());
-            mediaPlayer.CurrentSong.GetFullDescription(staticVisualUpdate, window.youtube);
         }
         private void UpdateTrackBarVisual()
         {
@@ -104,11 +104,20 @@ namespace NHMPh_music_player
                 {
                     if (MusicSetting.isLyrics)
                     {
+                        if (mediaPlayer.CurrentSong.SongLyrics.Count == 0)
+                        {
+                            window.lyricsTextBox.Height = 76;
+                            if (mediaPlayer.CurrentSong.rawLyrics.Length!=0)
+                            window.lyricsBox.Text=mediaPlayer.CurrentSong.rawLyrics;
+                            else  window.lyricsBox.Text = "Searching lyrics...";
+                            return;
+                        } ;
+                        window.lyricsTextBox.Height = double.NaN;
                         double seconds = mediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
                         string line = mediaPlayer.CurrentSong.GetLyricBytime(seconds);
                         if (line != "")
                         {
-                            window.lyricsTextBox.Text = line;
+                            window.lyricsBox.Text = line;
                         }
 
                     }

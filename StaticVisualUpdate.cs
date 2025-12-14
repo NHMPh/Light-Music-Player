@@ -18,6 +18,14 @@ namespace NHMPh_music_player
         {
             mainWindow.title.Text = videoInfo.Title;
             mainWindow.description.Text = videoInfo.Description;
+            if (videoInfo.SquareThumbnail)
+            {
+                mainWindow.thumbnail.Stretch=System.Windows.Media.Stretch.Uniform;
+            }
+            else
+            {
+               mainWindow.thumbnail.Stretch = System.Windows.Media.Stretch.Fill;
+            }
             mainWindow.thumbnail.ImageSource = new BitmapImage(new Uri(videoInfo.Thumbnail));
         }
         public void SetVisualDes(string des)

@@ -17,6 +17,6 @@ namespace NHMPh_music_player
         public static bool isRadio=false;
         public static bool isSpectrum;
         public static double  lyricsOffset;
-
+        public static bool isInPictureMode = false;
     }
 }

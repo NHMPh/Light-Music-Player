@@ -19,6 +19,8 @@ using YoutubeDLSharp;
 using YoutubeDLSharp.Options;
 using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
+using YoutubeSearchApi.Net.Models.Youtube;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace NHMPh_music_player
 {
@@ -47,6 +49,42 @@ namespace NHMPh_music_player
              ytdl = new YoutubeDL();
             this.mainWindow = mainWindow;
             this.visualizer = visualizer;
+        }
+        public async Task<string> GetStreamingUrl(string surl)
+        {
+            string url = "";
+            try
+            {
+                mainWindow.youtube = new YoutubeClient();
+                var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(surl);
+                var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
+                url = streamUrl.Url;
+                mainWindow.RefreshYoutubeClientHttpClient();
+
+            }
+            catch (Exception EX)
+            {
+                Console.WriteLine(EX.ToString());
+
+                await mainWindow.Dispatcher.InvokeAsync(() =>
+                {
+                    mainWindow.status.Text = "YTDL...";
+                });
+                try
+                {
+                    url = await GetRr5UrlAsync(surl);
+                }
+                catch (Exception ex3)
+                {
+                    await mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        mainWindow.status.Text = "403";
+                    });
+                }
+
+            }
+            return url;
+
         }
         public async Task<string> GetRr5UrlAsync(string videoUrl)
         {
@@ -122,49 +160,32 @@ namespace NHMPh_music_player
         private async Task GetSongStream()
         {
 
-            string url = "";
+            string url = await GetStreamingUrl(currentSong.Url);
 
             Console.WriteLine(currentSong.Url);
-            try
-            {
-                mainWindow.youtube = new YoutubeClient();
-                var streamManifest = await mainWindow.youtube.Videos.Streams.GetManifestAsync(currentSong.Url);
-                var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
-                url = streamUrl.Url;
-                mainWindow.RefreshYoutubeClientHttpClient();
-
-            }
-            catch (Exception EX)
-            {
-
-               
-                await mainWindow.Dispatcher.InvokeAsync(() =>
-                {
-                    mainWindow.status.Text = "YTDL...";
-                });
-                try
-                {
-                    url = await GetRr5UrlAsync(currentSong.Url);
-                }
-                catch (Exception ex3)
-                {
-                    await mainWindow.Dispatcher.InvokeAsync(() =>
-                    {
-                        mainWindow.status.Text = "403";
-                    });
-                }
-
-            }
+            
 
 
             Console.WriteLine(url);
+           
+           
             _mf = new _MediaFoundationReader(url);
-            Console.WriteLine("4");
+            Console.WriteLine(_mf.WaveFormat.SampleRate);
+            if (_mf.WaveFormat.SampleRate == 44100) { 
+               YoutubeVideo newVid = await Searcher.ReSearch($"{currentSong.Title}+{currentSong.Artist}");
+
+                string newUrl = await GetStreamingUrl(newVid.Url);
+                Console.WriteLine("Re-Searched URL: " + newUrl);
+                _mf = new _MediaFoundationReader(newUrl);
+            }
+            
+           
             //  PlayBackUrl = streamUrl;
             wave = new NAudio.Wave.WaveChannel32(_mf);
             Console.WriteLine("5");
             fftProvider = new FFTSampleProvider(wave.ToSampleProvider(), visualizer);
             Console.WriteLine("6");
+
 
         }
         private void GetRadioStream()

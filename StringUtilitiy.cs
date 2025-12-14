@@ -85,25 +85,54 @@ namespace NHMPh_music_player
         };
         public static string ProcessInvailName(string name)
         {
+            // Normalize symbols
             if (name.Contains('‒'))
                 name = name.Replace('‒', '-');
             if (name.Contains(" - Tik Tok"))
                 name = name.Replace(" - Tik Tok", "");
-            if(name.Contains(" x "))
+            if (name.Contains(" x "))
                 name = name.Replace(" x ", " ");
-            name = Regex.Replace(name, @"(\([^)]*\)|\[[^\]]*\])|【|】|""""[^""""]*""""""", "");
+            name = name.Replace("(Official Video)", "");
+            // Remove brackets [], japanese brackets, quotes — KEEP ()
+            name = Regex.Replace(name, @"(\[[^\]]*\])|【|】|""""[^""""]*""""""", "");
+
+            // Remove everything after ★
+            name = Regex.Replace(name, @"★.*$", "");
+
             string result = name;
+
+            // If there is no dash
             if (!result.Contains("-"))
             {
-                result = Regex.Replace(result, @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|★|!", "");
-                try { result = songException[result.Replace(" ", "")]; } catch { };
+                result = Regex.Replace(result,
+                    @"\|.*$|(\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|★|!|The Original Song|Original Song by\s+\S+",
+                    "");
+
+                // Remove trailing ★ segment again as safety
+                result = Regex.Replace(result, @"★.*$", "");
+
                 return result.Replace(" ", "%20");
             }
+
+            // Split Artist - Song
             string[] parts = Regex.Split(result, @"(?<=\s-\s)|(?<=\s--\s)|(?<=-\s)");
-            //string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO";
-            string combinedPattern = @"\|.*$|(\([^)]*\)|\[[^\]]*\])|-\..*|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|The Original Song|Original Song by|★|!";
+            if (parts.Length < 2)
+            {
+                return result.Replace(" ", "%20");
+            }
+
+            // ★ removal included in the cleanup pattern
+            string combinedPattern =
+                @"\|.*$|\[[^\]]*\]|-\..*|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|The Original Song|Original Song by\s+\S+|★|!";
+
             parts[0] = Regex.Replace(parts[0], combinedPattern, "");
             parts[1] = Regex.Replace(parts[1], combinedPattern, "");
+
+            // Remove everything after ★ (extra safety)
+            parts[0] = Regex.Replace(parts[0], @"★.*$", "");
+            parts[1] = Regex.Replace(parts[1], @"★.*$", "");
+
+            // Fix artist formatting
             if (parts[0].Contains(','))
                 parts[0] = parts[0].Replace(',', '&');
             parts[0] = Regex.Replace(parts[0], @"(?<!\w)x(?!x|\w)", ",");
@@ -112,12 +141,14 @@ namespace NHMPh_music_player
             {
                 parts[0] = parts[0].Split('&')[parts[0].Split('&').Length - 1];
             }
-            parts[1] = ReplaceNumbersWithWords(parts[1]);
-            string processName = parts[0] + "" + parts[1];
-            Console.WriteLine(processName.Replace(" ", ""));
-            try { processName = songException[processName.Replace(" ", "")]; } catch { }
-            return processName.Replace(" ", "%20");
 
+            // Convert numbers (123 → one two three)
+            parts[1] = ReplaceNumbersWithWords(parts[1]);
+
+            string processName = parts[0] + parts[1];
+            Console.WriteLine(processName.Replace(" ", ""));
+
+            return processName.Replace(" ", "%20");
         }
 
         public static string ExtractId(string href)
@@ -205,11 +236,11 @@ namespace NHMPh_music_player
 
             return null;
         }
-       public static List<(double, string)> ExtractAndParseTimestampsAndLyricsToMilliseconds(string text)
+        public static List<(double, string)> ExtractAndParseTimestampsAndLyricsToMilliseconds(string text)
         {
             List<(double, string)> timestampedLyrics = new List<(double, string)>();
             // Regular expression to match the timestamps and lyrics
-            Regex regex = new Regex(@"\[(\d{2}):(\d{2})\.(\d{2})\] (.*)");
+            Regex regex = new Regex(@"\[(\d{2}):(\d{2})\.(\d{2})\]\s?(.*)");
             MatchCollection matches = regex.Matches(text);
 
             foreach (Match match in matches)
@@ -221,7 +252,7 @@ namespace NHMPh_music_player
                     int seconds = int.Parse(match.Groups[2].Value);
                     int milliseconds = int.Parse(match.Groups[3].Value); // Convert to milliseconds
 
-                    TimeSpan timeSpan = new TimeSpan(0,0,minutes, seconds, milliseconds);
+                    TimeSpan timeSpan = new TimeSpan(0, 0, minutes, seconds, milliseconds);
                     // Convert the entire timestamp to milliseconds
                     //  int totalMilliseconds = (minutes * 60 * 1000) + (seconds * 1000) + milliseconds;
                     double totalSeconds = timeSpan.TotalSeconds;

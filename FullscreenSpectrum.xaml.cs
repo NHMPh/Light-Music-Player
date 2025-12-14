@@ -140,6 +140,7 @@ namespace NHMPh_music_player
                     {
                         double seconds = mainWindow.MediaPlayer.Wave.CurrentTime.TotalSeconds - MusicSetting.lyricsOffset;
                         var line = mainWindow.MediaPlayer.CurrentSong.GetLyricBytime(seconds);
+                        var nextline = mainWindow.MediaPlayer.CurrentSong.GetNextLyricByTime(seconds);
                         int wordCount = line.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
 
                         if (wordCount > 15)
@@ -159,7 +160,7 @@ namespace NHMPh_music_player
                             this.lyric.FontSize = 60;
                         }
                         this.lyric.Text = line;
-                        this.postLyric.Text = "";
+                        this.postLyric.Text = nextline;
                     }
                     else
                     {
