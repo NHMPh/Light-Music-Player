@@ -80,7 +80,7 @@ namespace NHMPh_music_player
                 HttpClient httpClient = new HttpClient();
                 if (key.First() == '`')
                 {
-                    YouTubeMusicClient yt = new YouTubeMusicClient("US", null, null, null, httpClient);
+                    YouTubeMusicClient yt = new YouTubeMusicClient("US", null, null, null, null, httpClient);
                     PaginatedAsyncEnumerable<SearchResult> searchResults = yt.SearchAsync(key.Remove(0,1), SearchCategory.Songs);
                     IReadOnlyList<SearchResult> bufferedSearchResults = await searchResults.FetchItemsAsync(0, 1);
                     foreach (SongSearchResult song in bufferedSearchResults.Cast<SongSearchResult>())

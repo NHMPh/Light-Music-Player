@@ -127,7 +127,7 @@ namespace NHMPh_music_player
             // var des = await youtube.Videos.GetAsync(this.url);
             HttpClient httpClient = new HttpClient();
 
-            YouTubeMusicClient yt = new YouTubeMusicClient("US", null, null, null, httpClient);
+            YouTubeMusicClient yt = new YouTubeMusicClient("US", null, null, null,null , httpClient);
             SongVideoInfo info = await yt.GetSongVideoInfoAsync(StringUtilitiy.ExtractId(url));
             Console.WriteLine($"{info.Name}, {string.Join(", ", info.Artists.Select(artist => artist.Name))} - {info.Description}");
 
@@ -400,6 +400,50 @@ namespace NHMPh_music_player
                 
 
             }
+        }
+        private static readonly HttpClient client = new HttpClient();
+        public async Task<string> GetLyricsAsync(
+    string videoId,
+    string song,
+    string artist,
+    int duration,
+    string album,
+    string token)
+        {
+            const string url = "https://lyrics.api.dacubeking.com/v2/lyrics";
+
+            var data = new Dictionary<string, string>
+            {
+                ["videoId"] = videoId,
+                ["song"] = song,
+                ["artist"] = artist,
+                ["duration"] = duration.ToString(),
+                ["album"] = album,
+                ["alwaysFetchMetadata"] = "false",
+                ["token"] = token
+            };
+
+            var content = new FormUrlEncodedContent(data);
+
+            var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, new Uri(url))
+            {
+                Content = content
+            };
+
+            request.Headers.TryAddWithoutValidation(
+                "Accept", "*/*");
+
+            request.Headers.TryAddWithoutValidation(
+                "Referer", "https://music.youtube.com/");
+
+            var response = await client.SendAsync(request);
+
+            string responseBody =
+                await response.Content.ReadAsStringAsync();
+
+            response.EnsureSuccessStatusCode();
+
+            return responseBody;
         }
         public async void GetLyrics(MainWindow mainWindow, YoutubeClient youtube)
         {
