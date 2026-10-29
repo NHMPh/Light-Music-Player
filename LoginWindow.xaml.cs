@@ -1,10 +1,12 @@
 ﻿using Microsoft.Web.WebView2.Core;
-using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
+using Newtonsoft.Json.Linq;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -20,18 +22,119 @@ namespace NHMPh_music_player
 
         public YoutubeClient YoutubeClientInstance { get; private set; }
         public Cookie[] YoutubeCookies { get; private set; }
-        public LoginWindow()
+
+        private bool isForToken = false;
+        public LoginWindow(bool isForToken)
         {
             InitializeComponent();
             MouseLeftButtonDown += (s, e) => DragMove();
-            InitializeWebViewAsync();
+
+            this.isForToken = isForToken;
+
+            if (!this.isForToken)
+
+            {
+                this.Visibility = Visibility.Visible;
+                InitializeWebViewAsync();
+
+            }
         }
         private bool isAuthenticated = false;
+        private async void GetLyricsToken(string token)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                string url = "https://lyrics.api.dacubeking.com/verify-turnstile";
 
+
+                string json = "{\"token\":\"" + token + "\"}";
+
+                using (var content = new StringContent(
+                    json, Encoding.UTF8, "application/json"))
+                {
+                    HttpResponseMessage response =
+                        await client.PostAsync(url, content);
+
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    Console.WriteLine("Status: " + (int)response.StatusCode);
+                    Console.WriteLine("Response: " + result);
+
+                    string newToken = JObject.Parse(result)["jwt"].ToString();
+
+                    //save the new token to a file or use it as needed
+                    SaveTokenToTxt(newToken, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "lyricstoken.txt"));
+
+                   
+                }
+            }
+           
+        }
+        void SaveTokenToTxt(string tokens, string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath, false))
+            {
+                writer.WriteLine(tokens);
+            }
+        }
+        public  async void GetVerifyToken()
+        {
+            Console.WriteLine("Starting WebView for token retrieval...");
+
+            await webView.EnsureCoreWebView2Async(null);
+
+            Console.WriteLine("dsadasdssss");
+            webView.Visibility = System.Windows.Visibility.Hidden;
+            this.Visibility = Visibility.Hidden;
+            string token = string.Empty;
+
+            Console.WriteLine("WebView initialized. Waiting for token...");
+            // Receive messages forwarded from JavaScript to C#.
+            webView.CoreWebView2.WebMessageReceived += (sender, e) =>
+            {
+                token = JObject.Parse(e.WebMessageAsJson)["data"]["token"].ToString();
+
+                Console.WriteLine("Received token: " + token);
+
+                GetLyricsToken(token);             
+            };
+
+            string html = @"
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <iframe
+                    id=""targetFrame""
+                    src=""https://lyrics.api.dacubeking.com/challenge""
+                    width=""800""
+                    height=""600"">
+                </iframe>
+
+                <script>
+                    window.addEventListener(""message"", function (event) {
+                        console.log(""Message received:"", event.data);
+                        console.log(""Origin:"", event.origin);
+
+                        // Forward the message to C#.
+                        window.chrome.webview.postMessage({
+                            origin: event.origin,
+                            data: event.data
+                        });
+                    });
+                </script>
+            </body>
+            </html>
+            """;
+            
+            webView.CoreWebView2.NavigateToString(html);
+        }
 
         private async void InitializeWebViewAsync()
         {
             await webView.EnsureCoreWebView2Async(null);
+
+            webView.Visibility = System.Windows.Visibility.Visible;
+            this.Visibility = Visibility.Visible;
             _coreWebView2 = webView.CoreWebView2;
 
             // Subscribe to navigation events

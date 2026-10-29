@@ -83,6 +83,38 @@ namespace NHMPh_music_player
         {
             { "MiatriSsStartitover-Decemberstoryrewind" ,"MiatriSs%20Начать%20Сначала"} , { "WITHYOU", "With You Hoaprox"}, { "BoneyM-Rasputin", "Rasputin"},{ "BoneyM.-Rasputin", "Rasputin"},{"DMDOKURO-Stained,BrutalCalamity", "Stained, Brutal Calamity"},{"NineInchNails-HurtLyricsVideo","Nine Inch Nails - Hurt " },{"FoolsGarden-LemonTree","Lemon Tree"},{"Fool'sGarden-LemonTree","Lemon Tree"},{"O-Zone-DragosteaDinTei","O-zone"}
         };
+
+        public static JObject ExtractProviderResults(string response, out JObject providerResults)
+        {
+            var output = new JObject();
+
+            var reader = new StringReader(response);
+            string   line;
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (!line.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var jsonText = line.Substring("data:".Length).Trim();
+
+                if (string.IsNullOrWhiteSpace(jsonText))
+                    continue;
+
+                var eventObject = JObject.Parse(jsonText);
+                var provider = eventObject["provider"]?.Value<string>();
+
+                if (string.IsNullOrWhiteSpace(provider))
+                    continue;
+
+                output[provider] = new JObject
+                {
+                    ["results"] = eventObject["results"] ?? new JObject()
+                };
+            }
+            providerResults = output;
+            return output;
+        }
         public static string ProcessInvailName(string name)
         {
             // Normalize symbols
@@ -105,7 +137,7 @@ namespace NHMPh_music_player
             if (!result.Contains("-"))
             {
                 result = Regex.Replace(result,
-                    @"\|.*$|(\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|★|!|The Original Song|Original Song by\s+\S+",
+                    @"\|.*$|(\[[^\]]*\])|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|★|!|\(Official MV\)|\(Music Video\)|The Original Song|Original Song by\s+\S+",
                     "");
 
                 // Remove trailing ★ segment again as safety
@@ -123,7 +155,7 @@ namespace NHMPh_music_player
 
             // ★ removal included in the cleanup pattern
             string combinedPattern =
-                @"\|.*$|\[[^\]]*\]|-\..*|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|The Original Song|Original Song by\s+\S+|★|!";
+                @"\|.*$|\[[^\]]*\]|-\..*|ft\..*|FT\..*|Ft\..*|feat\..*|Feat\..*|FEAT\..*|【|】|""[^""]*""|LYRICS|VIDEO|The Original Song|\(Official MV\)|\(Music Video\)|Lyrics Video|Original Song by\s+\S+|★|!";
 
             parts[0] = Regex.Replace(parts[0], combinedPattern, "");
             parts[1] = Regex.Replace(parts[1], combinedPattern, "");
@@ -240,7 +272,7 @@ namespace NHMPh_music_player
         {
             List<(double, string)> timestampedLyrics = new List<(double, string)>();
             // Regular expression to match the timestamps and lyrics
-            Regex regex = new Regex(@"\[(\d{2}):(\d{2})\.(\d{2})\]\s?(.*)");
+            Regex regex = new Regex(@"\[(\d{1,2}):(\d{1,2})\.(\d{1,3})\]\s?(.*)");
             MatchCollection matches = regex.Matches(text);
 
             foreach (Match match in matches)

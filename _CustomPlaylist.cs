@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 
@@ -27,9 +28,28 @@ namespace NHMPh_music_player
             this.songManager = songsManager;
             this.mediaPlayer = mediaPlayer;
             this.mainWindow.loadCustom_btn.Click += LoadCustom_btn_Click;
+            this.mainWindow.loadCustom_btn.MouseRightButtonDown += AddCustom_btn_Click;
             this.mainWindow.viewCustom_btn.Click += ViewCustom_btn_Click;
             this.mainWindow.comboboxCustomPlayList.SelectionChanged += ComboboxCustomPlayList_SelectionChanged;
             LoadCustomPlayList();
+        }
+
+        private void AddCustom_btn_Click(object sender, MouseButtonEventArgs e)
+        {
+            string playlistname = mainWindow.customPlname.Text;
+            JObject currentCustomFile = StringUtilitiy.ReadJsonFile($".\\custom\\{playlistname}.json");
+           var videoInfo = mediaPlayer.CurrentSong;
+            var data = new JObject(
+               new JProperty("url", videoInfo.Url),
+               new JProperty("title", videoInfo.Title),
+               new JProperty("thumbnail", videoInfo.Thumbnail),
+               new JProperty("description", videoInfo.Description)
+             );
+            ((JArray)currentCustomFile["songs"]).Add(data);
+
+            Console.WriteLine(currentCustomFile["songs"]);
+            System.IO.File.WriteAllText($".\\custom\\{playlistname}.json", currentCustomFile.ToString());
+            mainWindow.status.Text = $"Song Added";
         }
 
         private void ComboboxCustomPlayList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

@@ -148,7 +148,7 @@ namespace NHMPh_music_player
         private void LoginWindowBtn(object sender, RoutedEventArgs e)
         {
 
-            LoginWindow loginWindow = new LoginWindow();
+            LoginWindow loginWindow = new LoginWindow(false);
             bool? result = loginWindow.ShowDialog();
             if (result == true)
             {

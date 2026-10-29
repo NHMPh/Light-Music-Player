@@ -127,19 +127,19 @@ namespace NHMPh_music_player
 
                 // Add Runs and LineBreaks
                 textBlock.Text = "                    ===MAUNAL===\n" +
-           " You can search for your song  using\n" +
-           "keywords, a YouTube link, or a " +
-           "YouTube\nplaylist link.\n" +
-           "\n" +
-           " Make sure your YouTube playlist link " +
-           "isn't\n set to private.\n" +
-           "\n" +
-           " Youtube auto-generated link is NOT\n supported\n" +
-           "\n" +
-           " You're also able to change your\n" +
-           "playlist name clicking on \"New playlist\"\n" +
-           "and thumbnail by clicking on any song\n" +
-           "in the playlist.";
+                       " You can search for your song  using\n" +
+                       "keywords, a YouTube link, or a " +
+                       "YouTube\nplaylist link.\n" +
+                       "\n" +
+                       " Make sure your YouTube playlist link " +
+                       "isn't\n set to private.\n" +
+                       "\n" +
+                       " Youtube auto-generated link is NOT\n supported\n" +
+                       "\n" +
+                       " You're also able to change your\n" +
+                       "playlist name clicking on \"New playlist\"\n" +
+                       "and thumbnail by clicking on any song\n" +
+                       "in the playlist.";
                 selectionPanel.Children.Add(textBlock);
             }
             for (int i = 0; i < currentCustomFile["songs"].Count(); i++)

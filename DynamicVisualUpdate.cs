@@ -104,9 +104,9 @@ namespace NHMPh_music_player
                 {
                     if (MusicSetting.isLyrics)
                     {
-                        if (mediaPlayer.CurrentSong.SongLyrics.Count == 0)
+                        if (mediaPlayer.CurrentSong.SongLyrics.Count == 0 && mediaPlayer.CurrentSong._SongLyrics.Captions.Count ==0)
                         {
-                            window.lyricsTextBox.Height = 76;
+                            window.lyricsTextBox.Height = 75;
                             if (mediaPlayer.CurrentSong.rawLyrics.Length!=0)
                             window.lyricsBox.Text=mediaPlayer.CurrentSong.rawLyrics;
                             else  window.lyricsBox.Text = "Searching lyrics...";

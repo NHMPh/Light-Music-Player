@@ -22,7 +22,7 @@
                     <StackPanel Orientation="Horizontal"   Height="132" Margin="10,-3,0,0">
 
                         <StackPanel Orientation="Vertical" Margin="0" Width="380" Height="133">
-                            <TextBlock Padding="4,4,0,0" x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Text="Light music player v.1.2.2" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"   />
+                            <TextBlock Padding="4,4,0,0" x:Name="title" Foreground="#FF12F6FA" FontFamily="Global Sans Serif"  Text="Light music player v.1.3.0" Width="380" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"   />
                             <Grid>
                                 <StackPanel Orientation="Vertical" Height="76">
                                     <ScrollViewer x:Name="lyricsTextBox"  HorizontalAlignment="Left" Height="0"  VerticalScrollBarVisibility="Hidden">
